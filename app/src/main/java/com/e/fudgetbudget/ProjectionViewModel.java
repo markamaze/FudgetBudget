@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 
 class ProjectionViewModel {
     private final MainActivity context;
+    private double startOfDayBalance;
     private BudgetModel budgetModel;
 
 
@@ -28,6 +29,7 @@ class ProjectionViewModel {
 
     void loadProjectionLineItems(LinearLayout list_view) {
         LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> projections = budgetModel.getProjectedTransactionsByPeriod();
+        this.startOfDayBalance = budgetModel.getCurrentBalance();
 
         //TODO: I need to carry the running balance for the projections
         //  I did this before, but either it got removed or I'm not seeing where it went and it's not working
@@ -81,10 +83,10 @@ class ProjectionViewModel {
         TextView eodBalanceValue = (TextView) line_item_view.findViewById( R.id.projection_lineitem_eod_balance_amount );
         TextView dateValue = (TextView) line_item_view.findViewById( R.id.date_value );
 
-
         double expense_sum = budgetModel.getExpenseSumFromList(projected_transaction_list);
         double income_sum = budgetModel.getIncomeSumFromList(projected_transaction_list);
-        double end_of_day_balance = budgetModel.getCurrentBalance() + income_sum - expense_sum;
+        double end_of_day_balance = this.startOfDayBalance + income_sum - expense_sum;
+        this.startOfDayBalance = end_of_day_balance;
 
         dateValue.setText( date.format( DateTimeFormatter.ofPattern( "MMM dd, yy" ) ) );
         eodBalanceValue.setText( String.valueOf( end_of_day_balance ) );
