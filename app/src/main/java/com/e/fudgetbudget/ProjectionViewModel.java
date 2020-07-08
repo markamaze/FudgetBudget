@@ -31,8 +31,6 @@ class ProjectionViewModel {
         LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> projections = budgetModel.getProjectedTransactionsByPeriod();
         this.startOfDayBalance = budgetModel.getCurrentBalance();
 
-        //TODO: I need to carry the running balance for the projections
-        //  I did this before, but either it got removed or I'm not seeing where it went and it's not working
         projections.forEach( (date, projections_list) -> {
             list_view.addView( getProjectionLineItemLayout(date, projections_list) );
         });
@@ -43,36 +41,8 @@ class ProjectionViewModel {
     }
 
 
-//    void showBalanceEditorDialog() {
-//        AlertDialog.Builder builder = new AlertDialog.Builder( this.context );
-//        LinearLayout dialog_view = getBalanceEditorLayout();
-//        dialog_view.setTag(R.string.object_type, R.string.balance_tag);
-//        View finalDialog_view = dialog_view;
-//        builder.setPositiveButton( "Update", ((dialog, which) -> {
-//            EditText balance_editor = (EditText) finalDialog_view.findViewById( balancesheet_currentbalance_editor_id );
-//            String new_balance = balance_editor.getText().toString();
-//            budgetModel.update(Double.parseDouble( new_balance ));
-//            dialog.dismiss();
-//            this.context.recreate();
-//        }) );
-//        builder.setNegativeButton("Discard", (dialog, which) -> dialog.dismiss() );
-//        builder.setView( finalDialog_view );
-//        builder.show();
-//    }
-
-
-//    private LinearLayout getBalanceEditorLayout(){
-//        LinearLayout balance_editor_view = (LinearLayout) LinearLayout.inflate( this.context, property_displays_balance_layout, null );
-//
-//        TextView reset_balance_header = (TextView) balance_editor_view.findViewById( reset_current_balance_header_id );
-//        LinearLayout reset_balance_layout = (LinearLayout) balance_editor_view.findViewById( reset_currentbalance_layout_id );
-//
-//        balance_editor_view.removeAllViews();
-//        balance_editor_view.addView( reset_balance_header );
-//        balance_editor_view.addView( reset_balance_layout );
-//
-//        return balance_editor_view;
-//    }
+    //todo: build balance editor dialog and layout
+    //  don't actually change the balance, but rather create a record that adjusts the balance to value specified by user
 
 
     private LinearLayout getProjectionLineItemLayout(LocalDate date, ArrayList<?> projected_transaction_list) {
