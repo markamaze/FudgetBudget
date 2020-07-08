@@ -336,8 +336,7 @@ class TransactionViewModel {
 
         LinearLayout projectedTransactionsList = displayView.findViewById( R.id.projected_transactions_list );
         //todo: set a property for how far to project and use this whenever calling to get projections
-        HashMap<LocalDate, ProjectedTransaction> projections = transaction.getProjectedTransactionsWithProjectedDate(LocalDate.now().plusMonths( 3 ));
-
+        HashMap<LocalDate, ProjectedTransaction> projections = transaction.getProjectedTransactionsWithProjectedDate(budgetModel.getCutoffDate());
         if(projections.size() <= 0) projectedTransactionsList.addView( View.inflate( this.context, R.layout.view_empty_list_message, null ) );
         else projections.forEach( (date, projectedTransaction) -> {
             //maybe this could be moved to projectionViewModel.showProjectionLineItemDialog ?

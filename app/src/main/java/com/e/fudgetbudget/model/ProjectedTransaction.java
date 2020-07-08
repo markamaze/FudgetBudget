@@ -50,7 +50,7 @@ public class ProjectedTransaction {
         setAmount(transaction.getAmount());
         setNote(transaction.getNote());
         setProjectedDate(projected_date);
-        setScheduledDate(transaction.getScheduledDate());
+        setScheduledDate(projected_date);
     }
     private boolean setLabel(Object object) {
         if(object instanceof String) this.label = (String) object;

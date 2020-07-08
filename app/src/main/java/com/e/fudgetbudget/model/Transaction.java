@@ -179,6 +179,7 @@ public class Transaction {
     public URI getPath() { return this.path; }
     private HashMap<LocalDate, ProjectedTransaction> getStoredProjections() { return this.projectedTransactions; }
     public HashMap<LocalDate, ProjectedTransaction> getProjectedTransactionsWithProjectedDate(LocalDate cutoff_date) {
+
         this.projectTransactionsToDate( cutoff_date );
 
         HashMap<LocalDate, ProjectedTransaction> projectionSet = new HashMap<>(  );

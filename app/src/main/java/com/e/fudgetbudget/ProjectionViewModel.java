@@ -26,9 +26,8 @@ class ProjectionViewModel {
         this.budgetModel = new BudgetModel( context );
     }
 
-
     void loadProjectionLineItems(LinearLayout list_view) {
-        LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> projections = budgetModel.getProjectedTransactionsByPeriod(60);
+        LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> projections = budgetModel.getProjectedTransactionsByPeriod();
 
         //TODO: I need to carry the running balance for the projections
         //  I did this before, but either it got removed or I'm not seeing where it went and it's not working
@@ -246,5 +245,4 @@ class ProjectionViewModel {
 
         return projectedTransaction;
     }
-
 }

@@ -37,10 +37,14 @@ public class BudgetModel {
     private HashMap<URI, Transaction> transactions_income_map;
     private Double current_balance;
     private UUID last_record_id;
+    private final String projectionPeriod;
+    private final int periodsToProject;
 
 
     public BudgetModel(Context context) {
         this.context = context;
+        this.projectionPeriod = "days";
+        this.periodsToProject = 130;
         File transactions_file = readAppFile("app_transactions");
         File records_file = readAppFile("app_records");
         File balance_file = readAppFile( "app_balance" );
@@ -158,7 +162,7 @@ public class BudgetModel {
     //todo: add a property for period
     //  adjust method by grouping results into entries by the period property
     //todo: remove days_to_project parameter and replace with a property in budgetmodel for how far to project
-    public LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> getProjectedTransactionsByPeriod(int days_to_project){
+    public LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> getProjectedTransactionsByPeriod(){
         LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> result = new LinkedHashMap<>();
         ArrayList<Transaction> allTransactions = new ArrayList<>();
 
@@ -166,18 +170,20 @@ public class BudgetModel {
         allTransactions.addAll( this.transactions_income_map.values() );
 
         LocalDate currentDate = LocalDate.now();
-        LocalDate cutoffDate = currentDate.plusDays( days_to_project );
 
 
-        for( int index = 0; index < days_to_project; index ++){
-            result.put( currentDate.plusDays( index ), new ArrayList<ProjectedTransaction>() );
+        for( int index = 0; index < this.periodsToProject; index ++){
+            if(this.projectionPeriod.contentEquals( "days" )) result.put( currentDate.plusDays( index ), new ArrayList<ProjectedTransaction>() );
+            else if(this.projectionPeriod.contentEquals( "weeks" )) result.put( currentDate.plusWeeks( index ), new ArrayList<>(  ));
+            else if(this.projectionPeriod.contentEquals( "months" )) result.put( currentDate.plusMonths( index ), new ArrayList<>(  ));
+            else if(this.projectionPeriod.contentEquals( "years" )) result.put( currentDate.plusYears( index ), new ArrayList<>(  ));
         }
 
         while(!allTransactions.isEmpty()){
             Transaction currentTransaction = allTransactions.remove(0);
             LocalDate scheduledDate = currentTransaction.getScheduledDate();
 
-            if (scheduledDate.isAfter( cutoffDate )) continue;
+            if (scheduledDate.isAfter( this.getCutoffDate() )) continue;
 
             if(scheduledDate.isBefore( (LocalDate)result.keySet().toArray()[0] )){
                 //if scheduledDate is before date in first entry of result, we need to extend the range of result
@@ -199,7 +205,7 @@ public class BudgetModel {
             resultSet.add( projection );
             result.replace( scheduledDate, resultSet );
 
-            HashMap<LocalDate, ProjectedTransaction> currentTransactionProjections = currentTransaction.getProjectedTransactionsWithProjectedDate(cutoffDate);
+            HashMap<LocalDate, ProjectedTransaction> currentTransactionProjections = currentTransaction.getProjectedTransactionsWithProjectedDate(this.getCutoffDate());
 
             for(Map.Entry<LocalDate, ProjectedTransaction> entry: currentTransactionProjections.entrySet()){
                 ArrayList<ProjectedTransaction> resultSet1 = result.get( entry.getKey() );
@@ -288,6 +294,19 @@ public class BudgetModel {
         return object;
     }
 
-
+    public LocalDate getCutoffDate() {
+        switch (this.projectionPeriod) {
+            case "days":
+                return LocalDate.now().plusDays( this.periodsToProject );
+            case "weeks":
+                return LocalDate.now().plusWeeks( this.periodsToProject );
+            case "months":
+                return LocalDate.now().plusMonths( this.periodsToProject );
+            case "years":
+                return LocalDate.now().plusYears( this.periodsToProject );
+            default:
+                return LocalDate.now();
+        }
+    }
 }
 
