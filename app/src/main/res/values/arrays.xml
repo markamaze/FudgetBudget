@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pages" >
+        <item>Overview</item>
+        <item>Balance Sheet</item>
+        <item>Transactions</item>
+        <item>Records</item>
+    </string-array>
+    <string-array name="date_periods">
+        <item>Day</item>
+        <item>Week</item>
+        <item>Month</item>
+        <item>Year</item>
+    </string-array>
+    <string-array name="on_day_types" >
+        <item></item>
+        <item>day of week</item>
+        <item>day of month</item>
+        <item>day of week occurrence in month</item>
+    </string-array>
+    <string-array name="days_of_week_options">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+        <item>Sunday</item>
+    </string-array>
+    <string-array name="day_of_month_options">
+        <item>DayOfMonth</item>
+        <item>WeekDayOfMonth</item>
+    </string-array>
+</resources>

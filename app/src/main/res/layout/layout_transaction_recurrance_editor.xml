@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="12dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Set Repeating Properties"
+        android:textSize="18dp"
+        android:gravity="center"
+        android:padding="12dp"/>
+
+    <Switch
+        android:id="@+id/recurring_property_toggle_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Repeat Transaction"
+        android:textSize="14dp"/>
+
+    <LinearLayout
+        android:id="@+id/set_recurrance_parameters_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="Repeat every " />
+
+                <EditText
+                    android:id="@+id/recurrence_frequency_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:hint="frequency"
+                    android:inputType="number"
+                    android:textAlignment="center" />
+
+                <Spinner
+                    android:id="@+id/recurrence_period_spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:entries="@array/date_periods"
+                    android:textAlignment="center" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/on_day_type_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:visibility="invisible"
+                android:layout_marginStart="48dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="on" />
+
+                <Spinner
+                    android:id="@+id/on_day_type_selector"
+                    android:layout_width="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_height="match_parent"
+                    android:textAlignment="center" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <Switch
+            android:id="@+id/set_end_parameters_switch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Stop repeating after..."
+            android:paddingTop="36dp"
+            android:paddingBottom="12dp"
+            android:paddingStart="36dp"
+            android:paddingEnd="36dp"/>
+
+        <LinearLayout
+            android:id="@+id/set_end_parameters_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:visibility="gone">
+
+            <RadioGroup
+                android:id="@+id/set_end_parameters_options"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <RadioButton
+                    android:id="@+id/after_number_of_occurrences"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+                <RadioButton
+                    android:id="@+id/after_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+                <RadioButton
+                    android:id="@+id/when_total_reaches_amount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+            </RadioGroup>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_weight="1">
+
+                        <EditText
+                            android:id="@+id/after_number_of_occurrences_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:hint="number of"
+                            android:enabled="false"
+                            android:inputType="number"
+                            android:textAlignment="center"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:text="occurences" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_weight="1">
+
+                        <Button
+                            android:id="@+id/after_date_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginStart="36dp"
+                            android:layout_marginEnd="36dp"
+                            android:text="date"
+                            android:enabled="false"
+                            tools:ignore="NestedWeights" />
+
+                    </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:text="total amounts reach value" />
+
+
+                    <EditText
+                        android:id="@id/when_total_reaches_amount_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:hint="amount"
+                        android:inputType="number"
+                        android:enabled="false"
+                        android:textAlignment="center"/>
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+<!--        <TextView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:paddingStart="24dp"-->
+<!--            android:paddingTop="6dp"-->
+<!--            android:paddingEnd="36dp"-->
+<!--            android:paddingBottom="6dp"-->
+<!--            android:text="* Changes to the recurrance properties will result in resetting the scheduled dates of all future transactions."-->
+<!--            android:textSize="12sp"-->
+<!--            android:textStyle="italic" />-->
+
+<!--        <TextView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:paddingStart="24dp"-->
+<!--            android:paddingTop="6dp"-->
+<!--            android:paddingEnd="36dp"-->
+<!--            android:paddingBottom="6dp"-->
+<!--            android:text="* Once repeating transactions are projected, scheduled date for each future transaction can be adjusted as needed."-->
+<!--            android:textSize="12sp"-->
+<!--            android:textStyle="italic" />-->
+
+    </LinearLayout>
+
+</LinearLayout>
