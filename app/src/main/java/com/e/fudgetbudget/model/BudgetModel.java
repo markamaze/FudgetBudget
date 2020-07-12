@@ -9,6 +9,7 @@ import org.w3c.dom.Node;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -159,12 +160,58 @@ public class BudgetModel {
     }
 
 
+
+    //TODO: change projection data access->
+    //    create a method, setProjectionDate(), which will create two objects from the current transactions
+    //    one object will contain balance data where it has 4 items, beginning of day bal, income sum, expense, sum, ending balance
+    //    the other object will contain transaction projections for each period
+    //    both objects have matching keys, which are defined by the setting value, period
+    private LinkedHashMap<LocalDate, ArrayList<Double>> getProjectedBalancesByPeriod(){
+        LinkedHashMap<LocalDate, ArrayList<Double>> result = new LinkedHashMap<>();
+        double tempCurrentBalance = this.getCurrentBalance();
+
+        LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> projectedTransactionByPeriod = getProjectedTransactionsByPeriod();
+
+        for( Map.Entry<LocalDate, ArrayList<ProjectedTransaction>> periodEntry: projectedTransactionByPeriod.entrySet()){
+            LocalDate period = periodEntry.getKey();
+            ArrayList<ProjectedTransaction> projectionList = periodEntry.getValue();
+            double beginningBalance, endingBalance, incomeSum, expenseSum;
+
+            beginningBalance = tempCurrentBalance;
+            incomeSum = 0;
+            expenseSum = 0;
+            endingBalance = 0;
+
+            for(ProjectedTransaction projection : projectionList){
+                if(projection.getIncomeFlag()) incomeSum += projection.getAmount();
+                else expenseSum += projection.getAmount();
+            }
+
+            endingBalance = beginningBalance + incomeSum - expenseSum;
+
+            ArrayList<Double> balanceArray = new ArrayList<>(  );
+            balanceArray.add(beginningBalance);
+            balanceArray.add( incomeSum );
+            balanceArray.add( expenseSum );
+            balanceArray.add( endingBalance );
+
+            result.put( period, balanceArray );
+            tempCurrentBalance = endingBalance;
+        }
+
+
+	    return result;
+    }
+
+
+    
     //todo: add a property for period
     //  adjust method by grouping results into entries by the period property
     //todo: remove days_to_project parameter and replace with a property in budgetmodel for how far to project
     public LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> getProjectedTransactionsByPeriod(){
         LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> result = new LinkedHashMap<>();
         ArrayList<Transaction> allTransactions = new ArrayList<>();
+	
 
         allTransactions.addAll( this.transactions_expenses_map.values() );
         allTransactions.addAll( this.transactions_income_map.values() );
