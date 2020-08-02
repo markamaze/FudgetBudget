@@ -14,6 +14,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/date_key"
+            android:textStyle="bold"
+            android:textAlignment="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Start Bal"
+            android:textStyle="bold"
             android:textAlignment="center" />
 
         <TextView
@@ -21,6 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/key_projection_income"
+            android:textStyle="bold"
             android:textAlignment="center" />
 
         <TextView
@@ -28,6 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/key_projection_expense"
+            android:textStyle="bold"
             android:textAlignment="center" />
 
         <TextView
@@ -35,6 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/key_projection_end_balance"
+            android:textStyle="bold"
             android:textAlignment="center" />
 
     </LinearLayout>

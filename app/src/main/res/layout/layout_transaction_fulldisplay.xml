@@ -61,6 +61,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/layout_transaction_fulldisplay_recurrance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -129,13 +130,14 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/layout_transaction_fulldisplay_futureProjections"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="12dp">
 
         <TextView
-            android:layout_width="100dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/key_projected_transactions"
             android:textSize="12dp"

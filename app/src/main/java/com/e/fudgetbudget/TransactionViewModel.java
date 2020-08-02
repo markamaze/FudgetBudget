@@ -18,29 +18,27 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.e.fudgetbudget.model.BudgetModel;
 import com.e.fudgetbudget.model.ProjectedTransaction;
-import com.e.fudgetbudget.model.PropertySetter;
 import com.e.fudgetbudget.model.Transaction;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.UUID;
 
 
 class TransactionViewModel {
     private final MainActivity context;
     private BudgetModel budgetModel;
-    private ProjectionViewModel projectionViewModel;
 
 
-    TransactionViewModel(MainActivity context) {
+    TransactionViewModel(MainActivity context, BudgetModel budgetModel) {
         this.context = context;
-        this.budgetModel = new BudgetModel( context );
-        this.projectionViewModel = new ProjectionViewModel( context );
+        this.budgetModel = budgetModel;
     }
 
     void loadIncomeLineItems(ViewGroup list_view) {
-        ArrayList<Transaction> income = budgetModel.getIncomeTransactions();
+        ArrayList<Transaction> income = budgetModel.getTransactionsByType("income");
         if(income.size() <= 0) list_view.addView( TextView.inflate( this.context, R.layout.view_empty_list_message, null ) );
 
         else income.iterator().forEachRemaining( transaction -> {
@@ -50,7 +48,7 @@ class TransactionViewModel {
         });
     }
     void loadExpenseLineItems(ViewGroup list_view) {
-        ArrayList<Transaction> expenses = budgetModel.getExpenseTransactions();
+        ArrayList<Transaction> expenses = budgetModel.getTransactionsByType("expense");
         if(expenses.size() <= 0) list_view.addView( View.inflate( this.context, R.layout.view_empty_list_message, null ) );
 
         else expenses.iterator().forEachRemaining( transaction -> {
@@ -66,20 +64,20 @@ class TransactionViewModel {
 
         if(object instanceof Transaction)
             transaction = (Transaction) object ;
-        else if(object instanceof Integer && (Integer)object == R.string.tag_transaction_expense)
-            transaction = (Transaction)budgetModel.factory( Transaction.class, R.string.tag_transaction_expense );
-        else if(object instanceof Integer && (Integer)object == R.string.tag_transaction_income)
-            transaction = (Transaction) budgetModel.factory( Transaction.class, R.string.tag_transaction_income );
+        else if(object instanceof Integer && (Integer)object == R.string.expense_tag)
+            transaction = Transaction.getInstance(R.string.expense_tag, this.context.getExternalFilesDir( null ).getAbsolutePath());
+        else if(object instanceof Integer && (Integer)object == R.string.income_tag)
+            transaction = Transaction.getInstance(R.string.income_tag, this.context.getExternalFilesDir( null ).getAbsolutePath());
         else transaction = null;
 
         editor_view = getEditorLayout( transaction );
         TextView header = editor_view.findViewById( R.id.editor_header );
-        if(transaction.getIncomeFlag()) header.setText("Income Transaction");
+        if((boolean)transaction.getProperty(R.string.income_tag )) header.setText("Income Transaction");
         else header.setText("Expense Transaction");
 
         builder.setView( editor_view );
         builder.setPositiveButton( "Save", (dialog, which) -> {
-            budgetModel.update( getTransactionFromView( transaction, editor_view, "editor" ) );
+            budgetModel.update( getTransactionFromEditorView( transaction, editor_view ) );
             dialog.dismiss();
             this.context.recreate();
         });
@@ -88,12 +86,12 @@ class TransactionViewModel {
         } );
         builder.show();
     }
-    private void showFullDisplayDialog(Transaction transaction) {
+    void showFullDisplayDialog(Transaction transaction) {
         AlertDialog.Builder builder = new AlertDialog.Builder( this.context );
         LinearLayout fullDisplayView = getFullDisplayLayout( transaction );
 
         TextView header = fullDisplayView.findViewById( R.id.fulldisplay_header );
-        if(transaction.getIncomeFlag()) header.setText("Income Transaction");
+        if((boolean)transaction.getProperty( R.string.income_tag )) header.setText("Income Transaction");
         else header.setText("Expense Transaction");
 
         builder.setView( fullDisplayView );
@@ -110,27 +108,28 @@ class TransactionViewModel {
         builder.show();
     }
 
-    private LinearLayout getEditorLayout(Transaction transaction){
+    LinearLayout getEditorLayout(Transaction transaction){
         LinearLayout editorView = (LinearLayout) this.context.getLayoutInflater().inflate( R.layout.layout_transaction_editor, null );
 
         if(transaction == null) return editorView;
-        editorView.setTag( R.string.id_tag, transaction.getId() );
-        if(transaction.getIncomeFlag()) editorView.setTag(R.string.object_type_tag, R.string.tag_transaction_income);
-        else editorView.setTag(R.string.object_type_tag, R.string.tag_transaction_income);
+        editorView.setTag( R.string.id_tag, (UUID)transaction.getProperty( R.string.id_tag ) );
+        if((boolean)transaction.getProperty( R.string.income_tag )) editorView.setTag(R.string.object_type_tag, R.string.income_tag );
+        else editorView.setTag(R.string.object_type_tag, R.string.income_tag );
 
         ( (EditText) editorView.findViewById( R.id.label_editor ) )
-                .setText(transaction.getLabel());
+                .setText((String)transaction.getProperty( R.string.label_tag ));
 
         Button dateEditorButton = (Button) editorView.findViewById( R.id.date_editor_button );
-        LocalDate date = transaction.getScheduledDate();
+        LocalDate date = (LocalDate) transaction.getProperty( R.string.date_tag );
         dateEditorButton.setText(date.format( DateTimeFormatter.ofPattern( "MMMM dd, yyyy" ) ));
         dateEditorButton.setTag(R.string.date_tag, date);
         dateEditorButton.setOnClickListener( view -> {
             final LocalDate[] newDate = {date};
             DatePickerDialog pickerDialog = new DatePickerDialog( this.context );
             DatePicker picker = pickerDialog.getDatePicker();
-            picker.init( newDate[0].getYear(), newDate[0].getMonthValue(), newDate[0].getDayOfMonth(), (button_view, year, monthOfYear, dayOfMonth) -> {
-                newDate[0] = LocalDate.of( year, monthOfYear, dayOfMonth );
+
+            picker.init( newDate[0].getYear(), newDate[0].getMonthValue()-1, newDate[0].getDayOfMonth(), (button_view, year, monthOfYear, dayOfMonth) -> {
+                newDate[0] = LocalDate.of( year, monthOfYear+1, dayOfMonth );
             } );
             pickerDialog.setButton( DatePickerDialog.BUTTON_POSITIVE, "OK", (dialog, which)->{
                 dateEditorButton.setText( newDate[0].format( DateTimeFormatter.ofPattern( "MMMM dd, yyyy" ) ));
@@ -143,7 +142,7 @@ class TransactionViewModel {
         });
 
         Button recurranceEditorButton = editorView.findViewById( R.id.recurrance_editor_button );
-        String recurrenceValue = String.valueOf( transaction.getRecurrance() );
+        String recurrenceValue = (String)transaction.getProperty( R.string.recurrence_tag );
         //TODO: print recurrenceValue in a more readable form
         recurranceEditorButton.setText( recurrenceValue );
         recurranceEditorButton.setOnClickListener( view -> {
@@ -250,7 +249,7 @@ class TransactionViewModel {
                 String pattern = "^(0|1)-(\\d+)-(0|Month|Week|Year|Day)-(0|DayOfMonth|WeekDayOfMonth|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)-(0|1)-(0|StopAfterOccurrenceCount|StopAfterDate|StopAfterRecordedAmount)-(\\d+)$";
                 String[] groupValues = new String[7];
 
-                for(int i = 0; i < groupValues.length; i++){ groupValues[i] = "0"; }
+                Arrays.fill( groupValues, "0" );
 
                 Switch recurringPropertyToggle = recurranceEditor.findViewById( R.id.recurring_property_toggle_switch );
                 if(recurringPropertyToggle.isChecked()){
@@ -294,7 +293,7 @@ class TransactionViewModel {
                 capturedRecurrenceValue.deleteCharAt( capturedRecurrenceValue.length()-1 );
                 //TODO: print capturedRecurrenceValue in a more readable form
                 recurranceEditorButton.setText(capturedRecurrenceValue);
-                recurranceEditorButton.setTag(R.string.transaction_recurrence_tag, capturedRecurrenceValue.toString() );
+                recurranceEditorButton.setTag(R.string.recurrence_tag, capturedRecurrenceValue.toString() );
             } );
             builder.setNegativeButton( "Cancel", ((dialog, which) -> { dialog.dismiss(); }) );
             builder.setView( recurranceEditor );
@@ -302,10 +301,10 @@ class TransactionViewModel {
         });
 
         ( (EditText) editorView.findViewById( R.id.amount_editor ))
-                .setText(String.valueOf( transaction.getAmount() ));
+                .setText(String.valueOf( transaction.getProperty( R.string.amount_tag ) ));
 
         ( (EditText) editorView.findViewById( R.id.note_editor ))
-                .setText( transaction.getNote() );
+                .setText( (String)transaction.getProperty( R.string.note_tag ) );
 
         return editorView;
     }
@@ -316,66 +315,63 @@ class TransactionViewModel {
         TextView label = lineItemView.findViewById( R.id.label_value );
         TextView amount = lineItemView.findViewById( R.id.amount_value );
 
-        date.setText(transaction.getScheduledDate().format( DateTimeFormatter.ofPattern( "MM/dd" ) ));
-        label.setText( transaction.getLabel() );
-        amount.setText( String.valueOf( transaction.getAmount() ));
+        date.setText( ((LocalDate)transaction.getProperty( R.string.date_tag )).format( DateTimeFormatter.ofPattern( "MM/dd" ) ));
+        label.setText( (String) transaction.getProperty( R.string.label_tag ) );
+        amount.setText( String.valueOf( transaction.getProperty( R.string.amount_tag ) ));
 
+        //I think this is redundant: also setting onClickListener to open fullDisplay when getLineItems is called
         lineItemView.setOnClickListener( view -> showFullDisplayDialog(transaction) );
 
 
         return lineItemView;
     }
-    private LinearLayout getFullDisplayLayout(Transaction transaction){
+    private <T extends Transaction> LinearLayout getFullDisplayLayout(Transaction transaction){
         LinearLayout displayView = (LinearLayout)LinearLayout.inflate( this.context, R.layout.layout_transaction_fulldisplay, null);
 
-        ( (TextView) displayView.findViewById( R.id.label_value ) ).setText(transaction.getLabel());
-        ( (TextView) displayView.findViewById( R.id.amount_value ) ).setText(String.valueOf(transaction.getAmount()));
-        ( (TextView) displayView.findViewById( R.id.date_value ) ).setText(transaction.getScheduledDate().format( DateTimeFormatter.ofPattern( "MMMM dd, yyyy" ) ));
-        ( (TextView) displayView.findViewById( R.id.note_value ) ).setText(transaction.getNote());
-        ( (TextView) displayView.findViewById( R.id.recurrance_value )).setText(transaction.getRecurrance().toString());
+        ( (TextView) displayView.findViewById( R.id.label_value ) ).setText((String)transaction.getProperty(R.string.label_tag ));
+        ( (TextView) displayView.findViewById( R.id.amount_value ) ).setText(String.valueOf(transaction.getProperty(R.string.amount_tag )));
+        ( (TextView) displayView.findViewById( R.id.date_value ) ).setText(((LocalDate)transaction.getProperty( R.string.date_tag )).format( DateTimeFormatter.ofPattern( "MMMM dd, yyyy" ) ));
+        ( (TextView) displayView.findViewById( R.id.note_value ) ).setText((String)transaction.getProperty(R.string.note_tag ));
+        ( (TextView) displayView.findViewById( R.id.recurrance_value )).setText((String)transaction.getProperty(R.string.recurrence_tag ));
 
-        LinearLayout projectedTransactionsList = displayView.findViewById( R.id.projected_transactions_list );
-        //todo: set a property for how far to project and use this whenever calling to get projections
-        HashMap<LocalDate, ProjectedTransaction> projections = transaction.getProjectedTransactionsWithProjectedDate(budgetModel.getCutoffDate());
-        if(projections.size() <= 0) projectedTransactionsList.addView( View.inflate( this.context, R.layout.view_empty_list_message, null ) );
-        else projections.forEach( (date, projectedTransaction) -> {
-            //maybe this could be moved to projectionViewModel.showProjectionLineItemDialog ?
-            LinearLayout lineItem = (LinearLayout) LinearLayout.inflate( this.context, R.layout.layout_projected_transactions_lineitem, null );
-            ((TextView)lineItem.findViewById( R.id.date_value )).setText(projectedTransaction.getScheduledDate().format( DateTimeFormatter.ofPattern( "MM-dd" ) ));
-            ((TextView)lineItem.findViewById( R.id.label_value )).setText(projectedTransaction.getLabel());
-            ((TextView)lineItem.findViewById( R.id.amount_value )).setText(String.valueOf( projectedTransaction.getAmount() ));
+        if(!((String)transaction.getProperty( R.string.recurrence_tag )).contentEquals( "0-0-0-0-0-0-0")){
+            LinearLayout projectedTransactionsList = displayView.findViewById( R.id.projected_transactions_list );
+            ArrayList<T> projections = budgetModel.getProjections(transaction);
 
-            lineItem.setOnClickListener( view -> projectionViewModel.showProjectionFullDisplayDialog(projectedTransaction) );
+            if(projections.size() <= 0) projectedTransactionsList.addView( View.inflate( this.context, R.layout.view_empty_list_message, null ) );
+            else projections.forEach( projectedTransaction -> {
+                LinearLayout lineItem = (LinearLayout) LinearLayout.inflate( this.context, R.layout.layout_projected_transactions_lineitem, null );
+                ((TextView)lineItem.findViewById( R.id.date_value )).setText(((LocalDate)projectedTransaction.getProperty( R.string.date_tag )).format( DateTimeFormatter.ofPattern( "MM-dd" ) ));
+                ((TextView)lineItem.findViewById( R.id.label_value )).setText((String)projectedTransaction.getProperty(R.string.label_tag ));
+                ((TextView)lineItem.findViewById( R.id.amount_value )).setText(String.valueOf( projectedTransaction.getProperty(R.string.amount_tag ) ));
 
-            projectedTransactionsList.addView( lineItem );
-        } );
+                lineItem.setOnClickListener( view -> {
+                    if(projectedTransaction instanceof ProjectedTransaction) this.context.projectionViewModel.showProjectionFullDisplayDialog((ProjectedTransaction)projectedTransaction);
+                    else throw new Error("unhandled object type");
+                } );
 
+                projectedTransactionsList.addView( lineItem );
+            } );
+        } else {
+            displayView.removeView( displayView.findViewById( R.id.layout_transaction_fulldisplay_recurrance ) );
+            displayView.removeView( displayView.findViewById( R.id.layout_transaction_fulldisplay_futureProjections ) );
+        }
 
         return displayView;
     }
 
-    private Transaction getTransactionFromView(Transaction transaction, View containing_view, String view_type){
-        String label = null;
-        Double amount = null;
-        String note = null;
-        LocalDate date = null;
-        String recurrence = null;
-        HashMap<Integer, PropertySetter> properties = transaction.taggedPropertySetters();
+    private Transaction getTransactionFromEditorView(Transaction transaction, View containing_view){
+        String label = ( (EditText) containing_view.findViewById( R.id.label_editor )).getText().toString();
+        LocalDate date = (LocalDate) containing_view.findViewById( R.id.date_editor_button ).getTag(R.string.date_tag );
+        Double amount = Double.valueOf(( (EditText) containing_view.findViewById( R.id.amount_editor )).getText().toString());
+        String note = ( (EditText) containing_view.findViewById( R.id.note_editor )).getText().toString();
+        String recurrence = containing_view.findViewById( R.id.recurrance_editor_button ).getTag(R.string.recurrence_tag ).toString();
 
-        if(view_type.contentEquals( "editor" )){
-            label = ( (EditText) containing_view.findViewById( R.id.label_editor )).getText().toString();
-            date = (LocalDate)( (Button) containing_view.findViewById( R.id.date_editor_button )).getTag(R.string.date_tag );
-            amount = Double.valueOf(( (EditText) containing_view.findViewById( R.id.amount_editor )).getText().toString());
-            note = ( (EditText) containing_view.findViewById( R.id.note_editor )).getText().toString();
-            recurrence = ( (Button) containing_view.findViewById( R.id.recurrance_editor_button )).getTag(R.string.transaction_recurrence_tag).toString();
-        }
-
-        properties.get(R.string.transaction_label_tag).setProperty( label );
-        properties.get(R.string.date_tag ).setProperty( date );
-        properties.get(R.string.transaction_amount_tag).setProperty( amount );
-        properties.get(R.string.transaction_note_tag).setProperty( note );
-        properties.get(R.string.transaction_recurrence_tag).setProperty( recurrence );
-
+        transaction.setProperty( R.string.label_tag, label );
+        transaction.setProperty( R.string.date_tag, date );
+        transaction.setProperty( R.string.amount_tag, amount );
+        transaction.setProperty( R.string.note_tag, note );
+        transaction.setProperty( R.string.recurrence_tag, recurrence );
 
         return transaction;
     }

@@ -2,15 +2,18 @@
     <string name="app_name">Fudget Budget</string>
     <string name="income_transactions_list_title">Income</string>
     <string name="expense_transactions_list_title">Expenses</string>
+
     <string name="id_tag">id_tag</string>
     <string name="object_type_tag">object_type_tag</string>
-    <string name="tag_transaction_income">tag_transaction_income</string>
-    <string name="date_tag">transaction_date_tag</string>
-    <string name="transaction_label_tag">transaction_label_tag</string>
-    <string name="transaction_amount_tag">transaction_amount_tag</string>
-    <string name="tag_transaction_expense">tag_transaction_expense</string>
-    <string name="transaction_note_tag">transaction_note_tag</string>
+    <string name="income_tag">income_tag</string>
+    <string name="date_tag">date_tag</string>
+    <string name="label_tag">label_tag</string>
+    <string name="amount_tag">amount_tag</string>
+    <string name="expense_tag">expense_tag</string>
+    <string name="note_tag">note_tag</string>
     <string name="date_value_tag">date_value_tag</string>
+    <string name="recurrence_tag">recurrance_tag</string>
+
     <string name="date_key">Date</string>
     <string name="key_projection_end_balance">End Bal</string>
     <string name="key_projection_expense">Expense</string>
@@ -24,7 +27,6 @@
     <string name="key_projected_transactions">Future Occurances</string>
     <string name="recurrance_key">Recurrs</string>
     <string name="transaction_recurrence_value" />
-    <string name="transaction_recurrence_tag" />
     <string name="projected_date_key">Scheduled Date</string>
     <string name="scheduled_date_key">Original transaction date</string>
     <string name="scheduled_amount_key" >Original schedule amount</string>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/date_value"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:gravity="left"
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/label_value"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/amount_value"
+        android:layout_width="70dp"
+        android:layout_height="match_parent"
+        android:paddingEnd="6dp"
+        android:gravity="right"
+        android:textStyle="italic" />
+</LinearLayout>

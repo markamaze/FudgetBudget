@@ -1,190 +1,50 @@
 package com.e.fudgetbudget.model;
 
-
 import android.content.Context;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import com.e.fudgetbudget.R;
 
-import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.URI;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.MonthDay;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 public class BudgetModel {
-    private final Context context;
-//    private LinkedList<Record> records_linkedlist;
-//    private HashMap<URI, Record> records_map;
-    private HashMap<URI, Transaction> transactions_expenses_map;
-    private HashMap<URI, Transaction> transactions_income_map;
-    private Double current_balance;
-    private UUID last_record_id;
     private final String projectionPeriod;
     private final int periodsToProject;
+    private final StorageControl storage;
+    private Double lowestProjectedBalance;
 
 
     public BudgetModel(Context context) {
-        this.context = context;
-        this.projectionPeriod = "days";
-        this.periodsToProject = 130;
-        File transactions_file = readAppFile("app_transactions");
-        File records_file = readAppFile("app_records");
-        File balance_file = readAppFile( "app_balance" );
-
-
-        //Build Transaction Resources
-        List transactions_file_set = Arrays.asList( transactions_file.listFiles() );
-        HashMap<URI, Transaction> income_transactions = new HashMap<>(  );
-        HashMap<URI, Transaction> expense_transactions = new HashMap<>(  );
-
-        for( Object file : transactions_file_set){
-            Transaction transaction = Transaction.getInstance( getDocumentFromFile( (File) file ) );
-            if (!transaction.getIncomeFlag()) expense_transactions.put(transaction.getPath(), transaction);
-            else income_transactions.put(transaction.getPath(), transaction);
-        }
-        this.transactions_income_map = income_transactions;
-        this.transactions_expenses_map = expense_transactions;
-
-
-        //Build Records Resources  TODO: finish writing once I'm ready to create records
-//        this.records_linkedlist = new LinkedList<>(  );
-//        this.records_map = new HashMap<>(  );
-
-
-        //Read Balance From File
-        Document balance_document = getDocumentFromFile( balance_file );
-
-        if(balance_document == null) this.current_balance = 0.00;
-        else {
-            Node balance_node = balance_document.getFirstChild();
-            String balance_string = balance_node.getTextContent();
-            this.current_balance = Double.parseDouble( balance_string );
-        }
-    }
-    public Object factory(Class clazz, int type){
-        if(clazz.equals( Transaction.class )) return Transaction.getInstance(type);
-//        else if(clazz.equals( Record.class )) return Record.getInstance();
-        else return null;
-    }
-    public Object factory(Class clazz, int type, UUID id){
-        if(clazz.equals( Transaction.class )) return Transaction.getInstance(type, id);
-//        else if(clazz.equals( Record.class )) return Record.getInstance(id);
-        else return null;
+        this.storage = new StorageControl( context );
+        this.projectionPeriod = (String) storage.readSettingsValue("projection_period");
+        this.periodsToProject = (int) storage.readSettingsValue("projection_periods_to_project");
     }
 
-    private File readAppFile(String path) {
-        File file = new File(this.context.getFilesDir(), path);
-
-        if( !file.exists() && path.contentEquals( "app_balance" )){
-            try {
-                file.setReadable( true );
-                file.setWritable( true );
-                file.createNewFile();
-
-
-            } catch (IOException e) { e.printStackTrace(); }
-        }
-
-        else if(!file.exists()) {
-            try {
-                file.mkdir();
-                file.setReadable( true );
-                file.setWritable( true );
-                file.createNewFile();
-            }
-            catch (IOException e) { e.printStackTrace(); }
-
-        }
-        return file;
-    }
-    private boolean writeDocumentToFile(Document document) {
-
-        try {
-            File transaction_file;
-            if(document.getDocumentURI().contains( this.context.getFilesDir().toURI().getPath() )) transaction_file = new File(document.getDocumentURI());
-            else transaction_file = new File( this.context.getFilesDir(), document.getDocumentURI());
-            
-            if(!transaction_file.exists()){
-                transaction_file.setWritable( true );
-                transaction_file.setReadable( true );
-                transaction_file.createNewFile();
-            }
-
-
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(document);
-            StreamResult streamResult = new StreamResult(transaction_file);
-            transformer.transform(source, streamResult);
-            return true;
-        } catch ( TransformerConfigurationException e) {
-            e.printStackTrace();
-            return false;
-        } catch (TransformerException e) {
-            e.printStackTrace();
-            return false;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    private Document getDocumentFromFile(File file){
-
-        try {
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-
-            Document document = documentBuilder.parse(file);
-            return document;
-
-        } catch (Exception e){ e.printStackTrace(); return null; }
-    }
-
-
-
-    //TODO: change projection data access->
-    //    create a method, setProjectionDate(), which will create two objects from the current transactions
-    //    one object will contain balance data where it has 4 items, beginning of day bal, income sum, expense, sum, ending balance
-    //    the other object will contain transaction projections for each period
-    //    both objects have matching keys, which are defined by the setting value, period
-    private LinkedHashMap<LocalDate, ArrayList<Double>> getProjectedBalancesByPeriod(){
+    public <T extends Transaction> LinkedHashMap<LocalDate, ArrayList<Double>> getProjectedBalancesByPeriod(){
         LinkedHashMap<LocalDate, ArrayList<Double>> result = new LinkedHashMap<>();
         double tempCurrentBalance = this.getCurrentBalance();
 
-        LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> projectedTransactionByPeriod = getProjectedTransactionsByPeriod();
+        LinkedHashMap<LocalDate, ArrayList<T>> projectedTransactionByPeriod = getProjectedTransactionsByPeriod();
 
-        for( Map.Entry<LocalDate, ArrayList<ProjectedTransaction>> periodEntry: projectedTransactionByPeriod.entrySet()){
+        for( Map.Entry<LocalDate, ArrayList<T>> periodEntry: projectedTransactionByPeriod.entrySet()){
             LocalDate period = periodEntry.getKey();
-            ArrayList<ProjectedTransaction> projectionList = periodEntry.getValue();
+            ArrayList<T> projectionList = periodEntry.getValue();
             double beginningBalance, endingBalance, incomeSum, expenseSum;
 
             beginningBalance = tempCurrentBalance;
             incomeSum = 0;
             expenseSum = 0;
-            endingBalance = 0;
 
-            for(ProjectedTransaction projection : projectionList){
-                if(projection.getIncomeFlag()) incomeSum += projection.getAmount();
-                else expenseSum += projection.getAmount();
+            for(T projection : projectionList){
+                if((boolean)projection.getProperty(R.string.income_tag )) incomeSum += (Double)projection.getProperty(R.string.amount_tag );
+                else expenseSum += (Double)projection.getProperty( R.string.amount_tag );
             }
 
             endingBalance = beginningBalance + incomeSum - expenseSum;
@@ -200,160 +60,276 @@ public class BudgetModel {
         }
 
 
-	    return result;
+        return result;
     }
-
-
-    
-    //todo: add a property for period
-    //  adjust method by grouping results into entries by the period property
-    //todo: remove days_to_project parameter and replace with a property in budgetmodel for how far to project
-    public LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> getProjectedTransactionsByPeriod(){
-        LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> result = new LinkedHashMap<>();
-        ArrayList<Transaction> allTransactions = new ArrayList<>();
-	
-
-        allTransactions.addAll( this.transactions_expenses_map.values() );
-        allTransactions.addAll( this.transactions_income_map.values() );
-
+    public <T extends Transaction> LinkedHashMap<LocalDate, ArrayList<T>> getProjectedTransactionsByPeriod(){
+        LinkedHashMap<LocalDate, ArrayList<T>> result = new LinkedHashMap<>();
+        ArrayList<T> allProjections = new ArrayList<>(  );
+        LocalDate cutoffDate = this.getCutoffDate();
         LocalDate currentDate = LocalDate.now();
+        LocalDate firstProjectedDate;
 
 
-        for( int index = 0; index < this.periodsToProject; index ++){
-            if(this.projectionPeriod.contentEquals( "days" )) result.put( currentDate.plusDays( index ), new ArrayList<ProjectedTransaction>() );
-            else if(this.projectionPeriod.contentEquals( "weeks" )) result.put( currentDate.plusWeeks( index ), new ArrayList<>(  ));
-            else if(this.projectionPeriod.contentEquals( "months" )) result.put( currentDate.plusMonths( index ), new ArrayList<>(  ));
-            else if(this.projectionPeriod.contentEquals( "years" )) result.put( currentDate.plusYears( index ), new ArrayList<>(  ));
+        storage.readTransactions( "all_active" ).forEach( transaction ->
+                allProjections.addAll( getProjections( transaction ) ) );
+
+        if(this.projectionPeriod.contentEquals( "days" )) firstProjectedDate = currentDate;
+        else if(this.projectionPeriod.contentEquals( "weeks" )) firstProjectedDate = currentDate.with( DayOfWeek.MONDAY );
+        else if(this.projectionPeriod.contentEquals( "months" )) firstProjectedDate = currentDate.with( MonthDay.of( currentDate.getMonth(), 1 ) );
+        else if(this.projectionPeriod.contentEquals( "years" )) firstProjectedDate = currentDate.with( Month.JANUARY ).with( MonthDay.of( Month.JANUARY, 1 ));
+        else throw new Error("invalid period set for: BudgetModel.projectionPeriod");
+
+
+        for( int index = 0; index <= this.periodsToProject; index ++){
+            LocalDate indexDate;
+            if(this.projectionPeriod.contentEquals( "days" )) indexDate = firstProjectedDate.plusDays( index );
+            else if(this.projectionPeriod.contentEquals( "weeks" )) indexDate = firstProjectedDate.plusWeeks( index );
+            else if(this.projectionPeriod.contentEquals( "months" )) indexDate = firstProjectedDate.plusMonths( index );
+            else if(this.projectionPeriod.contentEquals( "years" )) indexDate = firstProjectedDate.plusYears( index );
+            else throw new Error("invalid period set for: BudgetModel.projectionPeriod");
+
+            result.put( indexDate, new ArrayList<>(  ));
         }
 
-        while(!allTransactions.isEmpty()){
-            Transaction currentTransaction = allTransactions.remove(0);
-            LocalDate scheduledDate = currentTransaction.getScheduledDate();
+        while(!allProjections.isEmpty()){
+            T projection = allProjections.remove( 0 );
+            LocalDate projectedDate = (LocalDate) projection.getProperty( R.string.date_tag );
+            if (projectedDate.isAfter( cutoffDate )) continue;
 
-            if (scheduledDate.isAfter( this.getCutoffDate() )) continue;
-
-            if(scheduledDate.isBefore( (LocalDate)result.keySet().toArray()[0] )){
-                //if scheduledDate is before date in first entry of result, we need to extend the range of result
+            if(projectedDate.isBefore( firstProjectedDate )){
                 int index = 0;
-                while(scheduledDate.isBefore( currentDate )){
-                    LinkedHashMap<LocalDate, ArrayList<ProjectedTransaction>> result_copy = new LinkedHashMap<>(  );
+                while(projectedDate.isBefore( firstProjectedDate )){
+                    LinkedHashMap<LocalDate, ArrayList<T>> result_copy = new LinkedHashMap<>(  );
                     index++;
-                    currentDate = currentDate.minusDays( index );
-                    result_copy.put( currentDate, new ArrayList<ProjectedTransaction>(  ));
 
-                    result.forEach( (date, projection) -> result_copy.put( date, projection ) );
+                    if(this.projectionPeriod.contentEquals( "days" )) firstProjectedDate = firstProjectedDate.minusDays( index );
+                    else if(this.projectionPeriod.contentEquals( "weeks" )) firstProjectedDate = firstProjectedDate.minusWeeks( index );
+                    else if(this.projectionPeriod.contentEquals( "months" )) firstProjectedDate = firstProjectedDate.minusMonths( index );
+                    else if(this.projectionPeriod.contentEquals( "years" )) firstProjectedDate = firstProjectedDate.minusYears( index );
+                    else throw new Error("invalud property value for: BudgetModel.projectionPeriod");
+
+                    result_copy.put( firstProjectedDate, new ArrayList<>(  ));
+                    result.forEach( (date, projectionList) -> result_copy.put( date, projectionList ) );
                     result = result_copy;
                 }
 
             }
 
-            ProjectedTransaction projection = ProjectedTransaction.getInstance( scheduledDate, currentTransaction );
-            ArrayList<ProjectedTransaction> resultSet = result.get( scheduledDate );
-            resultSet.add( projection );
-            result.replace( scheduledDate, resultSet );
 
-            HashMap<LocalDate, ProjectedTransaction> currentTransactionProjections = currentTransaction.getProjectedTransactionsWithProjectedDate(this.getCutoffDate());
+            LocalDate resultInsertionDate = null;
+            int keyIndex = 0;
+            Object[] keySet = result.keySet().toArray();
 
-            for(Map.Entry<LocalDate, ProjectedTransaction> entry: currentTransactionProjections.entrySet()){
-                ArrayList<ProjectedTransaction> resultSet1 = result.get( entry.getKey() );
-                resultSet1.add(entry.getValue());
-                result.replace( entry.getKey(), resultSet1);
+            while(resultInsertionDate == null && keyIndex < keySet.length){
+                LocalDate firstDayOfPeriod = ((LocalDate)keySet[keyIndex]);
+                LocalDate firstDayOfNextPeriod;
+                if(keyIndex == keySet.length -1) firstDayOfNextPeriod = cutoffDate;
+                else firstDayOfNextPeriod = ((LocalDate)keySet[keyIndex + 1]);
+
+                if( projectedDate.isAfter( firstDayOfPeriod.minusDays( 1 ) ) && projectedDate.isBefore( firstDayOfNextPeriod ) )
+                    resultInsertionDate = (LocalDate) keySet[keyIndex];
+                keyIndex++;
             }
+
+
+            ArrayList<T> resultSet = result.get( resultInsertionDate );
+
+            resultSet.add( projection );
+            Collections.sort( resultSet );
+            result.replace( resultInsertionDate, resultSet );
         }
 
         return result;
     }
-    public ArrayList<Transaction> getIncomeTransactions(){
-        ArrayList<Transaction> result = new ArrayList<>();
-        Arrays.asList( this.transactions_income_map.values().toArray()).stream().forEach( transaction -> result.add((Transaction) transaction) );
-        return result;
+//    public LinkedHashMap<LocalDate, ArrayList<RecordedTransaction>> getRecordsByPeriod(){
+//        LinkedHashMap<LocalDate, ArrayList<RecordedTransaction>> recordMap = new LinkedHashMap<>(  );
+//
+//        return recordMap;
+//    };
+    public ArrayList<RecordedTransaction> getRecords(String type){
+        return storage.readRecords( type );
     }
-    public ArrayList<Transaction> getExpenseTransactions(){
-        ArrayList<Transaction> result = new ArrayList<>();
-        Arrays.asList( this.transactions_expenses_map.values().toArray()).stream().forEach( transaction ->
-                result.add((Transaction) transaction ) );
-        return result;
-    }
-    public Double getCurrentBalance() { return this.current_balance; }
-    public double getExpenseSumFromList(ArrayList<?> projected_transaction_list) {
-        double total = 0.00;
 
-        for(Object item : projected_transaction_list){
-            if(item instanceof ProjectedTransaction && !((ProjectedTransaction)item).getIncomeFlag())
-                total += ((ProjectedTransaction)item).getAmount();
-        }
-        return total;
+    public ArrayList<Transaction> getTransactionsByType(String type){
+        return storage.readTransactions( type );
     }
-    public double getIncomeSumFromList(ArrayList<?> projected_transaction_list) {
-        double total = 0.00;
 
-        for(Object item : projected_transaction_list){
-            if(item instanceof ProjectedTransaction && ((ProjectedTransaction)item).getIncomeFlag())
-                total += ((ProjectedTransaction)item).getAmount();
-        }
-        return total;
-    }
-    public void delete(Object object){
-        if(object instanceof Transaction){
-            Transaction transaction = (Transaction) object;
-            File objectFile = new File(transaction.getPath());
+    public Double getCurrentBalance() {
+        ArrayList<RecordedTransaction> records = storage.readRecords( "all" );
+        double balance = 0.00;
 
-            System.out.println(objectFile.delete());
-        }
-        else throw new Error("you are trying to delete an unknown object type");
-    }
-    public Object update(Object object){
-        if(object instanceof Transaction){
-            Transaction transaction = (Transaction) object;
-            writeDocumentToFile( transaction.writeToDocument());
+        for( RecordedTransaction recordedTransaction : records) {
+            boolean isIncome = (boolean) recordedTransaction.getProperty( R.string.income_tag );
+            double amount = (Double) recordedTransaction.getProperty( R.string.amount_tag );
 
-            return transaction;
+            if(isIncome) balance = balance + amount;
+            else balance = balance - amount;
         }
 
-        else if(object instanceof ProjectedTransaction) {
-            System.out.println( "handle removing projection from transactino here" );
-        }
-//        else if(object instanceof Record){
-//            Record record = (Record) object;
-//            writeDocumentToFile( record.writeToDocument() );
-//            return record;
-//        }
-        else if(object instanceof Double){
-            //TODO: need to handle difference between new balance and old by creating a record that reflects the change
-            Double value = (Double) object;
-
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder documentBuilder = null;
-            try { documentBuilder = documentBuilderFactory.newDocumentBuilder(); }
-            catch (ParserConfigurationException e) { e.printStackTrace(); }
-
-            Document document = documentBuilder.newDocument();
-            document.setDocumentURI( "app_balance" );
-            Element element = document.createElement( "current_balance" );
-            element.setTextContent( value.toString() );
-            document.appendChild( element );
-//            document.setTextContent( value.toString() );
-//            document.createTextNode( value.toString() );
-            writeDocumentToFile( document );
-            this.current_balance = value;
-            return value;
-        }
-        return object;
+        return balance;
     }
+
+    public Double getLowestProjectedBalance(){
+        if(this.lowestProjectedBalance == null) this.lowestProjectedBalance = getCurrentBalance();
+        return this.lowestProjectedBalance;
+    }
+    public void setLowestProjectedBalance(Double lowBalance) { this.lowestProjectedBalance = lowBalance; }
+
+    public Double getThresholdValue(){ return 200.0; }
 
     public LocalDate getCutoffDate() {
+        LocalDate currentDate = LocalDate.now();
         switch (this.projectionPeriod) {
-            case "days":
-                return LocalDate.now().plusDays( this.periodsToProject );
-            case "weeks":
-                return LocalDate.now().plusWeeks( this.periodsToProject );
-            case "months":
-                return LocalDate.now().plusMonths( this.periodsToProject );
-            case "years":
-                return LocalDate.now().plusYears( this.periodsToProject );
-            default:
-                return LocalDate.now();
+            case "days": return currentDate.plusDays( this.periodsToProject );
+            case "weeks": return currentDate.with( DayOfWeek.SUNDAY ).plusWeeks( this.periodsToProject );
+            case "months": return currentDate.with( MonthDay.of( currentDate.getMonth(), currentDate.lengthOfMonth() ) ).plusMonths( this.periodsToProject );
+            case "years": return currentDate.with( MonthDay.of( Month.DECEMBER, 31)).plusYears( this.periodsToProject );
+            default: return currentDate;
         }
     }
-}
 
+
+    public boolean update(Object object){
+        //I need to check for:
+        //  if a Transaction is updating it's date or recurrance value, clear all stored projections
+
+        if(object instanceof ProjectedTransaction) return storage.writeProjection( (ProjectedTransaction) object );
+        else if(object instanceof RecordedTransaction) return storage.writeRecord( (RecordedTransaction) object );
+        else if(object instanceof Transaction) return storage.writeTransaction( (Transaction) object );
+        else if(object instanceof String[] && ((String[])object).length == 2){
+            String key = ((String[])object)[0];
+            String value = ((String[])object)[1];
+            return storage.writeSettingsValue(key, value);
+        }
+        else return false;
+    }
+
+    public boolean reconcile(Object object){
+        if(object instanceof ProjectedTransaction){
+            ProjectedTransaction projectedTransaction = (ProjectedTransaction) object;
+            RecordedTransaction record = RecordedTransaction.getInstance(projectedTransaction);
+            Transaction transaction = storage.readTransactions( record ).get( 0 );
+
+            transaction.setProperty( R.string.date_tag, getNextProjectedDate( transaction, ((LocalDate)transaction.getProperty( R.string.date_tag ))));
+
+            storage.deleteProjection( projectedTransaction );
+            storage.writeRecord( record );
+            storage.writeTransaction( transaction );
+
+            return true;
+        }
+        else if(object instanceof Transaction){
+            Transaction transaction = (Transaction) object;
+            RecordedTransaction record = RecordedTransaction.getInstance( transaction );
+
+            transaction.setProperty( R.string.date_tag, "" );
+
+            storage.writeRecord( record );
+            storage.writeTransaction( transaction );
+
+            return true;
+        } else return false;
+    }
+
+    public boolean delete(Object object){
+        if(object instanceof ProjectedTransaction) return storage.deleteProjection((ProjectedTransaction) object);
+        else if(object instanceof RecordedTransaction) return storage.deleteRecord((RecordedTransaction) object);
+        else if(object instanceof Transaction) return storage.deleteTransaction((Transaction) object);
+        else return false;
+    }
+
+    public <T extends Transaction> ArrayList<T> getProjections(Transaction transaction) {
+        //this will take the transaction and return a list of all projected transactions to the cutoff date
+        //list will generate projection when one is not found in storage, will load stored projection if found
+
+        ArrayList<T> projections = new ArrayList<>(  );
+        String recurrance = transaction.getProperty( R.string.recurrence_tag ).toString();
+
+        if(recurrance.contentEquals( "0-0-0-0-0-0-0" )) projections.add( (T)transaction );
+        else {
+            LocalDate indexDate = (LocalDate) transaction.getProperty( R.string.date_tag );
+            LinkedHashMap<LocalDate, ProjectedTransaction> storedProjections = storage.readProjections( transaction );
+
+
+            if(storedProjections.size() > 0){
+                LocalDate firstStoredProjectionDate = (LocalDate) storedProjections.keySet().toArray()[0];
+                if(firstStoredProjectionDate.isBefore( indexDate )) indexDate = firstStoredProjectionDate;
+            }
+
+            while(!indexDate.isAfter( getCutoffDate() )){
+                ProjectedTransaction projection = storedProjections.get( indexDate );
+
+                if(projection == null) projection = ProjectedTransaction.getInstance( transaction, indexDate );
+                projections.add( (T) projection );
+                indexDate = getNextProjectedDate(transaction, indexDate);
+            }
+
+        }
+
+        return projections;
+    }
+
+    private LocalDate getNextProjectedDate(Transaction transaction, LocalDate indexDate) {
+        String[] recurrenceGroups = transaction.getProperty(R.string.recurrence_tag).toString().split( "-" );
+        int recurrenceBit = Integer.parseInt( recurrenceGroups[0] );
+        int frequency = Integer.parseInt( recurrenceGroups[1] );
+        String period = recurrenceGroups[2];
+        String onDayType = recurrenceGroups[3];
+        int endRecurrenceBit = Integer.parseInt( recurrenceGroups[4] );
+        String endParameterType = recurrenceGroups[5];
+        String endParameterValue = recurrenceGroups[6];
+
+        LocalDate nextDate;
+        if(recurrenceBit == 0) nextDate = null;
+        else if(period.contentEquals( "Day" )) nextDate = indexDate.plusDays( frequency );
+        else if(period.contentEquals( "Week" )) nextDate = indexDate.plusWeeks( frequency );
+        else if(period.contentEquals("Month" )){
+            if(onDayType.contentEquals( "DayOfMonth" )) nextDate = indexDate.plusMonths( frequency );
+            else if(onDayType.contentEquals( "WeekDayOfMonth" )){
+                int indexDayOfWeekValue = indexDate.getDayOfWeek().getValue();
+                int tempDayValue = indexDate.getDayOfMonth();
+                int weekCount = 1;
+
+                while (tempDayValue > 7) {
+                    tempDayValue = tempDayValue - 7;
+                    weekCount++;
+                }
+
+                //create a temp next date set to the correct month, but starting on day 1
+                //then increment until it is the correct day of the week
+                //once on correct day of week, increment by week until count at 1
+                //this should land us on the correct day (mostly: doesn't handle 5th and/or last day of week of the month
+                LocalDate tempNextDate = indexDate.plusMonths( frequency ).withDayOfMonth( 1 );
+                while( tempNextDate.getDayOfWeek().getValue() != indexDayOfWeekValue )  {
+                    tempNextDate.plusDays( 1 );
+                }
+                while( weekCount > 1) {
+                    tempNextDate.plusWeeks( 1 );
+                    weekCount--;
+                }
+
+                nextDate = tempNextDate;
+            }
+            else nextDate = null;
+        }
+        else if(period.contentEquals( "Year" )) nextDate = indexDate.plusYears( frequency );
+        else nextDate = null;
+
+        if(endRecurrenceBit == 0) return nextDate;
+        else if(endParameterType.contentEquals( "StopAfterDate" )){
+            LocalDate endDate = LocalDate.parse( endParameterValue, DateTimeFormatter.BASIC_ISO_DATE );
+            if(endDate.isAfter( nextDate )) return nextDate;
+            else return null;
+        }
+        else if(endParameterType.contentEquals( "StopAfterOccurrenceCount" )){
+            //don't have this setup for now, will require checking records and stored projections to get the count
+            return nextDate;
+        }
+        else if(endParameterType.contentEquals( "StopAfterRecordedAmount" )){
+            //don't have this setup for now, will require checking records and stored projections to get balance
+            return nextDate;
+        }
+        else return nextDate;
+    }
+
+}

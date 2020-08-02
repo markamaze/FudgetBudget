@@ -16,7 +16,11 @@
             android:layout_width="wrap_content"
             android:layout_weight="1"/>
 
-
+        <TextView
+            android:id="@+id/projection_lineitem_bod_balance_amount"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"/>
         <TextView
             android:id="@+id/projection_lineitem_income_amount"
             android:layout_width="wrap_content"

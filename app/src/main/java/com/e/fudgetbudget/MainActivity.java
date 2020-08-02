@@ -8,23 +8,29 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.TextView;
+
+import com.e.fudgetbudget.model.BudgetModel;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TransactionViewModel transactionViewModel;
-    private ProjectionViewModel projectionViewModel;
+    TransactionViewModel transactionViewModel;
+    ProjectionViewModel projectionViewModel;
+    RecordViewModel recordViewModel;
+    private BudgetModel budgetModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
 
-        projectionViewModel = new ProjectionViewModel( this );
-        transactionViewModel = new TransactionViewModel( this );
+        budgetModel = new BudgetModel( this );
+        projectionViewModel = new ProjectionViewModel( this, budgetModel );
+        recordViewModel = new RecordViewModel( this, budgetModel );
+        transactionViewModel = new TransactionViewModel( this, budgetModel );
 
         Spinner page_switcher_view = findViewById( R.id.page_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pages, android.R.layout.simple_list_item_1 );
@@ -44,11 +50,20 @@ public class MainActivity extends AppCompatActivity {
         } );
     }
     private View overviewPage() {
-        ConstraintLayout overviewPage = (ConstraintLayout) View.inflate( this, R.layout.page_overview, null);
+        LinearLayout overviewPage = (LinearLayout) View.inflate( this, R.layout.page_overview, null);
 
-        LinearLayout layout_balance_data = overviewPage.findViewById( R.id.balance_lineitem );
+        Double currentBalance = budgetModel.getCurrentBalance();
+        Double lowestBalance = budgetModel.getLowestProjectedBalance();
+        Double thresholdValue = budgetModel.getThresholdValue();
+        Double availableFunds;
+        if(lowestBalance < 0) availableFunds = 0.0;
+        else if((lowestBalance-thresholdValue) < 0) availableFunds = 0.0;
+        else availableFunds = lowestBalance - thresholdValue;
 
-        projectionViewModel.loadBalanceView( layout_balance_data );
+        ((TextView)overviewPage.findViewById( R.id.current_balance_value )).setText( String.valueOf( currentBalance ));
+        ((TextView)overviewPage.findViewById( R.id.lowest_projected_balance_value )).setText( String.valueOf( lowestBalance ));
+        ((TextView) overviewPage.findViewById( R.id.avaliable_funds_value )).setText( String.valueOf( availableFunds ));
+        ((TextView) overviewPage.findViewById( R.id.balance_threshold_value )).setText( String.valueOf( thresholdValue ));
 
         return overviewPage;
     }
@@ -61,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
         transactionViewModel.loadExpenseLineItems(expenseTransactionList.findViewById( R.id.list_body ));
 
         pageLayoutTransactions.findViewById( R.id.button_create_income_transaction )
-                .setOnClickListener( view -> transactionViewModel.showEditorDialog(R.string.tag_transaction_income));
+                .setOnClickListener( view -> transactionViewModel.showEditorDialog(R.string.income_tag ));
 
         pageLayoutTransactions.findViewById( R.id.button_create_expense_transaction )
-                .setOnClickListener( view -> transactionViewModel.showEditorDialog( R.string.tag_transaction_expense ) );
+                .setOnClickListener( view -> transactionViewModel.showEditorDialog( R.string.expense_tag ) );
 
         return pageLayoutTransactions;
     }
@@ -77,9 +92,9 @@ public class MainActivity extends AppCompatActivity {
     }
     private View recordsPage() {
         LinearLayout page_records = (LinearLayout) getLayoutInflater().inflate( R.layout.page_records, null );
-
-        //add all records to view with id: R.id.record_list_body
-
+        LinearLayout records_list = page_records.findViewById( R.id.record_list_body );
+        recordViewModel.loadRecordLineItems( records_list );
+        
         return page_records;
     }
 
