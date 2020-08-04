@@ -1,26 +1,26 @@
 package com.e.fudgetbudget;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
-import com.e.fudgetbudget.model.BudgetModel;
+import com.e.fudgetbudget.model.RecordedTransaction;
+import com.e.fudgetbudget.model.Transaction;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    TransactionViewModel transactionViewModel;
-    ProjectionViewModel projectionViewModel;
-    RecordViewModel recordViewModel;
     private BudgetModel budgetModel;
+    private ViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +28,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView( R.layout.activity_main );
 
         budgetModel = new BudgetModel( this );
-        projectionViewModel = new ProjectionViewModel( this, budgetModel );
-        recordViewModel = new RecordViewModel( this, budgetModel );
-        transactionViewModel = new TransactionViewModel( this, budgetModel );
+        viewModel = new ViewModel(this, budgetModel);
 
         Spinner page_switcher_view = findViewById( R.id.page_spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.pages, android.R.layout.simple_list_item_1 );
@@ -52,49 +50,76 @@ public class MainActivity extends AppCompatActivity {
     private View overviewPage() {
         LinearLayout overviewPage = (LinearLayout) View.inflate( this, R.layout.page_overview, null);
 
-        Double currentBalance = budgetModel.getCurrentBalance();
-        Double lowestBalance = budgetModel.getLowestProjectedBalance();
-        Double thresholdValue = budgetModel.getThresholdValue();
-        Double availableFunds;
-        if(lowestBalance < 0) availableFunds = 0.0;
-        else if((lowestBalance-thresholdValue) < 0) availableFunds = 0.0;
-        else availableFunds = lowestBalance - thresholdValue;
-
-        ((TextView)overviewPage.findViewById( R.id.current_balance_value )).setText( String.valueOf( currentBalance ));
-        ((TextView)overviewPage.findViewById( R.id.lowest_projected_balance_value )).setText( String.valueOf( lowestBalance ));
-        ((TextView) overviewPage.findViewById( R.id.avaliable_funds_value )).setText( String.valueOf( availableFunds ));
-        ((TextView) overviewPage.findViewById( R.id.balance_threshold_value )).setText( String.valueOf( thresholdValue ));
+//        Double currentBalance = budgetModel.getCurrentBalance();
+//        Double lowestBalance = budgetModel.getLowestProjectedBalance();
+//        Double thresholdValue = budgetModel.getThresholdValue();
+//        Double availableFunds;
+//        if(lowestBalance < 0) availableFunds = 0.0;
+//        else if((lowestBalance-thresholdValue) < 0) availableFunds = 0.0;
+//        else availableFunds = lowestBalance - thresholdValue;
+//
+//        ((TextView)overviewPage.findViewById( R.id.current_balance_value )).setText( String.valueOf( currentBalance ));
+//        ((TextView)overviewPage.findViewById( R.id.lowest_projected_balance_value )).setText( String.valueOf( lowestBalance ));
+//        ((TextView) overviewPage.findViewById( R.id.avaliable_funds_value )).setText( String.valueOf( availableFunds ));
+//        ((TextView) overviewPage.findViewById( R.id.balance_threshold_value )).setText( String.valueOf( thresholdValue ));
 
         return overviewPage;
     }
     private View transactionsPage(){
         LinearLayout pageLayoutTransactions = (LinearLayout) getLayoutInflater().inflate( R.layout.page_transactions, null );
-        LinearLayout incomeTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_income_list );
-        LinearLayout expenseTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_expense_list );
 
-        transactionViewModel.loadIncomeLineItems(incomeTransactionList.findViewById( R.id.list_body ));
-        transactionViewModel.loadExpenseLineItems(expenseTransactionList.findViewById( R.id.list_body ));
+        //build income transaction list
+        int[] incomeListColumnTags = new int[]{R.string.date_tag, R.string.label_tag, R.string.amount_tag};
+        ArrayList<Transaction> incomeListData = budgetModel.getTransactionsByType( R.string.transaction_type_income );
+        ViewGroup incomeTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_income_list );
+        viewModel.getListView(incomeTransactionList, incomeListData, incomeListColumnTags );
+//        pageLayoutTransactions.addView( incomeTransactionList );
 
+
+        //build expense transaction list
+        int[] expenseListColumnTags = new int[]{R.string.date_tag, R.string.label_tag, R.string.amount_tag};
+        ArrayList<Transaction> expenseListData = budgetModel.getTransactionsByType( R.string.transaction_type_expense );
+        ViewGroup expenseTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_expense_list );
+        viewModel.getListView( expenseTransactionList, expenseListData, expenseListColumnTags );
+//        pageLayoutTransactions.addView( expenseTransactionList );
+
+
+        //build unscheduled transaction list
+        int[] unscheduledListColumnTags = new int[]{R.string.label_tag, R.string.amount_tag};
+        ArrayList<Transaction> unscheduledListData = budgetModel.getTransactionsByType( R.string.transaction_type_unscheduled );
+        ViewGroup unscheduledTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_unscheduled_list );
+        viewModel.getListView( unscheduledTransactionList, unscheduledListData, unscheduledListColumnTags );
+//        pageLayoutTransactions.addView( unscheduledTransactionList );
+
+
+        //set onclick handlers to create new transactions
         pageLayoutTransactions.findViewById( R.id.button_create_income_transaction )
-                .setOnClickListener( view -> transactionViewModel.showEditorDialog(R.string.income_tag ));
+                .setOnClickListener( view -> viewModel.createTransaction(R.string.transaction_type_income));
 
         pageLayoutTransactions.findViewById( R.id.button_create_expense_transaction )
-                .setOnClickListener( view -> transactionViewModel.showEditorDialog( R.string.expense_tag ) );
+                .setOnClickListener( view -> viewModel.createTransaction(R.string.transaction_type_expense));
 
         return pageLayoutTransactions;
     }
     private View balanceSheetPage() {
         LinearLayout page_layout_balancesheet = (LinearLayout) getLayoutInflater().inflate( R.layout.page_balancesheet, null );
-        LinearLayout projected_balance_list = page_layout_balancesheet.findViewById( R.id.projected_balance_list_body );
-        projectionViewModel.loadProjectionLineItems( projected_balance_list );
+
+        ArrayList<Object[]> projectionListData = budgetModel.getProjectionsWithBalances();
+        ViewGroup projectionList = page_layout_balancesheet.findViewById( R.id.projected_balance_list );
+        viewModel.getListView( projectionList, projectionListData );
+//        page_layout_balancesheet.addView( projectionList );
 
         return page_layout_balancesheet;
     }
     private View recordsPage() {
         LinearLayout page_records = (LinearLayout) getLayoutInflater().inflate( R.layout.page_records, null );
-        LinearLayout records_list = page_records.findViewById( R.id.record_list_body );
-        recordViewModel.loadRecordLineItems( records_list );
-        
+
+        int[] recordsListColumns = new int[]{R.string.date_tag, R.string.label_tag, R.string.amount_tag};
+        ArrayList<RecordedTransaction> recordsListData = budgetModel.getRecords( "all" );
+        ViewGroup recordsList = page_records.findViewById( R.id.record_list );
+        viewModel.getListView( recordsList, recordsListData, recordsListColumns );
+//        page_records.addView( recordsList );
+
         return page_records;
     }
 

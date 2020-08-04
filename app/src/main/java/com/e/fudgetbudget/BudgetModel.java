@@ -1,8 +1,12 @@
-package com.e.fudgetbudget.model;
+package com.e.fudgetbudget;
 
 import android.content.Context;
+import android.graphics.Color;
 
-import com.e.fudgetbudget.R;
+import com.e.fudgetbudget.model.ProjectedTransaction;
+import com.e.fudgetbudget.model.RecordedTransaction;
+import com.e.fudgetbudget.model.StorageControl;
+import com.e.fudgetbudget.model.Transaction;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -11,6 +15,7 @@ import java.time.MonthDay;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,14 +24,46 @@ public class BudgetModel {
     private final int periodsToProject;
     private final StorageControl storage;
     private Double lowestProjectedBalance;
+    private ArrayList<Object[]> projectionsWithBalances;
 
 
     public BudgetModel(Context context) {
         this.storage = new StorageControl( context );
         this.projectionPeriod = (String) storage.readSettingsValue("projection_period");
         this.periodsToProject = (int) storage.readSettingsValue("projection_periods_to_project");
+        setProjectionsWithBalances();
     }
 
+
+    //can I rebuild these such that:
+    //      a single call returns an arrayList with
+
+    public ArrayList<Object[]> getProjectionsWithBalances(){ return this.projectionsWithBalances; }
+    public void setProjectionsWithBalances(){
+        ArrayList<Object[]> result = new ArrayList<>(  );
+        LinkedHashMap<LocalDate, ArrayList<Double>> balances = getProjectedBalancesByPeriod();
+        LinkedHashMap<LocalDate, ArrayList<Transaction>> projectedTransactions = getProjectedTransactionsByPeriod();
+        final Double[] indexBal = {getCurrentBalance()};
+        balances.forEach( (balancePeriodDate, balanceList) -> {
+            ArrayList<Double> periodBalances = balanceList;
+            ArrayList<Transaction> periodTransactions = projectedTransactions.get( balancePeriodDate );
+            LinkedHashMap<Transaction, Double> periodProjections = new LinkedHashMap<>(  );
+
+            for( Transaction transaction : periodTransactions) {
+                Double endBal;
+                if(transaction.getIncomeFlag()) endBal = indexBal[0] + (Double)transaction.getProperty( R.string.amount_tag );
+                else endBal = indexBal[0] - (Double)transaction.getProperty( R.string.amount_tag );
+                periodProjections.put( transaction, endBal );
+                indexBal[0] = endBal;
+                //TODO: use endBal to set flags for going below zero balance or threshold
+            }
+
+            Object[] projectionItemData = new Object[]{balancePeriodDate, periodBalances, periodProjections};
+            result.add( projectionItemData );
+        } );
+
+        this.projectionsWithBalances = result;
+    }
     public <T extends Transaction> LinkedHashMap<LocalDate, ArrayList<Double>> getProjectedBalancesByPeriod(){
         LinkedHashMap<LocalDate, ArrayList<Double>> result = new LinkedHashMap<>();
         double tempCurrentBalance = this.getCurrentBalance();
@@ -131,12 +168,15 @@ public class BudgetModel {
                 keyIndex++;
             }
 
+            if(resultInsertionDate != null && !resultInsertionDate.isAfter( cutoffDate )){
+                ArrayList<T> resultSet = result.get( resultInsertionDate );
 
-            ArrayList<T> resultSet = result.get( resultInsertionDate );
+                resultSet.add( projection );
+                Collections.sort( resultSet );
+                result.replace( resultInsertionDate, resultSet );
+            }
 
-            resultSet.add( projection );
-            Collections.sort( resultSet );
-            result.replace( resultInsertionDate, resultSet );
+
         }
 
         return result;
@@ -150,7 +190,7 @@ public class BudgetModel {
         return storage.readRecords( type );
     }
 
-    public ArrayList<Transaction> getTransactionsByType(String type){
+    public ArrayList<Transaction> getTransactionsByType(Object type){
         return storage.readTransactions( type );
     }
 

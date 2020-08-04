@@ -6,11 +6,11 @@
     <string name="id_tag">id_tag</string>
     <string name="object_type_tag">object_type_tag</string>
     <string name="income_tag">income_tag</string>
-    <string name="date_tag">date_tag</string>
-    <string name="label_tag">label_tag</string>
-    <string name="amount_tag">amount_tag</string>
+    <string name="date_tag">Date</string>
+    <string name="label_tag">Label</string>
+    <string name="amount_tag">Amount</string>
     <string name="expense_tag">expense_tag</string>
-    <string name="note_tag">note_tag</string>
+    <string name="note_tag">Note</string>
     <string name="date_value_tag">date_value_tag</string>
     <string name="recurrence_tag">recurrance_tag</string>
 
@@ -30,4 +30,9 @@
     <string name="projected_date_key">Scheduled Date</string>
     <string name="scheduled_date_key">Original transaction date</string>
     <string name="scheduled_amount_key" >Original schedule amount</string>
+    <string name="transaction_type_income">Income Transaction</string>
+    <string name="transaction_type_expense">Expense Transaction</string>
+    <string name="transaction_type_unscheduled">Unscheduled Transaction</string>
+    <string name="objectStoredAsTag" />
+    <string name="balance_tag">Balance</string>
 </resources>

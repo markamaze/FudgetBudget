@@ -11,7 +11,7 @@
         android:padding="12dp"
         android:gravity="center_horizontal"/>
 
-    <include layout="@layout/layout_record_list"
+    <include layout="@layout/view_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/record_list" />

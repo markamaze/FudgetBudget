@@ -8,6 +8,7 @@
     <TextView
         android:id="@+id/fulldisplay_header"
         android:layout_width="match_parent"
+        android:text="Transaction"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:padding="12dp"

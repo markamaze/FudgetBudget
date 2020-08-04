@@ -29,35 +29,44 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-class StorageControl {
+public class StorageControl {
     private final Context context;
 
-    StorageControl(Context context) { this.context = context; }
+    public StorageControl(Context context) { this.context = context; }
 
-    ArrayList<Transaction> readTransactions(Object type){
+    public ArrayList<Transaction> readTransactions(Object type){
         File[] transactions_file_set = readAppFile("app_transactions").listFiles();
         ArrayList<Transaction> found_transactions = new ArrayList<>(  );
 
-        if(type.toString().contentEquals( "income" ))
-            Arrays.asList(transactions_file_set).stream().forEach( file -> {
-                Transaction transaction = Transaction.getInstance( getDocumentFromFile( file ) );
-                if(transactionIsActive( transaction ) && (boolean)transaction.getProperty( R.string.income_tag ))
-                    found_transactions.add( transaction );
-            } );
-
-        else if(type.toString().contentEquals( "expense" ))
-            Arrays.asList(transactions_file_set).stream().forEach( file -> {
-                Transaction transaction = Transaction.getInstance( getDocumentFromFile( file ) );
-
-                if(transactionIsActive( transaction) && !(boolean)transaction.getProperty(R.string.income_tag ))
+        if( type instanceof String ){
+            if(type.toString().contentEquals( "all_active" ))
+                Arrays.asList(transactions_file_set).stream().forEach( file -> {
+                    Transaction transaction = Transaction.getInstance( getDocumentFromFile( file ) );
+                    if( transactionIsActive(transaction) ) found_transactions.add( transaction );
+                });
+        }
+        else if( type instanceof Integer ){
+            if( (int)type == R.string.transaction_type_income )
+                Arrays.asList(transactions_file_set).stream().forEach( file -> {
+                    Transaction transaction = Transaction.getInstance( getDocumentFromFile( file ) );
+                    if(transactionIsActive( transaction ) && (boolean)transaction.getProperty( R.string.income_tag ))
                         found_transactions.add( transaction );
-            } );
+                } );
 
-        else if(type.toString().contentEquals( "all_active" ))
-            Arrays.asList(transactions_file_set).stream().forEach( file -> {
-                Transaction transaction = Transaction.getInstance( getDocumentFromFile( file ) );
-                if( transactionIsActive(transaction) ) found_transactions.add( transaction );
-            });
+            else if( (int)type == R.string.transaction_type_expense )
+                Arrays.asList(transactions_file_set).stream().forEach( file -> {
+                    Transaction transaction = Transaction.getInstance( getDocumentFromFile( file ) );
+
+                    if(transactionIsActive( transaction) && !(boolean)transaction.getProperty(R.string.income_tag ))
+                        found_transactions.add( transaction );
+                } );
+            else if( (int)type == R.string.transaction_type_unscheduled )
+                Arrays.asList( transactions_file_set ).stream().forEach( file -> {
+                    Transaction transaction = Transaction.getInstance( getDocumentFromFile( file ) );
+                    if( !transactionIsActive( transaction )) found_transactions.add( transaction );
+                } );
+
+        }
         else if( type instanceof Transaction ){
             File transactionFile = new File(((Transaction)type).getPath().getPath());
             Transaction transaction = Transaction.getInstance( getDocumentFromFile( transactionFile ) );
@@ -73,7 +82,7 @@ class StorageControl {
     }
 
 
-    LinkedHashMap<LocalDate, ProjectedTransaction> readProjections(Transaction transaction){
+    public LinkedHashMap<LocalDate, ProjectedTransaction> readProjections(Transaction transaction){
         LinkedHashMap<LocalDate, ProjectedTransaction> projections = new LinkedHashMap<>(  );
 
         File transactionFile = new File(transaction.getPath().getPath());
@@ -88,7 +97,7 @@ class StorageControl {
 
         return projections;
     }
-    ArrayList<RecordedTransaction> readRecords(Object object){
+    public ArrayList<RecordedTransaction> readRecords(Object object){
         File[] recordsFiles = readAppFile("app_records").listFiles();
         ArrayList<RecordedTransaction> foundRecords = new ArrayList<>(  );
 
@@ -130,15 +139,15 @@ class StorageControl {
         Collections.sort(foundRecords);
         return foundRecords;
     }
-    Object readSettingsValue(String setting) {
+    public Object readSettingsValue(String setting) {
         switch (setting){
             case "projection_period": return "months";
-            case "projection_periods_to_project": return 12;
+            case "projection_periods_to_project": return 6;
             default: return null;
         }
     }
 
-    boolean writeTransaction(Transaction transaction){
+    public boolean writeTransaction(Transaction transaction){
         File transactionFile = new File(transaction.getPath().getPath());
         Document transactionDocument;
 
@@ -163,7 +172,7 @@ class StorageControl {
 
         return writeDocumentToFile( transactionDocument );
     }
-    boolean writeProjection(ProjectedTransaction projectedTransaction){
+    public boolean writeProjection(ProjectedTransaction projectedTransaction){
         File transactionFile = new File(projectedTransaction.getPath().getPath());
         Document transactionDocument;
         if(!transactionFile.exists()) return false;
@@ -173,7 +182,7 @@ class StorageControl {
 
         return writeDocumentToFile( transactionDocument );
     }
-    boolean writeRecord(RecordedTransaction recordedTransaction){
+    public boolean writeRecord(RecordedTransaction recordedTransaction){
 
         //need to get the file based on the location of the recordedTransaction, not the transaction
         String[] uri = recordedTransaction.getPath().getPath().split( "/" );
@@ -190,11 +199,11 @@ class StorageControl {
 
         return writeDocumentToFile( recordDocument );
     }
-    boolean writeSettingsValue(String key, String value) {
+    public boolean writeSettingsValue(String key, String value) {
         return false;
     }
 
-    boolean deleteProjection(ProjectedTransaction projection) {
+    public boolean deleteProjection(ProjectedTransaction projection) {
         File transactionFile = new File(projection.getPath().getPath());
         Document transactionDocument;
         if(!transactionFile.exists()) return false;
@@ -218,10 +227,10 @@ class StorageControl {
 
         return true;
     }
-    boolean deleteRecord(RecordedTransaction object) {
+    public boolean deleteRecord(RecordedTransaction object) {
         return false;
     }
-    boolean deleteTransaction(Transaction object) {
+    public boolean deleteTransaction(Transaction object) {
         //todo: handle problem with this implementation
         //  problem -> i'm still not certain how records should be stored, but if stored within the Transaction Document,
         //              then I need to differentiate between active transactions, and those which only are storing records

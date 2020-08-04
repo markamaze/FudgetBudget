@@ -44,7 +44,7 @@ public class Transaction implements Comparable {
     private Transaction(int type, String absolutePath){
         this.transaction_id = UUID.randomUUID();
         this.path = URI.create(absolutePath + "/app_transactions/" + this.transaction_id);
-        if(type == R.string.income_tag) this.setIncomeFlag( true );
+        if(type == R.string.transaction_type_income) this.setIncomeFlag( true );
         else this.setIncomeFlag( false );
         this.clearStoredProjectionsFlag = false;
 
@@ -179,6 +179,7 @@ public class Transaction implements Comparable {
         if(transaction instanceof ProjectedTransaction) comparisonDate = (LocalDate)(((ProjectedTransaction)transaction).getProperty(R.string.date_tag ));
         else comparisonDate = (LocalDate)(((Transaction)transaction).getProperty(R.string.date_tag ));
 
+        if( this.getProperty(R.string.date_tag) == null) return 1;
         if ( ((LocalDate)this.getProperty(R.string.date_tag)).isAfter( comparisonDate )) return 1;
         if ( ((LocalDate)this.getProperty(R.string.date_tag)).isEqual( comparisonDate )) return 0;
         else return -1;
