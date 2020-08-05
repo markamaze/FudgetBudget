@@ -1,7 +1,7 @@
-package com.e.fudgetbudget.model;
+package com.fudgetbudget.model;
 
 
-import com.e.fudgetbudget.R;
+import com.fudgetbudget.R;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,7 +26,7 @@ public class Transaction implements Comparable {
 
 
     public static Transaction getInstance(int type, String absolutePath) { return new Transaction(type, absolutePath); }
-    static Transaction getInstance(Document document) { return new Transaction( document ); }
+    public static Transaction getInstance(Document document) { return new Transaction( document ); }
     Transaction(Transaction transaction) {
         //this constructor is used when another class extends Transaction and calls super()
 
@@ -59,8 +59,12 @@ public class Transaction implements Comparable {
     private Transaction(Document document) {
         Element element = document.getDocumentElement();
         String id = element.getAttribute( "id" );
+        String incomeFlag = element.getAttribute( "incomeFlag" );
+        String uri = document.getDocumentURI();
+
         this.transaction_id = UUID.fromString( id );
-        this.path = URI.create(document.getDocumentURI());
+        this.setIncomeFlag( incomeFlag );
+        this.path = URI.create(uri);
         this.clearStoredProjectionsFlag = false;
 
 
@@ -82,9 +86,6 @@ public class Transaction implements Comparable {
         if(label == null) this.label = "";
         else if(label instanceof String) this.label = (String) label;
         else return false;
-
-
-//        this.updateStorageDocument("label", this.label);
 
         return true;
     }
@@ -123,7 +124,10 @@ public class Transaction implements Comparable {
         else if( scheduledDate instanceof Long) this.scheduledDate = LocalDate.ofEpochDay( (Long)scheduledDate );
         else return false;
 
-        this.clearStoredProjectionsFlag = true;
+        if(this.recurrance == null || this.recurrance.toString().contentEquals( "0-0-0-0-0-0-0" ))
+            this.clearStoredProjectionsFlag = false;
+        else this.clearStoredProjectionsFlag = true;
+
         return true;
     }
     private boolean setRecurrance(Object recurrance){
@@ -132,7 +136,9 @@ public class Transaction implements Comparable {
         else if( recurrance instanceof String) this.recurrance = recurrance;
         else return false;
 
-        this.clearStoredProjectionsFlag = true;
+        if(this.recurrance != null & !this.recurrance.toString().contentEquals( "0-0-0-0-0-0-0" ))
+            this.clearStoredProjectionsFlag = true;
+
         return true;
     }
 
@@ -141,6 +147,7 @@ public class Transaction implements Comparable {
     public URI getPath() { return this.path; }
     public Boolean getIncomeFlag(){ return this.isIncome; }
     public Boolean getClearStoredProjectionsFlag() { return this.clearStoredProjectionsFlag; }
+    public void setClearStoredProjectionsFlag(boolean value) { this.clearStoredProjectionsFlag = value; }
 
     private String getLabel(){ return this.label; }
     private Double getAmount(){ return this.amount; }
@@ -161,8 +168,6 @@ public class Transaction implements Comparable {
     }
     public Object getProperty(int propertyTag){
         switch(propertyTag){
-            case R.string.income_tag: return this.getIncomeFlag();
-            case R.string.id_tag: return this.getId();
             case R.string.amount_tag: return this.getAmount();
             case R.string.date_tag: return this.getScheduledDate();
             case R.string.note_tag: return this.getNote();

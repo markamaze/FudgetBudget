@@ -6,10 +6,9 @@
     android:theme="@style/AppTheme">
 
     <TextView
-        android:id="@+id/fulldisplay_header"
         android:layout_width="match_parent"
-        android:text="Transaction"
         android:layout_height="wrap_content"
+        android:text="Projection"
         android:gravity="center_horizontal"
         android:padding="12dp"
         android:textSize="18dp"
@@ -29,7 +28,7 @@
             android:textSize="12dp"
             android:textStyle="bold" />
 
-        <TextView
+        <EditText
             android:id="@+id/label_value"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -52,12 +51,13 @@
             android:textSize="12dp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/projected_date_value"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_weight="1" />
+        <Button
+            android:id="@+id/date_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="set transaction date"
+            android:background="@android:color/white" />
 
     </LinearLayout>
 
@@ -99,12 +99,14 @@
             android:textSize="12dp"
             android:textStyle="bold" />
 
-        <TextView
+        <EditText
             android:id="@+id/amount_value"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_weight="1" />
+            android:hint="amount"
+            android:layout_weight="1"
+            android:gravity="center_horizontal|center_vertical"
+            android:inputType="numberDecimal" />
 
     </LinearLayout>
     <LinearLayout
@@ -144,12 +146,12 @@
             android:textSize="12dp"
             android:textStyle="bold" />
 
-        <TextView
+        <EditText
             android:id="@+id/note_value"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:gravity="center_horizontal|center_vertical" />
 
     </LinearLayout>
 

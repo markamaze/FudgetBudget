@@ -1,6 +1,6 @@
-package com.e.fudgetbudget.model;
+package com.fudgetbudget.model;
 
-import com.e.fudgetbudget.R;
+import com.fudgetbudget.R;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 
 public class ProjectedTransaction extends Transaction {
     private final LocalDate scheduledProjectionDate;
+    private final Double scheduledAmount;
     String projectedNote;
     Double projectedAmount;
     LocalDate projectedDate;
@@ -20,6 +21,7 @@ public class ProjectedTransaction extends Transaction {
     private ProjectedTransaction(Transaction transaction, LocalDate scheduledDate) {
         super( transaction );
         this.scheduledProjectionDate = scheduledDate ;
+        this.scheduledAmount = (Double) transaction.getProperty( R.string.amount_tag );
 
         setProjectedDate( scheduledDate );
         setProjectedAmount( transaction.getProperty( R.string.amount_tag ) );
@@ -31,6 +33,8 @@ public class ProjectedTransaction extends Transaction {
         if(scheduledProjectionDate == null || scheduledProjectionDate.isEmpty())
             this.scheduledProjectionDate = (LocalDate) transaction.getProperty( R.string.date_tag );
         else this.scheduledProjectionDate = LocalDate.parse( scheduledProjectionDate, DateTimeFormatter.BASIC_ISO_DATE );
+
+        this.scheduledAmount = (Double) transaction.getProperty( R.string.amount_tag );
 
         NodeList projectionProperties = projectionElement.getElementsByTagName( "projection_property" );
         for(int i = 0; i < projectionProperties.getLength(); i++) {
@@ -66,6 +70,7 @@ public class ProjectedTransaction extends Transaction {
     }
 
     public LocalDate getScheduledProjectionDate() { return this.scheduledProjectionDate; }
+    public Double getScheduledAmount() { return this.scheduledAmount; }
     private LocalDate getProjectedDate(){ return this.projectedDate; }
     private Double getProjectedAmount(){ return this.projectedAmount; }
     private String getProjectedNote(){ return this.projectedNote; }

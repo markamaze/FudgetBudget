@@ -2,34 +2,60 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight">
+        <item name="android:textSize">16dp</item>
         <!-- Customize your theme here. -->
 <!--        <item name="colorPrimary">@color/colorPrimary</item>-->
 <!--        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
 <!--        <item name="colorAccent">@color/colorAccent</item>-->
     </style>
 
-    <style name="period_date" parent="@style/AppTheme">
-        <item name="android:textSize">20dp</item>
+    <style name="period_date" parent="">
         <item name="android:textStyle">bold|italic</item>
     </style>
 
     <style name="period_balance">
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">20dp</item>
     </style>
 
     <style name="period_income">
         <item name="android:textStyle">italic</item>
-        <item name="android:textSize">12dp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:textColor">@android:color/holo_blue_dark</item>
     </style>
 
     <style name="period_expense">
         <item name="android:textStyle">italic</item>
-        <item name="android:textSize">12dp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:textColor">@android:color/holo_red_dark</item>
+    </style>
+
+    <style name="line_item_cell_amount">
+        <item name="android:textAlignment">textEnd</item>
+    </style>
+
+    <style name="line_item_cell_label">
+        <item name="android:textStyle">italic</item>
+    </style>
+
+    <style name="line_item_cell_date">
+
+    </style>
+
+    <style name="line_item_cell_amount_income">
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">@android:color/holo_green_dark</item>
+    </style>
+
+    <style name="line_item_cell_amount_expense">
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">@android:color/holo_red_dark</item>
+    </style>
+
+    <style name="line_item_cell_balance">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="line_item">
     </style>
 
 </resources>

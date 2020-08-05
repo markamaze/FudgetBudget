@@ -4,7 +4,6 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/fulldisplay_header"
         android:text="Record Transaction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,7 +26,7 @@
             android:textSize="12dp"
             android:textStyle="bold" />
 
-        <TextView
+        <EditText
             android:id="@+id/label_value"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -44,15 +43,14 @@
             android:layout_width="100dp"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="@string/recurrance_key"
+            android:text="Date"
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/recurrance_editor_button"
+            android:id="@+id/date_value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="set recurrence"
             android:background="@android:color/white" />
 
     </LinearLayout>
@@ -69,7 +67,7 @@
             android:textStyle="bold" />
 
         <EditText
-            android:id="@+id/amount_editor"
+            android:id="@+id/amount_value"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:hint="transaction amount"
@@ -94,7 +92,7 @@
 
 
         <EditText
-            android:id="@+id/note_editor"
+            android:id="@+id/note_value"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"

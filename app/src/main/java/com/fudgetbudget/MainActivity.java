@@ -1,4 +1,4 @@
-package com.e.fudgetbudget;
+package com.fudgetbudget;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,10 +12,11 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 
-import com.e.fudgetbudget.model.RecordedTransaction;
-import com.e.fudgetbudget.model.Transaction;
+import com.fudgetbudget.model.RecordedTransaction;
+import com.fudgetbudget.model.Transaction;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -72,24 +73,22 @@ public class MainActivity extends AppCompatActivity {
         int[] incomeListColumnTags = new int[]{R.string.date_tag, R.string.label_tag, R.string.amount_tag};
         ArrayList<Transaction> incomeListData = budgetModel.getTransactionsByType( R.string.transaction_type_income );
         ViewGroup incomeTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_income_list );
-        viewModel.getListView(incomeTransactionList, incomeListData, incomeListColumnTags );
-//        pageLayoutTransactions.addView( incomeTransactionList );
+        viewModel.buildListView(incomeTransactionList, incomeListData, incomeListColumnTags );
 
 
         //build expense transaction list
         int[] expenseListColumnTags = new int[]{R.string.date_tag, R.string.label_tag, R.string.amount_tag};
         ArrayList<Transaction> expenseListData = budgetModel.getTransactionsByType( R.string.transaction_type_expense );
         ViewGroup expenseTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_expense_list );
-        viewModel.getListView( expenseTransactionList, expenseListData, expenseListColumnTags );
-//        pageLayoutTransactions.addView( expenseTransactionList );
+        viewModel.buildListView( expenseTransactionList, expenseListData, expenseListColumnTags );
 
 
         //build unscheduled transaction list
-        int[] unscheduledListColumnTags = new int[]{R.string.label_tag, R.string.amount_tag};
-        ArrayList<Transaction> unscheduledListData = budgetModel.getTransactionsByType( R.string.transaction_type_unscheduled );
-        ViewGroup unscheduledTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_unscheduled_list );
-        viewModel.getListView( unscheduledTransactionList, unscheduledListData, unscheduledListColumnTags );
-//        pageLayoutTransactions.addView( unscheduledTransactionList );
+        //this isn't really necessary and is causing app to freeze if rescheduling an unscheduled transaction
+//        int[] unscheduledListColumnTags = new int[]{R.string.label_tag, R.string.amount_tag};
+//        ArrayList<Transaction> unscheduledListData = budgetModel.getTransactionsByType( R.string.transaction_type_unscheduled );
+//        ViewGroup unscheduledTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_unscheduled_list );
+//        viewModel.buildListView( unscheduledTransactionList, unscheduledListData, unscheduledListColumnTags );
 
 
         //set onclick handlers to create new transactions
@@ -106,8 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
         ArrayList<Object[]> projectionListData = budgetModel.getProjectionsWithBalances();
         ViewGroup projectionList = page_layout_balancesheet.findViewById( R.id.projected_balance_list );
-        viewModel.getListView( projectionList, projectionListData );
-//        page_layout_balancesheet.addView( projectionList );
+        viewModel.buildListView( projectionList, projectionListData );
 
         return page_layout_balancesheet;
     }
@@ -117,8 +115,9 @@ public class MainActivity extends AppCompatActivity {
         int[] recordsListColumns = new int[]{R.string.date_tag, R.string.label_tag, R.string.amount_tag};
         ArrayList<RecordedTransaction> recordsListData = budgetModel.getRecords( "all" );
         ViewGroup recordsList = page_records.findViewById( R.id.record_list );
-        viewModel.getListView( recordsList, recordsListData, recordsListColumns );
-//        page_records.addView( recordsList );
+
+        Collections.reverse(recordsListData);
+        viewModel.buildListView( recordsList, recordsListData, recordsListColumns );
 
         return page_records;
     }

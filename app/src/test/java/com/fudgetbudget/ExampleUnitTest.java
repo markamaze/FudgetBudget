@@ -1,4 +1,4 @@
-package com.e.fudgetbudget;
+package com.fudgetbudget;
 
 import org.junit.Test;
 

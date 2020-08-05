@@ -1,12 +1,10 @@
-package com.e.fudgetbudget;
+package com.fudgetbudget;
 
 import android.content.Context;
-import android.graphics.Color;
 
-import com.e.fudgetbudget.model.ProjectedTransaction;
-import com.e.fudgetbudget.model.RecordedTransaction;
-import com.e.fudgetbudget.model.StorageControl;
-import com.e.fudgetbudget.model.Transaction;
+import com.fudgetbudget.model.ProjectedTransaction;
+import com.fudgetbudget.model.RecordedTransaction;
+import com.fudgetbudget.model.Transaction;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -15,7 +13,6 @@ import java.time.MonthDay;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,10 +30,6 @@ public class BudgetModel {
         this.periodsToProject = (int) storage.readSettingsValue("projection_periods_to_project");
         setProjectionsWithBalances();
     }
-
-
-    //can I rebuild these such that:
-    //      a single call returns an arrayList with
 
     public ArrayList<Object[]> getProjectionsWithBalances(){ return this.projectionsWithBalances; }
     public void setProjectionsWithBalances(){
@@ -80,7 +73,7 @@ public class BudgetModel {
             expenseSum = 0;
 
             for(T projection : projectionList){
-                if((boolean)projection.getProperty(R.string.income_tag )) incomeSum += (Double)projection.getProperty(R.string.amount_tag );
+                if( projection.getIncomeFlag() ) incomeSum += (Double)projection.getProperty(R.string.amount_tag );
                 else expenseSum += (Double)projection.getProperty( R.string.amount_tag );
             }
 
@@ -181,11 +174,7 @@ public class BudgetModel {
 
         return result;
     }
-//    public LinkedHashMap<LocalDate, ArrayList<RecordedTransaction>> getRecordsByPeriod(){
-//        LinkedHashMap<LocalDate, ArrayList<RecordedTransaction>> recordMap = new LinkedHashMap<>(  );
-//
-//        return recordMap;
-//    };
+
     public ArrayList<RecordedTransaction> getRecords(String type){
         return storage.readRecords( type );
     }
@@ -199,7 +188,7 @@ public class BudgetModel {
         double balance = 0.00;
 
         for( RecordedTransaction recordedTransaction : records) {
-            boolean isIncome = (boolean) recordedTransaction.getProperty( R.string.income_tag );
+            boolean isIncome = recordedTransaction.getIncomeFlag();
             double amount = (Double) recordedTransaction.getProperty( R.string.amount_tag );
 
             if(isIncome) balance = balance + amount;
@@ -230,12 +219,20 @@ public class BudgetModel {
 
 
     public boolean update(Object object){
-        //I need to check for:
-        //  if a Transaction is updating it's date or recurrance value, clear all stored projections
-
         if(object instanceof ProjectedTransaction) return storage.writeProjection( (ProjectedTransaction) object );
-        else if(object instanceof RecordedTransaction) return storage.writeRecord( (RecordedTransaction) object );
-        else if(object instanceof Transaction) return storage.writeTransaction( (Transaction) object );
+        else if(object instanceof RecordedTransaction) {
+            //TODO: handle user trying to update record to future date
+            return storage.writeRecord( (RecordedTransaction) object );
+        }
+        else if(object instanceof Transaction) {
+            Transaction transaction = (Transaction) object;
+            boolean clearProjections = transaction.getClearStoredProjectionsFlag();
+
+            if(clearProjections) storage.readProjections( transaction ).values().forEach( projection ->
+                    storage.deleteProjection( projection ) );
+
+            return storage.writeTransaction( (Transaction) object );
+        }
         else if(object instanceof String[] && ((String[])object).length == 2){
             String key = ((String[])object)[0];
             String value = ((String[])object)[1];
@@ -245,6 +242,7 @@ public class BudgetModel {
     }
 
     public boolean reconcile(Object object){
+        //TODO: handle user trying to reconcile with a date in the future
         if(object instanceof ProjectedTransaction){
             ProjectedTransaction projectedTransaction = (ProjectedTransaction) object;
             RecordedTransaction record = RecordedTransaction.getInstance(projectedTransaction);

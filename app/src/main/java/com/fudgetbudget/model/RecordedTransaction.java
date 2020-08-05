@@ -1,29 +1,31 @@
-package com.e.fudgetbudget.model;
+package com.fudgetbudget.model;
 
-import com.e.fudgetbudget.R;
+import com.fudgetbudget.R;
 
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class RecordedTransaction extends Transaction {
     String recordNote;
     Double recordAmount;
     LocalDate recordDate;
+    UUID recordId;
 
     public static RecordedTransaction getInstance(Transaction transaction) { return new RecordedTransaction( transaction ); }
     public static RecordedTransaction getInstance(Element element, Transaction transaction){ return new RecordedTransaction( element, transaction ); }
     private RecordedTransaction(Transaction transaction) {
         super( transaction );
+        this.recordId = UUID.randomUUID();
         this.setProperty( R.string.date_tag, transaction.getProperty( R.string.date_tag ) );
         this.setProperty( R.string.amount_tag, transaction.getProperty( R.string.amount_tag ) );
         this.setProperty( R.string.note_tag, transaction.getProperty( R.string.note_tag ) );
     }
     private RecordedTransaction(Element element, Transaction transaction){
         super(transaction);
-
+        this.recordId = UUID.fromString(element.getAttribute( "record_id" ));
         NodeList elementNodes = element.getChildNodes();
 
         for(int i = 0; i < elementNodes.getLength(); i++){
@@ -61,6 +63,8 @@ public class RecordedTransaction extends Transaction {
     private LocalDate getRecordDate(){ return this.recordDate; }
     private Double getRecordAmount(){ return this.recordAmount; }
     private String getRecordNote(){ return this.recordNote; }
+
+    public UUID getRecordId(){ return this.recordId; }
 
     public boolean setProperty(int propertyTag, Object value){
         switch (propertyTag){

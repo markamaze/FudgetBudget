@@ -1,4 +1,4 @@
-package com.e.fudgetbudget;
+package com.fudgetbudget;
 
 import android.content.Context;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals( "com.e.fudgetbudget", appContext.getPackageName() );
+        assertEquals( "com.fudgetbudget", appContext.getPackageName() );
     }
 }

@@ -1,8 +1,11 @@
-package com.e.fudgetbudget.model;
+package com.fudgetbudget;
 
 import android.content.Context;
 
-import com.e.fudgetbudget.R;
+import com.fudgetbudget.R;
+import com.fudgetbudget.model.ProjectedTransaction;
+import com.fudgetbudget.model.RecordedTransaction;
+import com.fudgetbudget.model.Transaction;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -18,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.UUID;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -49,7 +52,7 @@ public class StorageControl {
             if( (int)type == R.string.transaction_type_income )
                 Arrays.asList(transactions_file_set).stream().forEach( file -> {
                     Transaction transaction = Transaction.getInstance( getDocumentFromFile( file ) );
-                    if(transactionIsActive( transaction ) && (boolean)transaction.getProperty( R.string.income_tag ))
+                    if(transactionIsActive( transaction ) && transaction.getIncomeFlag())
                         found_transactions.add( transaction );
                 } );
 
@@ -57,7 +60,7 @@ public class StorageControl {
                 Arrays.asList(transactions_file_set).stream().forEach( file -> {
                     Transaction transaction = Transaction.getInstance( getDocumentFromFile( file ) );
 
-                    if(transactionIsActive( transaction) && !(boolean)transaction.getProperty(R.string.income_tag ))
+                    if(transactionIsActive( transaction) && !transaction.getIncomeFlag())
                         found_transactions.add( transaction );
                 } );
             else if( (int)type == R.string.transaction_type_unscheduled )
@@ -87,6 +90,8 @@ public class StorageControl {
 
         File transactionFile = new File(transaction.getPath().getPath());
         Document transactionDocument = getDocumentFromFile( transactionFile );
+
+        if(transactionDocument == null) return projections;
 
         NodeList storedProjections = transactionDocument.getElementsByTagName("projections").item( 0 ).getChildNodes();
         for(int i = 0; i < storedProjections.getLength(); i++){
@@ -161,15 +166,6 @@ public class StorageControl {
 
         updateTransactionProperties(transactionDocument, transaction);
 
-        if(transaction.getClearStoredProjectionsFlag()){
-            //remove all stored projections from transactionDocument
-
-            Element storedProjectionsElement = (Element) transactionDocument.getElementsByTagName( "projections" ).item( 0 );
-            while(storedProjectionsElement.getChildNodes().getLength() > 0)
-                storedProjectionsElement.removeChild( storedProjectionsElement.getFirstChild() );
-
-        }
-
         return writeDocumentToFile( transactionDocument );
     }
     public boolean writeProjection(ProjectedTransaction projectedTransaction){
@@ -183,18 +179,13 @@ public class StorageControl {
         return writeDocumentToFile( transactionDocument );
     }
     public boolean writeRecord(RecordedTransaction recordedTransaction){
-
-        //need to get the file based on the location of the recordedTransaction, not the transaction
         String[] uri = recordedTransaction.getPath().getPath().split( "/" );
         uri[uri.length - 2] = "app_records";
-
 
         File recordFile = new File(String.join( "/", uri ));
         Document recordDocument = getDocumentFromFile( recordFile );
 
         if(recordDocument == null) recordDocument = getNewRecordDocument( recordedTransaction );
-
-
         updateRecord( recordDocument, recordedTransaction );
 
         return writeDocumentToFile( recordDocument );
@@ -225,10 +216,32 @@ public class StorageControl {
             ((Element)transactionDocument.getElementsByTagName( "projections" ).item( 0 )).removeChild( foundProjection );
 
 
+
         return true;
     }
-    public boolean deleteRecord(RecordedTransaction object) {
-        return false;
+    public boolean deleteRecord(RecordedTransaction record) {
+        String[] recordPath = (record.getPath().getPath()).split( "/" );
+        recordPath[recordPath.length - 2] = "app_records";
+        File recordFile = new File(String.join( "/", recordPath ));
+
+        if(!recordFile.exists()) return false;
+
+        Document recordDocument = getDocumentFromFile( recordFile );
+        NodeList records = recordDocument.getDocumentElement().getChildNodes();
+        Element foundRecord = null;
+
+        int index = 0;
+        while( foundRecord == null && index < records.getLength()){
+            Element storedRecord = (Element) records.item( index );
+            UUID storedRecordId = UUID.fromString( storedRecord.getAttribute( "record_id" ) );
+            UUID recordId = record.getRecordId();
+            if( storedRecordId.compareTo( recordId ) == 0) foundRecord = storedRecord;
+            index++;
+        }
+
+        if(foundRecord != null) recordDocument.getDocumentElement().removeChild( foundRecord );
+
+        return writeDocumentToFile( recordDocument );
     }
     public boolean deleteTransaction(Transaction object) {
         //todo: handle problem with this implementation
@@ -241,15 +254,14 @@ public class StorageControl {
         else return false;
     }
 
-
     private void updateTransactionProperties(Document transactionDocument, Transaction transaction) {
         NodeList propertyNodes = transactionDocument.getElementsByTagName( "transaction_property" );
 
         for(int i = 0; i < propertyNodes.getLength(); i++){
             Element propertyElement = (Element) propertyNodes.item( i );
             int key = Integer.parseInt( propertyElement.getAttribute( "key" ));
-
-            propertyElement.setTextContent( String.valueOf( transaction.getProperty( key ) ) );
+            String valueString = String.valueOf( transaction.getProperty( key ) );
+            propertyElement.setTextContent( valueString );
         }
 
     }
@@ -300,6 +312,7 @@ public class StorageControl {
             Element element = document.createElement("transaction");
             element.setAttribute( "id", transaction.getId().toString() );
             element.setIdAttribute( "id", true );
+            element.setAttribute( "incomeFlag", String.valueOf( transaction.getIncomeFlag() ));
 
 
 
@@ -314,9 +327,6 @@ public class StorageControl {
 
             Element note_node = document.createElement( "transaction_property" );
             note_node.setAttribute( "key", String.valueOf(R.string.note_tag ) );
-
-            Element incomeflag_node = document.createElement( "transaction_property" );
-            incomeflag_node.setAttribute( "key", String.valueOf(R.string.income_tag ) );
 
             Element recurrance_node = document.createElement( "transaction_property" );
             recurrance_node.setAttribute( "key", String.valueOf(R.string.recurrence_tag ) );
@@ -333,14 +343,12 @@ public class StorageControl {
             value_node.setTextContent( "" );
             date_node.setTextContent( "" );
             note_node.setTextContent( "" );
-            incomeflag_node.setTextContent( transaction.getIncomeFlag().toString() );
             recurrance_node.setTextContent( "" );
 
             element.appendChild( label_node );
             element.appendChild( value_node );
             element.appendChild( date_node );
             element.appendChild( note_node );
-            element.appendChild(incomeflag_node);
             element.appendChild( recurrance_node );
             element.appendChild( projectedTransactions );
             element.appendChild( records );
@@ -381,19 +389,17 @@ public class StorageControl {
     }
 
 
-    //TODO: rework given change in how records will be stored
     private void updateRecord(Document recordDocument, RecordedTransaction recordedTransaction) {
         Element recordsSetElement = recordDocument.getDocumentElement();
+        NodeList records = recordsSetElement.getChildNodes();
         Element recordElement = null;
-        NodeList storedRecordsNodeList = recordsSetElement.getChildNodes();
 
-        int i = 0;
-        while (i < storedRecordsNodeList.getLength() && recordElement == null) {
-            Element storedRecord = (Element) storedRecordsNodeList.item( i );
-            if (storedRecord.getAttribute( "recordDate" )
-                    .contentEquals( ((LocalDate)recordedTransaction.getProperty(R.string.date_tag)).format( DateTimeFormatter.BASIC_ISO_DATE ) ))
-                recordElement = storedRecord;
-            i++;
+        int index = 0;
+        while(recordElement == null && index < records.getLength()){
+            Element childElement = (Element)records.item( index );
+            UUID childID = UUID.fromString( childElement.getAttribute( "record_id" ) );
+            UUID recordId = recordedTransaction.getRecordId();
+            if(childID.compareTo(recordId) == 0) recordElement = childElement;
         }
 
         if(recordElement == null) {
@@ -401,16 +407,11 @@ public class StorageControl {
             recordsSetElement.appendChild( recordElement );
         }
 
-
         updateRecordProperties(recordElement, recordedTransaction);
-
-
     }
 
-    //TODO:
     private void updateRecordProperties(Element recordElement, RecordedTransaction recordedTransaction){
         NodeList propertyNodes = recordElement.getElementsByTagName( "record_property" );
-        recordElement.setAttribute( "recordDate", ((LocalDate) recordedTransaction.getProperty(R.string.date_tag)).format( DateTimeFormatter.BASIC_ISO_DATE ) );
 
         for(int i = 0; i < propertyNodes.getLength(); i++){
             Element propertyElement = (Element) propertyNodes.item( i );
@@ -420,9 +421,6 @@ public class StorageControl {
         }
     }
 
-
-
-    //TODO: need to create new method to getTransactionDocument, then rework getting new record Element as needed
     private Document getNewRecordDocument(RecordedTransaction recordedTransaction){
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder;
@@ -432,10 +430,7 @@ public class StorageControl {
             documentBuilder = documentBuilderFactory.newDocumentBuilder();
             document = documentBuilder.newDocument();
 
-            //the path for a record should be: /app_records/(id), but the stored path in recordedTransaction is the transation path which is: /app_transactions/(id)
-            //  so I need to figure out how to change the root folder in the path I get from the recordedTransaction
-            //  that or rework how the path/uri is implemented by creating the uri when needed using the id of the transaction
-
+            //TODO: consider dropping the getPath() from Transactions and instead build paths using the Id
             String[] recordPath = (recordedTransaction.getPath().getPath()).split( "/" );
             recordPath[recordPath.length - 2] = "app_records";
             document.setDocumentURI( String.join( "/", recordPath ) );
@@ -454,7 +449,8 @@ public class StorageControl {
     private Element getNewRecordElement(Document document, RecordedTransaction recordedTransaction){
 
         Element element = document.createElement( "record" );
-        element.setAttribute( "recordDate", ((LocalDate)recordedTransaction.getProperty( R.string.date_tag )).format( DateTimeFormatter.BASIC_ISO_DATE ) );
+        element.setAttribute( "record_id", recordedTransaction.getRecordId().toString() );
+        element.setIdAttribute( "record_id", true );
 
         Element value_node = document.createElement( "record_property" );
         value_node.setAttribute( "key", String.valueOf(R.string.amount_tag ) );
@@ -516,17 +512,13 @@ public class StorageControl {
     private boolean writeDocumentToFile(Document document) {
 
         try {
-            File transaction_file;
-//            if(document.getDocumentURI().contains( this.context.getExternalFilesDir(null).toURI().getPath() ))
-                transaction_file = new File(document.getDocumentURI());
-//            else transaction_file = new File( this.context.getExternalFilesDir(null), document.getDocumentURI());
+            File transaction_file = new File(document.getDocumentURI());
 
             if(!transaction_file.exists()){
                 transaction_file.setWritable( true );
                 transaction_file.setReadable( true );
                 transaction_file.createNewFile();
             }
-
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
@@ -539,6 +531,5 @@ public class StorageControl {
             return false;
         }
     }
-
 
 }

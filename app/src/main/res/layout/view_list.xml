@@ -12,8 +12,13 @@
         android:orientation="horizontal"
         android:weightSum="100"/>
 
-    <LinearLayout android:id="@+id/list_body"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"/>
+        android:layout_height="wrap_content">
+        <LinearLayout android:id="@+id/list_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
+    </ScrollView>
+
 </LinearLayout>
