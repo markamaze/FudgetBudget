@@ -1,165 +1,214 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="12dp">
-
-    <TextView
-        android:text="Transaction"
-        android:textAllCaps="true"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:padding="12dp"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/key_transaction_label"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/label_value"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_horizontal|center_vertical" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/date_key"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/date_value"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="set transaction date"
-            android:background="@android:color/white" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/recurrance_key"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/recurrance_value"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="set recurrence"
-            android:background="@android:color/white" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/key_transaction_amount"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/amount_value"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:hint="transaction amount"
-            android:layout_weight="1"
-            android:gravity="center_horizontal|center_vertical"
-            android:inputType="numberDecimal" />
-
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/key_transaction_note"
-            android:textStyle="bold" />
-
-
-        <EditText
-            android:id="@+id/note_value"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center_horizontal|center_vertical" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        xmlns:style="http://schemas.android.com/tools"
         android:orientation="vertical"
-        android:padding="12dp"
-        android:id="@+id/future_occurrences" >
+        style="@style/dialog_page">
 
-        <LinearLayout
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:text="Transaction Definition"
+            style="@style/dialog_page_title" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="@string/key_projected_transactions"
-                android:textSize="12dp"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/clear_projections_button"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="reset altered"/>
-        </LinearLayout>
-
-        <include android:id="@+id/future_occurrences_list"
-            layout="@layout/view_list"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="0dp"
+            android:layout_weight="1" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    style="@style/dialog_page_row">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="Label"
+                        style="@style/dialog_page_property_key" />
+
+                    <EditText
+                        android:id="@+id/label_value"
+                        android:layout_width="0dp"
+                        android:layout_weight="2"
+                        android:layout_height="wrap_content"
+                        style="@style/dialog_page_property_value"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    style="@style/dialog_page_row">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/key_transaction_amount"
+                        style="@style/dialog_page_property_key" />
+
+                    <EditText
+                        android:id="@+id/amount_value"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:inputType="numberDecimal"
+                        style="@style/dialog_page_property_value"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    style="@style/dialog_page_row">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/key_transaction_note"
+                        style="@style/dialog_page_property_key" />
+
+                    <EditText
+                        android:id="@+id/note_value"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:inputType="textMultiLine"
+                        style="@style/dialog_page_property_value" />
+
+                </LinearLayout>
+
+
+
+                <LinearLayout android:id="@+id/property_layout_recurrence_readable"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="Repeats"
+                        style="@style/dialog_page_property_key" />
+
+                    <TextView android:id="@+id/readable_recurrence_value"
+                        android:layout_width="0dp"
+                        android:layout_weight="2"
+                        android:layout_height="wrap_content"
+                        style="@style/dialog_page_property_value" />
+
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/property_layout_recurrence_switch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    style="@style/dialog_page_row">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="Repeats"
+                        style="@style/dialog_page_property_key" />
+
+                    <Switch
+                        android:id="@+id/recurrence_switch"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        style="@style/dialog_page_property_key" />
+
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/property_layout_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    style="@style/dialog_page_row">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/date_key"
+                        style="@style/dialog_page_property_key" />
+
+                    <Button
+                        android:id="@+id/date_value"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        style="@style/dialog_page_property_value"/>
+
+                </LinearLayout>
+
+                <include android:id="@+id/property_layout_recurrence_editor"
+                    layout="@layout/layout_transaction_recurrance_editor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+
+
+                <LinearLayout android:id="@+id/property_layout_recurrence_projections"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    style="@style/dialog_page_row" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" >
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/key_projected_transactions"
+                            style="@style/dialog_page_property_key" />
+
+                        <Button
+                            android:id="@+id/clear_projections_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="reset"/>
+                    </LinearLayout>
+
+                    <include android:id="@+id/future_occurrences_list"
+                        layout="@layout/view_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
 
     </LinearLayout>
 
 
-</LinearLayout>
+
+
+
+
+
+
+
+
+
 

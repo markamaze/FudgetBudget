@@ -1,15 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    style="@style/page"
+    android:id="@+id/page_records">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Records History"
-        android:textSize="18sp"
-        android:padding="12dp"
-        android:gravity="center_horizontal"/>
+        android:text="Fudget Budget:  Records"
+        style="@style/page_title"/>
+
+    <LinearLayout android:id="@+id/page_header"
+        style="@style/page_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            style="@style/page_header_row">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                style="@style/page_header_row_key"
+                android:text="recorded balance" />
+
+            <TextView android:id="@+id/current_recorded_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                style="@style/page_header_row_value" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        style="@style/list_header">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Transaction History"
+            style="@style/list_header_title" />
+
+    </LinearLayout>
 
     <include layout="@layout/view_list"
         android:layout_width="match_parent"

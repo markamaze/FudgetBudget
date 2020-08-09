@@ -4,24 +4,89 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
-
-    <Spinner
-        android:id="@+id/page_spinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/page_view"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    tools:context=".MainActivity"
+    android:background="@color/colorPrimaryDark">
 
     <ScrollView
         android:id="@+id/page_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toTopOf="@+id/nav_tabs"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/page_spinner" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_weight="9" />
+
+    <LinearLayout
+        android:id="@+id/nav_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <FrameLayout
+            android:id="@+id/nav_tab_transactions"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            style="@style/navigation_tab_wrapper">
+
+            <TextView
+                android:id="@+id/nav_tab_text_transactions"
+                style="@style/navigation_tab"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Budget" />
+        </FrameLayout>
+
+
+        <FrameLayout
+            android:id="@+id/nav_tab_balancesheet"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            style="@style/navigation_tab_wrapper">
+
+            <TextView
+                android:id="@+id/nav_tab_text_balancesheet"
+                style="@style/navigation_tab"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Balance Sheet" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/nav_tab_records"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            style="@style/navigation_tab_wrapper">
+
+            <TextView
+                android:id="@+id/nav_tab_text_records"
+                style="@style/navigation_tab"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Records" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/nav_tab_tools"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            style="@style/navigation_tab_wrapper">
+
+            <TextView
+                android:id="@+id/nav_tab_tools_icon"
+                style="@style/navigation_tab"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Tools"/>
+        </FrameLayout>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

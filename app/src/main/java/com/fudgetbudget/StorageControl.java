@@ -70,6 +70,7 @@ public class StorageControl {
                 } );
 
         }
+        //this seems pointless: why read a transaction where the search parameter is the transaction
         else if( type instanceof Transaction ){
             File transactionFile = new File(((Transaction)type).getPath().getPath());
             Transaction transaction = Transaction.getInstance( getDocumentFromFile( transactionFile ) );
@@ -146,8 +147,8 @@ public class StorageControl {
     }
     public Object readSettingsValue(String setting) {
         switch (setting){
-            case "projection_period": return "months";
-            case "projection_periods_to_project": return 6;
+            case "projection_periods_to_project": return 3;
+            case "balance_threshold": return 2.0;
             default: return null;
         }
     }
@@ -200,22 +201,31 @@ public class StorageControl {
         if(!transactionFile.exists()) return false;
         else transactionDocument = getDocumentFromFile( transactionFile );
 
-        NodeList storedProjections = transactionDocument.getElementsByTagName( "projections" ).item( 0 ).getChildNodes();
+        NodeList storedProjectionsNode = (transactionDocument.getElementsByTagName( "projections" ));
+        Element projectionElement;
+        NodeList storedProjections;
         Element foundProjection = null;
+
+        if(storedProjectionsNode == null || storedProjectionsNode.getLength() < 1) return false;
+
+        projectionElement = (Element) storedProjectionsNode.item( 0 );
+        storedProjections = projectionElement.getChildNodes();
+
 
         int index = 0;
         while(foundProjection == null && index < storedProjections.getLength()){
             Element storedProjection = (Element) storedProjections.item( index );
-            if( storedProjection.getAttribute( "scheduledProjectionDate" )
-                    .contentEquals( projection.getScheduledProjectionDate().format( DateTimeFormatter.BASIC_ISO_DATE )))
-                foundProjection = storedProjection;
+            String storedDateString = storedProjection.getAttribute( "scheduledProjectionDate" );
+            LocalDate storedProjectionDate = LocalDate.parse( storedDateString, DateTimeFormatter.BASIC_ISO_DATE );
+            LocalDate scheduledProjectionDate = projection.getScheduledProjectionDate();
+
+            if( storedProjectionDate.isEqual( scheduledProjectionDate ) ) foundProjection = storedProjection;
             index++;
         }
 
-        if(foundProjection != null)
-            ((Element)transactionDocument.getElementsByTagName( "projections" ).item( 0 )).removeChild( foundProjection );
+        if(foundProjection != null) projectionElement.removeChild( foundProjection );
 
-
+        writeDocumentToFile( transactionDocument );
 
         return true;
     }
@@ -333,12 +343,6 @@ public class StorageControl {
 
             Element projectedTransactions = document.createElement( "projections" );
 
-            //TODO: given that I"m storing records in their own file, this should be removed.
-            //  (don't want to break the storage I have right now)
-            Element records = document.createElement( "records" );
-
-
-
             label_node.setTextContent( "" );
             value_node.setTextContent( "" );
             date_node.setTextContent( "" );
@@ -351,7 +355,6 @@ public class StorageControl {
             element.appendChild( note_node );
             element.appendChild( recurrance_node );
             element.appendChild( projectedTransactions );
-            element.appendChild( records );
 
 
             document.appendChild( element );
@@ -366,6 +369,7 @@ public class StorageControl {
 
         Element element = document.createElement( "storedProjection" );
         element.setAttribute( "scheduledProjectionDate", projectedTransaction.getScheduledProjectionDate().format( DateTimeFormatter.BASIC_ISO_DATE ) );
+
 
         Element value_node = document.createElement( "projection_property" );
         value_node.setAttribute( "key", String.valueOf(R.string.amount_tag ) );

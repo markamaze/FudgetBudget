@@ -2,157 +2,176 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:style="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:theme="@style/AppTheme">
+    style="@style/dialog_page">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Projection"
-        android:gravity="center_horizontal"
-        android:padding="12dp"
-        android:textSize="18dp"
-        android:textStyle="bold" />
+        android:text="Repeating Transaction"
+        style="@style/dialog_page_title" />
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp">
+        android:layout_height="0dp"
+        android:layout_weight="1" >
 
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/key_transaction_label"
-            android:textSize="12dp"
-            android:textStyle="bold" />
-
-        <EditText
-            android:id="@+id/label_value"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_weight="1" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp">
-
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:text="@string/projected_date_key"
-            android:textAlignment="textStart"
-            android:textSize="12dp"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/date_value"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="set transaction date"
-            android:background="@android:color/white" />
+            android:orientation="vertical" >
 
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                style="@style/dialog_page_row">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Label"
+                    style="@style/dialog_page_property_key" />
 
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:text="@string/scheduled_date_key"
-            android:textAlignment="textEnd"
-            android:textSize="10dp"
-            android:textStyle="bold"
-            android:layout_weight="1"/>
+                <EditText
+                    android:id="@+id/label_value"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="wrap_content"
+                    style="@style/dialog_page_property_value"/>
 
-        <TextView
-            android:id="@+id/scheduled_date_value"
-            android:textSize="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_weight="1" />
+            </LinearLayout>
 
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                style="@style/dialog_page_row">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
 
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="@string/key_transaction_amount"
-            android:textSize="12dp"
-            android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/projected_date_key"
+                        style="@style/dialog_page_property_key" />
 
-        <EditText
-            android:id="@+id/amount_value"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:hint="amount"
-            android:layout_weight="1"
-            android:gravity="center_horizontal|center_vertical"
-            android:inputType="numberDecimal" />
+                    <Button
+                        android:id="@+id/date_value"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        style="@style/dialog_page_property_value" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    style="@style/dialog_page_sub_message">
 
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="5"
+                        android:layout_height="wrap_content"
+                        android:text="original projection date:"
+                        style="@style/dialog_page_sub_message_text" />
 
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:text="@string/scheduled_amount_key"
-            android:textAlignment="textEnd"
-            android:textSize="10dp"
-            android:textStyle="bold"
-            android:layout_weight="1"/>
+                    <TextView
+                        android:id="@+id/scheduled_date_value"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        style="@style/dialog_page_sub_message_text"/>
 
-        <TextView
-            android:id="@+id/scheduled_amount_value"
-            android:textSize="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_weight="1" />
+                </LinearLayout>
 
-    </LinearLayout>
+            </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                style="@style/dialog_page_row">
 
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:text="@string/key_transaction_note"
-            android:textSize="12dp"
-            android:textStyle="bold" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
 
-        <EditText
-            android:id="@+id/note_value"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center_horizontal|center_vertical" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/key_transaction_amount"
+                        style="@style/dialog_page_property_key" />
 
-    </LinearLayout>
+                    <EditText
+                        android:id="@+id/amount_value"
+                        android:layout_width="0dp"
+                        android:layout_weight="2"
+                        android:layout_height="wrap_content"
+                        android:hint="amount"
+                        android:inputType="numberDecimal"
+                        style="@style/dialog_page_property_value" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    style="@style/dialog_page_sub_message">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="5"
+                        android:layout_height="wrap_content"
+                        android:text="original projection amount:"
+                        style="@style/dialog_page_sub_message_text"/>
+
+                    <TextView
+                        android:id="@+id/scheduled_amount_value"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        style="@style/dialog_page_sub_message_text"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                style="@style/dialog_page_row">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/key_transaction_note"
+                    style="@style/dialog_page_property_key" />
+
+                <EditText
+                    android:id="@+id/note_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:inputType="textMultiLine"
+                    style="@style/dialog_page_property_value" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+
 
 </LinearLayout>

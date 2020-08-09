@@ -35,4 +35,21 @@
     <string name="transaction_type_unscheduled">Unscheduled Transaction</string>
     <string name="objectStoredAsTag" />
     <string name="balance_tag">Balance</string>
+    <string name="expendable_balance">Expendable Funds</string>
+    <string name="average_net_balance">Average Net Balance</string>
+    <string name="average_income_balance">Average Income Balance</string>
+    <string name="average_expense_balance">Average Expense Balance</string>
+    <string name="date_string_long" />
+    <string name="date_string_short_md" />
+    <string name="date_string_long_mdy">date_string_long_mdy</string>
+    <string name="transaction_recurrence_frequency">frequency</string>
+    <string name="transaction_recurrence_period">period</string>
+    <string name="transaction_recurrence_stop_bit">Stop Recurring</string>
+    <string name="number_format_add_suffix">number with suffix</string>
+    <string name="date_string_dayofweekinmonth">dayofweekinmonth</string>
+    <string name="date_string_dateofmonth">dateofmonth</string>
+    <string name="month_tag">Month</string>
+    <string name="week_tag">Week</string>
+    <string name="year_tag">Year</string>
+    <string name="day_tag">Day</string>
 </resources>
