@@ -6,12 +6,6 @@
     android:orientation="vertical"
     style="@style/dialog_page">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Repeating Transaction"
-        style="@style/dialog_page_title" />
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -58,14 +52,14 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_weight="1"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:text="@string/projected_date_key"
                         style="@style/dialog_page_property_key" />
 
                     <Button
                         android:id="@+id/date_value"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="2"
                         style="@style/dialog_page_property_value" />
                 </LinearLayout>
@@ -73,7 +67,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    style="@style/dialog_page_sub_message">
+                    style="@style/row_nested">
 
                     <TextView
                         android:layout_width="0dp"
@@ -126,7 +120,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    style="@style/dialog_page_sub_message">
+                    style="@style/row_nested">
 
                     <TextView
                         android:layout_width="0dp"

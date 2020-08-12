@@ -5,85 +5,84 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:background="@color/colorPrimaryDark">
+    android:theme="@android:style/Theme">
 
     <ScrollView
         android:id="@+id/page_view"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/colorPrimaryDark"
         app:layout_constraintBottom_toTopOf="@+id/nav_tabs"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_weight="9" />
+        app:layout_constraintVertical_weight="11" />
 
     <LinearLayout
         android:id="@+id/nav_tabs"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="12dp"
+        android:layout_height="0dp"
+        app:layout_constraintVertical_weight="1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/page_view">
 
         <FrameLayout
             android:id="@+id/nav_tab_transactions"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            style="@style/navigation_tab_wrapper">
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/nav_tab_text_transactions"
                 style="@style/navigation_tab"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:text="Budget" />
         </FrameLayout>
 
 
         <FrameLayout
             android:id="@+id/nav_tab_balancesheet"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            style="@style/navigation_tab_wrapper">
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/nav_tab_text_balancesheet"
                 style="@style/navigation_tab"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:text="Balance Sheet" />
         </FrameLayout>
 
         <FrameLayout
             android:id="@+id/nav_tab_records"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            style="@style/navigation_tab_wrapper">
+            android:layout_weight="1">
 
             <TextView
                 android:id="@+id/nav_tab_text_records"
                 style="@style/navigation_tab"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:text="Records" />
         </FrameLayout>
 
         <FrameLayout
             android:id="@+id/nav_tab_tools"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            style="@style/navigation_tab_wrapper">
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/nav_tab_tools_icon"
                 style="@style/navigation_tab"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="Tools"/>
+                android:layout_height="wrap_content"
+                android:text="Tools" />
         </FrameLayout>
 
     </LinearLayout>

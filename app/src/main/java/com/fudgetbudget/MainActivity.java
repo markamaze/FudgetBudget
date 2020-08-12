@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -34,16 +34,15 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
         budgetModel = new BudgetModel<T>( this );
         viewModel = new ViewModel(this, budgetModel);
 
-//        ((ImageButton)findViewById( R.id.nav_tab_tools_icon )).setImageDrawable( getDrawable( android.R.drawable.ic_menu_compass ) );
-//        ((ScrollView)findViewById( R.id.page_view )).addView( balanceSheetPage() );
-
         findViewById( R.id.page_view ).setOnTouchListener( this.pageViewTouchListener );
+
+//        setTheme(  );
 
 
         View transactionTab = findViewById( R.id.nav_tab_transactions );
         View recordsTab = findViewById( R.id.nav_tab_records );
         View balanceSheetTab = findViewById( R.id.nav_tab_balancesheet );
-        View toolsTab = findViewById( R.id.nav_tab_tools_icon );
+        View toolsTab = findViewById( R.id.nav_tab_tools );
 
         transactionTab.setOnClickListener( v -> {
             this.activePageIndex = 0;
@@ -86,50 +85,55 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
     }
     private void loadActivePage() {
         ScrollView currentPageView = findViewById( R.id.page_view );
-        int inctiveTabBackground = getResources().getColor( R.color.colorAccent, null );
-        int inactiveTabTextColor = getResources().getColor( R.color.colorPrimaryDark,null );
-        int activeTabBackground = getResources().getColor( R.color.colorPrimaryDark, null );
-        int activeTabTextColor = getResources().getColor( R.color.colorAccent, null );
+        int inctiveTabBackground = getResources().getColor( R.color.colorLightThemePrimary, null );
+        int activeTabBackground = getResources().getColor( R.color.colorLightThemePrimaryDark, null );
+        int inactiveTextColor = getResources().getColor(R.color.colorLightThemePrimaryLight, null);
+        int activeTextColor = getResources().getColor( R.color.colorLightThemePrimaryLight, null );
 
-        TextView balanceSheetTab = findViewById( R.id.nav_tab_text_balancesheet );
-        TextView transactionsTab = findViewById( R.id.nav_tab_text_transactions );
-        TextView recordsTab = findViewById( R.id.nav_tab_text_records );
-        TextView toolsTab = findViewById( R.id.nav_tab_tools_icon );
-
+        FrameLayout balanceSheetTab = findViewById( R.id.nav_tab_balancesheet );
+        TextView balanceSheetText = findViewById( R.id.nav_tab_text_balancesheet );
         balanceSheetTab.setBackgroundColor( inctiveTabBackground );
-        balanceSheetTab.setTextColor( inactiveTabTextColor );
-        transactionsTab.setBackgroundColor( inctiveTabBackground );
-        transactionsTab.setTextColor( inactiveTabTextColor );
-        recordsTab.setBackgroundColor( inctiveTabBackground );
-        recordsTab.setTextColor( inactiveTabTextColor );
-        toolsTab.setBackgroundColor( inctiveTabBackground );
-        toolsTab.setTextColor( inactiveTabTextColor );
+        balanceSheetText.setTextColor( inactiveTextColor );
 
+        FrameLayout transactionsTab = findViewById( R.id.nav_tab_transactions );
+        TextView transactionText = findViewById( R.id.nav_tab_text_transactions );
+        transactionsTab.setBackgroundColor( inctiveTabBackground );
+        transactionText.setTextColor( inactiveTextColor );
+
+        FrameLayout recordsTab = findViewById( R.id.nav_tab_records );
+        TextView recordsText = findViewById( R.id.nav_tab_text_records );
+        recordsTab.setBackgroundColor( inctiveTabBackground );
+        recordsText.setTextColor( inactiveTextColor );
+
+        FrameLayout toolsTab = findViewById( R.id.nav_tab_tools );
+        TextView toolsText = findViewById( R.id.nav_tab_tools_icon );
+        toolsTab.setBackgroundColor( inctiveTabBackground );
+        toolsText.setTextColor( inactiveTextColor );
 
         if(activePageIndex == 1) {
             balanceSheetTab.setBackgroundColor( activeTabBackground );
-            balanceSheetTab.setTextColor( activeTabTextColor );
+            balanceSheetText.setTextColor( activeTextColor );
 
             currentPageView.removeAllViews();
             currentPageView.addView( balanceSheetPage() );
         }
         else if(activePageIndex == 0) {
             transactionsTab.setBackgroundColor( activeTabBackground );
-            transactionsTab.setTextColor( activeTabTextColor );
+            transactionText.setTextColor( activeTextColor );
 
             currentPageView.removeAllViews();
             currentPageView.addView( transactionsPage() );
         }
         else if(activePageIndex == 2) {
             recordsTab.setBackgroundColor( activeTabBackground );
-            recordsTab.setTextColor( activeTabTextColor );
+            recordsText.setTextColor( activeTextColor );
 
             currentPageView.removeAllViews();
             currentPageView.addView( recordsPage() );
         }
         else if(activePageIndex == 3) {
             toolsTab.setBackgroundColor( activeTabBackground );
-            toolsTab.setTextColor( activeTabTextColor );
+            toolsText.setTextColor( activeTextColor );
 
             currentPageView.removeAllViews();
             currentPageView.addView( toolsPage() );
@@ -138,6 +142,10 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
 
 
     public View transactionsPage(){
+
+        getSupportActionBar().setTitle( "Fudget Budget: Budget" );
+
+
         LinearLayout pageLayoutTransactions = (LinearLayout) getLayoutInflater().inflate( R.layout.page_transactions, null );
         ArrayList<Transaction> incomeListData = budgetModel.getTransactionsByType( R.string.transaction_type_income );
         ArrayList<Transaction> expenseListData = budgetModel.getTransactionsByType( R.string.transaction_type_expense );
@@ -158,13 +166,13 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
         //build income transaction list
         int[] incomeListColumnTags = new int[]{R.string.date_tag, R.string.label_tag, R.string.amount_tag};
         ViewGroup incomeTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_income_list );
-        viewModel.buildListView(incomeTransactionList, incomeListData, incomeListColumnTags );
+        viewModel.buildTransactionListView(incomeTransactionList, incomeListData, incomeListColumnTags );
 
 
         //build expense transaction list
         int[] expenseListColumnTags = new int[]{R.string.date_tag, R.string.label_tag, R.string.amount_tag};
         ViewGroup expenseTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_expense_list );
-        viewModel.buildListView( expenseTransactionList, expenseListData, expenseListColumnTags );
+        viewModel.buildTransactionListView( expenseTransactionList, expenseListData, expenseListColumnTags );
 
         //set onclick handlers to create new transactions
         pageLayoutTransactions.findViewById( R.id.button_create_income_transaction )
@@ -178,6 +186,8 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
         return pageLayoutTransactions;
     }
     public View balanceSheetPage() {
+        getSupportActionBar().setTitle( "Fudget Budget: Balance Sheet" );
+
         LinearLayout page_layout_balancesheet = (LinearLayout) getLayoutInflater().inflate( R.layout.page_balancesheet, null );
 
         TextView currentBalanceView = page_layout_balancesheet.findViewById( R.id.current_recorded_balance );
@@ -190,11 +200,13 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
 
         ArrayList<Object[]> projectionListData = budgetModel.getProjectionsWithBalancesByPeriod();
         ViewGroup projectionList = page_layout_balancesheet.findViewById( R.id.projected_balance_list );
-        viewModel.buildListView( projectionList, projectionListData );
+        viewModel.buildPeriodProjectionListView( projectionList, projectionListData );
 
         return page_layout_balancesheet;
     }
     public View recordsPage() {
+        getSupportActionBar().setTitle( "Fudget Budget: Records" );
+
         LinearLayout page_records = (LinearLayout) getLayoutInflater().inflate( R.layout.page_records, null );
 
         TextView currentBalanceView = page_records.findViewById( R.id.current_recorded_balance );
@@ -206,12 +218,14 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
         ViewGroup recordsList = page_records.findViewById( R.id.record_list );
 
         Collections.reverse(recordsListData);
-        viewModel.buildListView( recordsList, recordsListData, recordsListColumns );
+        viewModel.buildTransactionListView( recordsList, recordsListData, recordsListColumns );
 
         return page_records;
     }
 
     public View toolsPage() {
+        getSupportActionBar().setTitle( "Fudget Budget: Tools" );
+
         LinearLayout tools_page = (LinearLayout) View.inflate( this, R.layout.page_tools, null );
 
 

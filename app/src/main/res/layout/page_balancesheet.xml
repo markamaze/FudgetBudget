@@ -2,14 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    style="@style/page"
     android:id="@+id/page_balanceSheet">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Fudget Budget:  Balance Sheet"
-        style="@style/page_title" />
 
     <LinearLayout android:id="@+id/page_header"
         style="@style/page_header"
@@ -68,9 +61,12 @@
 
     </LinearLayout>
 
-    <include layout="@layout/view_list"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:id="@+id/projected_balance_list" />
+        <LinearLayout android:id="@+id/projected_balance_list"
+            android:tag="list_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
+
+
 
 </LinearLayout>

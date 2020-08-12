@@ -3,14 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    style="@style/page"
     android:id="@+id/page_transactions">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Fudget Budget:  Transactions"
-        style="@style/page_title"/>
 
     <LinearLayout android:id="@+id/page_header"
         style="@style/page_header"
@@ -77,61 +70,69 @@
 
     </LinearLayout>
 
-    <LinearLayout
+
+    <LinearLayout android:id="@+id/transaction_expense_list"
+        android:tag="list_body"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal"
-        style="@style/list_header">
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Scheduled Income"
-            style="@style/list_header_title"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
 
-        <Button
-            android:id="@+id/button_create_income_transaction"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            style="@style/list_header_icon"
-            android:text="+" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="match_parent"
+                android:text="Scheduled Expenses"
+                style="@style/list_header_title" />
+
+            <Button
+                android:id="@+id/button_create_expense_transaction"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:text="+" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
 
-
-    <include layout="@layout/view_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/transaction_income_list" />
-
-    <LinearLayout
+    <LinearLayout android:id="@+id/transaction_income_list"
+        android:tag="list_body"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal"
-        style="@style/list_header">
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Scheduled Expenses"
-            style="@style/list_header_title" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
 
-        <Button
-            android:id="@+id/button_create_expense_transaction"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            style="@style/list_header_icon"
-            android:text="+" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="match_parent"
+                android:text="Scheduled Income"
+                style="@style/list_header_title"/>
+
+            <Button
+                android:id="@+id/button_create_income_transaction"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:text="+" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <include
-        android:id="@+id/transaction_expense_list"
-        layout="@layout/view_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 
 </LinearLayout>

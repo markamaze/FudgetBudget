@@ -52,4 +52,6 @@
     <string name="week_tag">Week</string>
     <string name="year_tag">Year</string>
     <string name="day_tag">Day</string>
+    <string name="date_long_dowmd">long dayofweek month year</string>
+    <string name="date_string_dayofweekanddate">day of week and date</string>
 </resources>

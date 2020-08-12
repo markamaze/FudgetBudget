@@ -1,18 +1,151 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/page_tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    style="@style/page"
-    android:id="@+id/page_tools">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-    <TextView
+    <RelativeLayout
+        android:id="@+id/page_tools_set_projection_freqency"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Fudget Budget:  Tools"
-        style="@style/page_title" />
+        style="@style/row_padded" >
+
+        <TextView
+            android:id="@+id/projection_frequency_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:text="Set number of months to project budget" />
+
+        <SeekBar
+            android:id="@+id/projection_frequency_value"
+            style="@style/row_nested"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/projection_frequency_label" />
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/page_tools_set_balance_threshold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/row_padded">
+
+        <TextView
+            android:id="@+id/balance_threshold_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:text="Set low balance warning threshold"/>
+
+        <EditText
+            android:id="@+id/balance_threshold_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:inputType="numberDecimal"
+            style="@style/value_input_cell"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/page_tools_reset_balance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/row_padded">
+
+        <LinearLayout
+            android:id="@+id/reset_balance_toggle_controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true">
+            <TextView
+                android:id="@+id/reset_balance_toggle_controls_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Reset balance"/>
+
+            <Switch
+                android:id="@+id/reset_balance_toggle_controls_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/reset_balance_toggle_controls"
+            style="@style/row_nested">
+
+            <LinearLayout android:id="@+id/reset_balance_control_option_record_overdue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/reset_balance_delete_overdue_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Delete overdue and set balance"/>
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    style="@style/value_input_cell" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/reset_balance_control_option_delete_overdue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/reset_balance_record_overdue_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Record overdue and set balance"/>
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    style="@style/value_input_cell" />
+
+            </LinearLayout>
+        </RadioGroup>
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/row_padded">
 
 
 
+    </RelativeLayout>
 </LinearLayout>

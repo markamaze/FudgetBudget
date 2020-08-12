@@ -1,7 +1,9 @@
 package com.fudgetbudget;
 
 import android.app.DatePickerDialog;
+import android.graphics.Color;
 import android.graphics.drawable.Icon;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -12,12 +14,14 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.fudgetbudget.model.ProjectedTransaction;
 import com.fudgetbudget.model.RecordedTransaction;
@@ -47,91 +51,70 @@ public class ViewModel<T extends Transaction> {
     }
 
     //build list view for any of the Transaction classes, using tags to set the property columns
-    void buildListView(ViewGroup listView, ArrayList<T> listData, int[] listColumns){
-        LinearLayout listHeader = listView.findViewById( R.id.list_header );
-        LinearLayout listBody = listView.findViewById( R.id.list_body );
+    void buildTransactionListView(ViewGroup listView, ArrayList<T> listData, int[] listColumns){
+        ViewGroup listHeader = (ViewGroup) View.inflate(this.context, R.layout.transaction_list_item, null);
+
+        TextView dateHeader = listHeader.findViewById( R.id.date_value );
+        TextView labelHeader = listHeader.findViewById( R.id.label_value );
+        TextView amountHeader = listHeader.findViewById( R.id.amount_value );
+
+        dateHeader.setText("Date");
+        labelHeader.setText("Label");
+        amountHeader.setText("Amt");
+
+        dateHeader.setTextAppearance( R.style.period_list_item_header );
+        labelHeader.setTextAppearance( R.style.period_list_item_header );
+        amountHeader.setTextAppearance( R.style.period_list_item_header );
+
+        listHeader.setBackgroundResource( R.drawable.list_header_item );
+        listView.addView( listHeader );
+
 
 
         for( T transaction : listData ){
-            LinearLayout listLineItem = (LinearLayout) LinearLayout.inflate( this.context, R.layout.view_list_lineitem, null );
-            LinearLayout listLineItemBody = listLineItem.findViewById( R.id.list_lineitem_body );
+            ViewGroup listLineItem = (ViewGroup) View.inflate( this.context, R.layout.transaction_list_item, null );
 
             if(Arrays.stream(listColumns).anyMatch(i -> i == R.string.date_tag)){
-                LinearLayout dateWrapper = (LinearLayout) View.inflate( this.context, R.layout.view_list_lineitem_cell, null );
-                TextView dateView = dateWrapper.findViewById( R.id.cell_value );
+                TextView dateView = listLineItem.findViewById( R.id.date_value );
 
                 LocalDate date = (LocalDate)transaction.getProperty( R.string.date_tag );
-                if(date == null) dateView.setText( "unscheduled" );
-                else dateView.setText(date.format( DateTimeFormatter.ofPattern( "eee MMM d" ) ));
-
-                dateView.setTextAppearance( R.style.line_item_cell_date );
-
-                if(!Arrays.stream( listColumns ).anyMatch( i -> i == R.string.label_tag ))
-                    dateWrapper.setLayoutParams( new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 3 ) );
-
-                listLineItemBody.addView( dateWrapper );
+                if(date == null) dateView.setText( "-" );
+                else dateView.setText( formatDate( R.string.date_long_dowmd, date) );
             }
 
             if(Arrays.stream(listColumns).anyMatch(i -> i == R.string.label_tag )){
-                LinearLayout labelWrapper = (LinearLayout) View.inflate( this.context, R.layout.view_list_lineitem_cell, null );
-                TextView labelView = labelWrapper.findViewById( R.id.cell_value );
+                TextView labelView = listLineItem.findViewById( R.id.label_value );
 
                 String label = (String) transaction.getProperty( R.string.label_tag );
                 labelView.setText( label );
-
-                labelWrapper.setLayoutParams( new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 3 ) );
-                labelView.setTextAppearance( R.style.line_item_cell_label );
-
-                listLineItemBody.addView( labelWrapper );
             }
 
             if(Arrays.stream(listColumns).anyMatch(i -> i == R.string.recurrence_tag )){
-                LinearLayout recurranceWrapper = (LinearLayout) View.inflate( this.context, R.layout.view_list_lineitem_cell, null );
-                TextView recurranceView = recurranceWrapper.findViewById( R.id.cell_value );
 
-                String recurrance = (String) transaction.getProperty( R.string.recurrence_tag );
-                recurranceView.setText( "repeat value" );
-
-                listLineItemBody.addView( recurranceWrapper );
             }
 
             if(Arrays.stream(listColumns).anyMatch(i -> i == R.string.amount_tag )){
-                LinearLayout amountWrapper = (LinearLayout) View.inflate( this.context, R.layout.view_list_lineitem_cell, null );
-                TextView amountView = amountWrapper.findViewById( R.id.cell_value );
+                TextView amountView = listLineItem.findViewById( R.id.amount_value );
 
                 amountView.setText( formatCurrency( transaction.getProperty( R.string.amount_tag )) );
-                if(transaction.getIncomeFlag()) amountView.setTextAppearance( R.style.line_item_cell_amount_income );
-                else amountView.setTextAppearance( R.style.line_item_cell_amount_expense );
-                listLineItemBody.addView( amountWrapper );
+                if(transaction.getIncomeFlag()) amountView.setTextAppearance( R.style.balance_amount_not_negative );
+                else amountView.setTextAppearance( R.style.balance_amount_negative );
             }
 
-            if(Arrays.stream(listColumns).anyMatch(i -> i == R.string.note_tag )){
-                LinearLayout noteWrapper = (LinearLayout) View.inflate( this.context, R.layout.view_list_lineitem_cell, null );
-                TextView noteView = noteWrapper.findViewById( R.id.cell_value );
-
-                String note = (String) transaction.getProperty( R.string.note_tag );
-                noteView.setText( note );
-
-                listLineItemBody.addView( noteWrapper );
-            }
-
-            listLineItemBody.setOnClickListener( view -> viewTransaction( transaction, false ) );
-            listBody.addView( listLineItem );
+            listLineItem.setOnClickListener( view -> viewTransaction( transaction, false ) );
+            listView.addView( listLineItem );
         }
     }
 
     //builds list view for period balance projections
-    void buildListView(ViewGroup listView, ArrayList<Object[]> listData){
-        listView.removeView( listView.findViewById( R.id.list_header ));
-        LinearLayout listBody = listView.findViewById( R.id.list_body );
+    void buildPeriodProjectionListView(ViewGroup listView, ArrayList<Object[]> listData){
+//        LinearLayout listBody = listView.findViewWithTag( "list_body" );
 
 
         boolean firstPeriodLoaded = false; //using this as a hack to deal with inaccurate income/expense sums on the first period projected
 
         for(Object listItem : listData){
-            LinearLayout listLineItem = (LinearLayout) LinearLayout.inflate( this.context, R.layout.projection_period_header, null );
+            ViewGroup listLineItem = (ViewGroup)LinearLayout.inflate( this.context, R.layout.period_list_item, null );
 
             Object[] entry = (Object[]) listItem;
             LocalDate periodBeginDate = (LocalDate) entry[0];
@@ -141,12 +124,16 @@ public class ViewModel<T extends Transaction> {
 
 
             //set period date
-            TextView periodMonth = listLineItem.findViewById( R.id.projection_period_header_date_month );
-            TextView periodYear = listLineItem.findViewById( R.id.projection_period_header_date_year );
-            periodMonth.setText( periodBeginDate.format( DateTimeFormatter.ofPattern( "MMMM" ) ) );
-            periodYear.setText( periodBeginDate.format( DateTimeFormatter.ofPattern( "yyyy" ) ) );
+            TextView periodDate = listLineItem.findViewById( R.id.projection_period_header_date_month );
+            periodDate.setText( periodBeginDate.format( DateTimeFormatter.ofPattern( "MMMM yyyy" ) ) );
 
-            if(!firstPeriodLoaded) ((LinearLayout)listLineItem.findViewById( R.id.projection_period_header_balance_layout )).removeAllViewsInLayout();
+            if(!firstPeriodLoaded) {
+//                ((LinearLayout)listLineItem.findViewById( R.id.projection_period_header_balance_layout )).removeAllViewsInLayout();
+//                ((LinearLayout)listLineItem.findViewById( R.id.period_header_expendable_line )).setVisibility( View.GONE );
+                listLineItem.removeView( listLineItem.findViewById( R.id.period_list_item_balances ));
+                listLineItem.findViewById( R.id.period_projection_list ).setVisibility( View.VISIBLE );
+//                listLineItem.findViewById( R.id.period_date_expense_header ).setBackgroundResource( R.drawable.background_border_bottom );
+            }
             else {
                 Double initialBal = periodBalances.get(0);
                 Double endBal = periodBalances.get(3);
@@ -155,119 +142,121 @@ public class ViewModel<T extends Transaction> {
 
 
                 TextView startOfPeriodBalance = listLineItem.findViewById( R.id.projection_period_header_initial_balance );
+                if(initialBal < 0) startOfPeriodBalance.setTextAppearance( R.style.balance_amount_negative );
+                else startOfPeriodBalance.setTextAppearance( R.style.balance_amount_not_negative );
                 startOfPeriodBalance.setText( formatCurrency( initialBal ) );
 
                 TextView endOfPeriodBalance = listLineItem.findViewById( R.id.projection_period_header_ending_balance );
-                endOfPeriodBalance.setText( formatCurrency( endBal ));
+                if(endBal < 0) endOfPeriodBalance.setTextAppearance( R.style.balance_amount_negative );
+                else endOfPeriodBalance.setTextAppearance( R.style.balance_amount_not_negative );
+                endOfPeriodBalance.setText( formatCurrency( endBal ) );
 
                 TextView periodIncome = listLineItem.findViewById( R.id.projection_period_header_income);
-                periodIncome.setText( "+ " + formatCurrency( income ));
+                periodIncome.setTextAppearance( R.style.balance_amount_not_negative );
+                periodIncome.setText( "+" + formatCurrency( income ));
 
                 TextView periodExpenses = listLineItem.findViewById( R.id.projection_period_header_expense );
-                periodExpenses.setText( "- " + formatCurrency( expense ));
+                periodExpenses.setTextAppearance( R.style.balance_amount_negative );
+                periodExpenses.setText( "-" + formatCurrency( expense ));
 
                 TextView netGain = listLineItem.findViewById( R.id.projection_period_header_net_gain );
-                if(endBal > initialBal){
-                    netGain.setText("+ " + formatCurrency( endBal - initialBal ));
-                    netGain.setTextAppearance( R.style.line_item_cell_amount_income );
-                } else if(endBal < initialBal){
-                    netGain.setText("- " + formatCurrency( endBal - initialBal ));
-                    netGain.setTextAppearance( R.style.line_item_cell_amount_expense );
-                } else netGain.setText( " - " );
+                if(endBal < initialBal){
+                    netGain.setText("-" + formatCurrency( endBal - initialBal ));
+                    netGain.setTextAppearance( R.style.balance_amount_negative );
+                } else {
+                    netGain.setText("+" + formatCurrency( endBal - initialBal ));
+                    netGain.setTextAppearance( R.style.balance_amount_not_negative );
+                }
             }
 
 
 
-
-            //add list of all projections for the period, with running balances
-            if(!firstPeriodLoaded){
-                LinearLayout expandedList = (LinearLayout) View.inflate( this.context, R.layout.view_list, null );
-                buildListView( expandedList, periodProjections );
-                listLineItem.addView( expandedList );
-            }
+            buildTransactionWithBalanceListView( listLineItem.findViewById( R.id.period_projection_list ), periodProjections );
 
             listLineItem.setOnClickListener( v -> {
+                View projectionList = listLineItem.findViewById( R.id.period_projection_list );
+                int visible = projectionList.getVisibility();
 
-                LinearLayout expandedList = v.findViewById( R.id.list );
-
-                if(expandedList == null){
-                    expandedList = (LinearLayout) View.inflate( this.context, R.layout.view_list, null );
-                    buildListView( expandedList, periodProjections );
-                    listLineItem.addView( expandedList );
-                }
-                else listLineItem.removeView( expandedList );
+                if(visible == View.VISIBLE) projectionList.setVisibility( View.GONE );
+                else projectionList.setVisibility( View.VISIBLE );
             } );
 
 
 
 
-            listBody.addView( listLineItem );
+            listView.addView( listLineItem );
         }
     }
 
     //builds list view for projected transactions with resulting balance
-    private void buildListView(ViewGroup listView, HashMap<T, Double> listData){
-        listView.removeView( listView.findViewById( R.id.list_header ));
-        LinearLayout listBody = listView.findViewById( R.id.list_body );
+    private void buildTransactionWithBalanceListView(ViewGroup listView, HashMap<T, Double> listData){
+
+        ViewGroup listHeader = (ViewGroup) View.inflate(this.context, R.layout.transaction_list_item_with_balance, null);
+        TextView dateHeader = listHeader.findViewById( R.id.date_value );
+        TextView labelHeader = listHeader.findViewById( R.id.label_value );
+        TextView amountHeader = listHeader.findViewById( R.id.amount_value );
+        TextView balanceHeader = listHeader.findViewById( R.id.balance_value );
+
+        dateHeader.setText("Date");
+        labelHeader.setText("Label");
+        amountHeader.setText("Amt");
+        balanceHeader.setText( "Bal" );
+
+        dateHeader.setTextAppearance( R.style.period_list_item_header );
+        labelHeader.setTextAppearance( R.style.period_list_item_header );
+        amountHeader.setTextAppearance( R.style.period_list_item_header );
+        balanceHeader.setTextAppearance( R.style.period_list_item_header );
+
+        listHeader.setBackgroundResource( R.drawable.list_header_item );
+        listView.addView( listHeader );
 
         for(Map.Entry<T, Double> listItem : listData.entrySet()){
-            LinearLayout listLineItem = (LinearLayout) LinearLayout.inflate( this.context, R.layout.view_list_lineitem, null );
-            LinearLayout listLineItemBody = listLineItem.findViewById( R.id.list_lineitem_body );
+            ViewGroup listLineItem = (ViewGroup) View.inflate( this.context, R.layout.transaction_list_item_with_balance, null );
 
             T transaction = listItem.getKey();
             Double balance = listItem.getValue();
 
 
-            //set reconcile action button
+//            set reconcile action button
+            Button reconcileTransactionButton = listLineItem.findViewById( R.id.reconcile_transaction_button );
             if(( (LocalDate) transaction.getProperty( R.string.date_tag )).isBefore( LocalDate.now().plusDays( 1 ) )){
-                ImageButton recordButton = (ImageButton) View.inflate( this.context, R.layout.view_button_record_projection, null );
-                recordButton.setImageIcon( Icon.createWithResource(this.context, androidx.appcompat.R.drawable.abc_ic_ab_back_material ));
-                recordButton.setOnClickListener( v -> reconcileTransaction( transaction ) );
-                listLineItemBody.addView( recordButton );
-            }
+                reconcileTransactionButton.setVisibility( View.VISIBLE );
+                reconcileTransactionButton.setOnClickListener( v -> reconcileTransaction( transaction ) );
+            } else reconcileTransactionButton.setVisibility( View.GONE );
 
             //set date column
-            LinearLayout dateWrapper = (LinearLayout) View.inflate( this.context, R.layout.view_list_lineitem_cell, null );
-            TextView date = dateWrapper.findViewById( R.id.cell_value );
-            date.setText( ((LocalDate)transaction.getProperty( R.string.date_tag )).format( DateTimeFormatter.ofPattern( "d - eee" )));
-            date.setTextAppearance( R.style.line_item_cell_date );
-            listLineItemBody.addView( dateWrapper );
+            TextView dateValue = listLineItem.findViewById( R.id.date_value );
+            LocalDate date = (LocalDate)transaction.getProperty( R.string.date_tag );
+            dateValue.setText( formatDate( R.string.date_string_dayofweekanddate, date));
+
 
             //set label column
-            LinearLayout labelWrapper = (LinearLayout) View.inflate( this.context, R.layout.view_list_lineitem_cell, null );
-            TextView label = labelWrapper.findViewById( R.id.cell_value );
-            label.setText( ((String)transaction.getProperty( R.string.label_tag )) );
-            date.setTextAppearance( R.style.line_item_cell_label );
-            labelWrapper.setLayoutParams( new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 5 ) );
-            listLineItemBody.addView( labelWrapper );
+            TextView labelValue = listLineItem.findViewById( R.id.label_value );
+            labelValue.setText( ((String)transaction.getProperty( R.string.label_tag )) );
+
 
             //set amount column
-            LinearLayout amountWrapper = (LinearLayout) View.inflate( this.context, R.layout.view_list_lineitem_cell, null );
-            TextView amount = amountWrapper.findViewById( R.id.cell_value );
+            TextView amount = listLineItem.findViewById( R.id.amount_value );
             if(transaction.getIncomeFlag()) {
                 amount.setText( "+ " + formatCurrency( transaction.getProperty( R.string.amount_tag )));
-                amount.setTextAppearance( R.style.line_item_cell_amount_income );
+                amount.setTextAppearance( R.style.balance_amount_not_negative );
             }
             else {
                 amount.setText( "- " + formatCurrency(transaction.getProperty( R.string.amount_tag )));
-                amount.setTextAppearance( R.style.line_item_cell_amount_expense );
+                amount.setTextAppearance( R.style.balance_amount_negative );
             }
-            amount.setTextSize( 12 );
-            listLineItemBody.addView( amountWrapper );
 
 
             //set balance column
-            LinearLayout balanceWrapper = (LinearLayout) View.inflate( this.context, R.layout.view_list_lineitem_cell, null );
-            TextView balanceView = balanceWrapper.findViewById( R.id.cell_value );
+            TextView balanceView = listLineItem.findViewById( R.id.balance_value );
             balanceView.setText( formatCurrency( balance ));
-            balanceView.setTextAppearance( R.style.line_item_cell_balance );
-            listLineItemBody.addView( balanceWrapper );
+            if(balance >= 0)balanceView.setTextAppearance( R.style.balance_amount_not_negative );
+            else balanceView.setTextAppearance( R.style.balance_amount_negative );
 
 
-            listLineItemBody.setOnClickListener( view -> viewTransaction( transaction, false ) );
+            listLineItem.setOnClickListener( view -> viewTransaction( transaction, false ) );
 
-            listBody.addView( listLineItem );
+            listView.addView( listLineItem );
         }
     }
 
@@ -278,11 +267,11 @@ public class ViewModel<T extends Transaction> {
             if(isEditable){
                 labelEditor.setText( label );
                 labelEditor.setEnabled( true );
-                labelEditor.setBackgroundColor( this.context.getColor( android.R.color.background_light ));
+                labelEditor.setTextAppearance( R.style.property_value_cell_editor );
             } else{
                 labelEditor.setText( label );
                 labelEditor.setEnabled( false );
-                labelEditor.setBackgroundColor( this.context.getColor( R.color.colorPrimaryLight ));
+                labelEditor.setTextAppearance( R.style.property_value_cell_display );
             }
         }
 
@@ -293,11 +282,12 @@ public class ViewModel<T extends Transaction> {
                 if(amountValue == 0.0) amount.setText("");
                 else amount.setText(String.valueOf( amountValue ));
                 amount.setEnabled( true );
-                amount.setBackgroundColor( this.context.getColor( android.R.color.background_light ) );
+                amount.setTextAppearance( R.style.property_value_cell_editor );
+
             } else{
                 amount.setText( formatCurrency( amountValue ) );
                 amount.setEnabled( false );
-                amount.setBackgroundColor( this.context.getColor( R.color.colorPrimaryLight ) );
+                amount.setTextAppearance( R.style.property_value_cell_display );
             }
         }
 
@@ -306,11 +296,12 @@ public class ViewModel<T extends Transaction> {
             if(isEditable){
                 note.setText( (String) transaction.getProperty( R.string.note_tag ));
                 note.setEnabled( true );
-                note.setBackgroundColor( this.context.getColor( android.R.color.background_light ) );
+                note.setTextAppearance( R.style.property_value_cell_editor );
+
             } else {
                 note.setText( (String) transaction.getProperty( R.string.note_tag ));
                 note.setEnabled( false );
-                note.setBackgroundColor( this.context.getColor( R.color.colorPrimaryLight ) );
+                note.setTextAppearance( R.style.property_value_cell_display );
             }
 
         }
@@ -343,7 +334,8 @@ public class ViewModel<T extends Transaction> {
                 dateEditorButton.setText( dateString );
                 dateEditorButton.setTag(R.string.date_tag, date);
                 dateEditorButton.setEnabled( true );
-                dateEditorButton.setBackgroundColor( this.context.getColor( android.R.color.background_light ) );
+                dateEditorButton.setTextAppearance( R.style.property_value_cell_editor );
+
 
                 LocalDate finalDate = date;
                 dateEditorButton.setOnClickListener( dateButtonView -> {
@@ -368,7 +360,7 @@ public class ViewModel<T extends Transaction> {
                 dateEditorButton.setText( formatDate(R.string.date_string_long_mdy, date) );
                 dateEditorButton.setTag(R.string.date_tag, date);
                 dateEditorButton.setEnabled( false );
-                dateEditorButton.setBackgroundColor( this.context.getColor( R.color.colorPrimaryLight ) );
+                dateEditorButton.setTextAppearance( R.style.property_value_cell_editor );
             }
         }
 
@@ -711,8 +703,12 @@ public class ViewModel<T extends Transaction> {
     }
 
     private void viewTransaction(T transaction, boolean editable){
-        AlertDialog.Builder builder = new AlertDialog.Builder( this.context );
+        AlertDialog.Builder builder = new AlertDialog.Builder( new ContextThemeWrapper( this.context, R.style.dialog_page_title ) );
         ViewGroup dialogView;
+
+        if(transaction instanceof ProjectedTransaction) builder.setTitle( "Repeating Transaction" );
+        else if(transaction instanceof RecordedTransaction) builder.setTitle( "Recorded Transaction" );
+        else builder.setTitle("Transaction");
 
         if(transaction instanceof ProjectedTransaction) dialogView = (ViewGroup) ViewGroup.inflate( this.context, R.layout.layout_projection, null );
         else if(transaction instanceof RecordedTransaction) dialogView = (ViewGroup) ViewGroup.inflate( this.context, R.layout.layout_record, null );
@@ -750,11 +746,14 @@ public class ViewModel<T extends Transaction> {
     String formatDate(int return_type, LocalDate date) {
 
         if(return_type == R.string.date_string_long_mdy){
-            return date.format( DateTimeFormatter.ofPattern( "MMMM dd, yyyy" ) );
+            return date.format( DateTimeFormatter.ofPattern( "eee MMMM dd, yyyy" ) );
         } 
         else if(return_type == R.string.date_string_short_md){
-            return date.format( DateTimeFormatter.ofPattern( "MM dd" ) );
+            return date.format( DateTimeFormatter.ofPattern( "MMM d" ) );
         }
+        else if(return_type == R.string.date_long_dowmd) return date.format( DateTimeFormatter.ofPattern( "eee MMM d"  ));
+        else if(return_type == R.string.date_string_dayofweekanddate) return date.format(DateTimeFormatter.ofPattern( "d - eee" ));
+
         else if(return_type == R.string.date_string_dayofweekinmonth){
             int dateOfMonth = date.getDayOfMonth();
             String dayOfWeek = date.getDayOfWeek().toString();

@@ -55,14 +55,14 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="beginning on"
+                android:text="from"
                 style="@style/dialog_page_property_key"/>
 
             <Button
                 android:id="@+id/recurrence_date_value"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:text="start date"
                 tools:ignore="NestedWeights"
                 style="@style/dialog_page_property_value"/>
@@ -100,13 +100,13 @@
             android:layout_height="wrap_content"
             android:text="Stop repeating"
             style="@style/dialog_page_row"
-            android:visibility="gone"/>
+            android:visibility="visible"/>
 
         <RadioGroup
             android:id="@+id/set_end_parameters_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
+            android:visibility="visible"
             android:orientation="vertical">
 
             <LinearLayout
