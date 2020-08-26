@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 import com.fudgetbudget.model.RecordedTransaction;
 import com.fudgetbudget.model.Transaction;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -31,13 +34,13 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
         setContentView( R.layout.activity_main );
         this.pageViewTouchListener = new OnSwipeTouchListener( this );
 
+        setSupportActionBar( findViewById( R.id.action_bar ) );
+        getSupportActionBar().setTitle( getTitle() );
+
         budgetModel = new BudgetModel<T>( this );
         viewModel = new ViewModel(this, budgetModel);
 
         findViewById( R.id.page_view ).setOnTouchListener( this.pageViewTouchListener );
-
-//        setTheme(  );
-
 
         View transactionTab = findViewById( R.id.nav_tab_transactions );
         View recordsTab = findViewById( R.id.nav_tab_records );
@@ -84,60 +87,41 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
         loadActivePage();
     }
     private void loadActivePage() {
-        ScrollView currentPageView = findViewById( R.id.page_view );
-        int inctiveTabBackground = getResources().getColor( R.color.colorLightThemePrimary, null );
-        int activeTabBackground = getResources().getColor( R.color.colorLightThemePrimaryDark, null );
-        int inactiveTextColor = getResources().getColor(R.color.colorLightThemePrimaryLight, null);
-        int activeTextColor = getResources().getColor( R.color.colorLightThemePrimaryLight, null );
+        ViewGroup currentPageView = findViewById( R.id.page_view );
 
-        FrameLayout balanceSheetTab = findViewById( R.id.nav_tab_balancesheet );
-        TextView balanceSheetText = findViewById( R.id.nav_tab_text_balancesheet );
-        balanceSheetTab.setBackgroundColor( inctiveTabBackground );
-        balanceSheetText.setTextColor( inactiveTextColor );
+        Button transactionsTab = findViewById( R.id.nav_tab_transactions );
+        Button balanceSheetTab = findViewById( R.id.nav_tab_balancesheet );
+        Button recordsTab = findViewById( R.id.nav_tab_records );
+        Button toolsTab = findViewById( R.id.nav_tab_tools );
 
-        FrameLayout transactionsTab = findViewById( R.id.nav_tab_transactions );
-        TextView transactionText = findViewById( R.id.nav_tab_text_transactions );
-        transactionsTab.setBackgroundColor( inctiveTabBackground );
-        transactionText.setTextColor( inactiveTextColor );
 
-        FrameLayout recordsTab = findViewById( R.id.nav_tab_records );
-        TextView recordsText = findViewById( R.id.nav_tab_text_records );
-        recordsTab.setBackgroundColor( inctiveTabBackground );
-        recordsText.setTextColor( inactiveTextColor );
 
-        FrameLayout toolsTab = findViewById( R.id.nav_tab_tools );
-        TextView toolsText = findViewById( R.id.nav_tab_tools_icon );
-        toolsTab.setBackgroundColor( inctiveTabBackground );
-        toolsText.setTextColor( inactiveTextColor );
+        transactionsTab.setTextAppearance( R.style.NavButton_Inactive );
+        balanceSheetTab.setTextAppearance( R.style.NavButton_Inactive );
+        recordsTab.setTextAppearance( R.style.NavButton_Inactive );
+        toolsTab.setTextAppearance( R.style.NavButton_Inactive );
+
+        currentPageView.removeAllViews();
 
         if(activePageIndex == 1) {
-            balanceSheetTab.setBackgroundColor( activeTabBackground );
-            balanceSheetText.setTextColor( activeTextColor );
-
-            currentPageView.removeAllViews();
+            balanceSheetTab.setTextAppearance( R.style.NavButton_Active );
             currentPageView.addView( balanceSheetPage() );
         }
         else if(activePageIndex == 0) {
-            transactionsTab.setBackgroundColor( activeTabBackground );
-            transactionText.setTextColor( activeTextColor );
-
-            currentPageView.removeAllViews();
+            transactionsTab.setTextAppearance( R.style.NavButton_Active );
             currentPageView.addView( transactionsPage() );
         }
         else if(activePageIndex == 2) {
-            recordsTab.setBackgroundColor( activeTabBackground );
-            recordsText.setTextColor( activeTextColor );
-
-            currentPageView.removeAllViews();
+            recordsTab.setTextAppearance( R.style.NavButton_Active );
             currentPageView.addView( recordsPage() );
         }
         else if(activePageIndex == 3) {
-            toolsTab.setBackgroundColor( activeTabBackground );
-            toolsText.setTextColor( activeTextColor );
-
-            currentPageView.removeAllViews();
+            toolsTab.setTextAppearance( R.style.NavButton_Active );
             currentPageView.addView( toolsPage() );
         }
+
+
+
     }
 
 
@@ -176,10 +160,34 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
 
         //set onclick handlers to create new transactions
         pageLayoutTransactions.findViewById( R.id.button_create_income_transaction )
-                .setOnClickListener( v -> viewModel.createTransaction(R.string.transaction_type_income));
+                .setOnClickListener( v -> {
+                    ViewParent parent = v.getParent().getParent();
+                    if(parent instanceof LinearLayout){
+                        LinearLayout incomeList = (LinearLayout) parent;
+
+                        T newTransaction = (T) Transaction.getInstance( R.string.transaction_type_income, this.getExternalFilesDir( null ).getAbsolutePath() );
+                        newTransaction.setProperty( R.string.label_tag, "new income" );
+                        budgetModel.update( newTransaction );
+                        ViewGroup newListItem = (ViewGroup) View.inflate( this, R.layout.transaction_list_item, null );
+                        ((TextView)newListItem.findViewById( R.id.date_value )).setText( viewModel.formatDate( R.string.date_string_dayofweekanddate, (LocalDate) newTransaction.getProperty( R.id.date_value ) ) );
+//                        ((TextView) newListItem.findViewById( R.id.label_value )).setText( newTransaction.getProperty( R.string.date ))
+
+                        incomeList.addView( newListItem, 2 );
+                    }
+
+
+
+                });
 
         pageLayoutTransactions.findViewById( R.id.button_create_expense_transaction )
-                .setOnClickListener( v -> viewModel.createTransaction(R.string.transaction_type_expense));
+                .setOnClickListener( v -> {
+                    T newTransaction = (T) Transaction.getInstance( R.string.transaction_type_expense, this.getExternalFilesDir( null ).getAbsolutePath() );
+                    newTransaction.setProperty( R.string.label_tag, "new expense" );
+                    budgetModel.update( newTransaction );
+                    ViewGroup newListItem = (ViewGroup) View.inflate( this, R.layout.transaction_list_item, null );
+                    viewModel.setTransactionPropertyViews(newListItem, newTransaction, true);
+                    ((ViewGroup)pageLayoutTransactions.findViewById( R.id.transaction_income_list )).addView( newListItem, 2 );
+                });
 
 
 

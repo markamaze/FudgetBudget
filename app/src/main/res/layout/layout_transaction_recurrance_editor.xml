@@ -1,187 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="12dp">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:gravity="center_horizontal">
 
-    <LinearLayout
-        android:id="@+id/set_recurrance_parameters_layout"
-        android:layout_width="match_parent"
+    <LinearLayout android:id="@+id/set_period_and_frequency_layout"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="visible"
-        android:padding="12dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        android:gravity="center_horizontal"
+        android:paddingVertical="8dp">
+        <TextView
+            android:id="@+id/set_frequency_label"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            style="@style/dialog_page_row">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="every"
-                style="@style/dialog_page_property_key"/>
-
-            <EditText
-                android:id="@+id/recurrence_frequency_value"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="number"
-                style="@style/dialog_page_property_value"/>
-
-            <Spinner
-                android:id="@+id/recurrence_period_value"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:entries="@array/date_periods"
-                style="@style/dialog_page_property_value"/>
-
-
-
-        </LinearLayout>
-        <LinearLayout android:id="@+id/recurrence_date_layout"
-            android:layout_width="match_parent"
+            android:text="every" />
+        <EditText
+            android:id="@+id/recurrence_frequency_value"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            style="@style/dialog_page_row">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="from"
-                style="@style/dialog_page_property_key"/>
-
-            <Button
-                android:id="@+id/recurrence_date_value"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="start date"
-                tools:ignore="NestedWeights"
-                style="@style/dialog_page_property_value"/>
-
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/on_day_type_layout"
-            android:layout_width="match_parent"
+            android:minWidth="50dp"
+            android:hint="#"
+            android:gravity="center_horizontal"
+            android:inputType="number" />
+        <Spinner
+            android:id="@+id/recurrence_period_value"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            style="@style/dialog_page_row">
+            android:gravity="end"
+            android:entries="@array/date_periods" />
+    </LinearLayout>
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="on"
-                style="@style/dialog_page_property_key"/>
+    <LinearLayout android:id="@+id/set_recurrence_date_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-            <Spinner
-                android:id="@+id/on_day_type_selector"
-                android:layout_width="0dp"
-                android:layout_weight="3"
-                android:layout_height="wrap_content"
-                style="@style/dialog_page_property_value"/>
-
-        </LinearLayout>
-
-
-
-
-        <Switch
-            android:id="@+id/set_end_parameters_switch"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Stop repeating"
-            style="@style/dialog_page_row"
-            android:visibility="visible"/>
+            android:text="from"/>
 
-        <RadioGroup
-            android:id="@+id/set_end_parameters_layout"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/recurrence_date_value"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="visible"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <RadioButton
-                    android:id="@+id/after_number_of_occurrences"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
-                <EditText
-                    android:id="@+id/after_number_of_occurrences_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:enabled="false"
-                    android:inputType="number" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="occurences" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/after_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="after"/>
-                <Button
-                    android:id="@+id/after_date_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="end date"
-                    android:enabled="false"
-                    tools:ignore="NestedWeights" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/when_total_reaches_amount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="total reachs" />
-
-                <EditText
-                    android:id="@id/when_total_reaches_amount_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:inputType="number"
-                    android:enabled="false"/>
-
-
-            </LinearLayout>
-
-        </RadioGroup>
+            android:text="date"
+            tools:ignore="NestedWeights"/>
 
     </LinearLayout>
+
+    <LinearLayout android:id="@+id/set_recurrence_onDateType_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="on" />
+
+        <Spinner
+            android:id="@+id/on_day_type_selector"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="100dp"
+            android:layout_gravity="center"/>
+
+    </LinearLayout>
+
+    <Switch android:id="@+id/set_end_parameters_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="set end parameter"
+        android:paddingVertical="8dp"
+        android:visibility="gone"/>
+
+    <RadioGroup
+        android:id="@+id/set_end_parameters_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/after_number_of_occurrences"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"/>
+            <EditText
+                android:id="@+id/after_number_of_occurrences_value"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:enabled="false"
+                android:inputType="number" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="occurences" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/after_date"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="after"/>
+            <Button
+                android:id="@+id/after_date_value"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="end date"
+                android:enabled="false"
+                tools:ignore="NestedWeights" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/when_total_reaches_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="total reachs" />
+
+            <EditText
+                android:id="@id/when_total_reaches_amount_value"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:inputType="number"
+                android:enabled="false"/>
+
+
+        </LinearLayout>
+
+    </RadioGroup>
+
 
 </LinearLayout>

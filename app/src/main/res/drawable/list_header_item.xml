@@ -2,11 +2,11 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
 
-<padding android:left="12dp"/>
-    <gradient android:startColor="@color/colorLightThemePrimaryAccent"
-        android:endColor="@color/colorLightThemePrimaryAccent"
-        android:type="linear"
-        android:angle="90" />
+<!--<padding android:left="12dp"/>-->
+<!--    <gradient android:startColor="@color/colorLightThemePrimaryAccent"-->
+<!--        android:endColor="@color/colorLightThemePrimaryAccent"-->
+<!--        android:type="linear"-->
+<!--        android:angle="90" />-->
 
 
 </shape>

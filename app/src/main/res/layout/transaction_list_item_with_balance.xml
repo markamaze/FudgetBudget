@@ -1,56 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:background="@drawable/list_item_background">
 
-    <Button
-        android:id="@+id/reconcile_transaction_button"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:visibility="invisible" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-    <TextView
-        android:id="@+id/date_value"
-        style="@style/list_item_cell"
-        android:layout_width="wrap_content"
+
+        <TextView
+            android:id="@+id/date_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:gravity="center_horizontal"
+            android:minWidth="80dp"
+            style="@style/listItemDate"/>
+
+        <TextView
+            android:id="@+id/label_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/amount_value"
+            android:layout_toEndOf="@+id/date_value"
+            android:gravity="center_horizontal" />
+
+        <TextView
+            android:id="@+id/amount_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/balance_value"
+            android:gravity="end"
+            android:minWidth="80dp" />
+
+        <TextView
+            android:id="@+id/balance_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@id/alert_indicator"
+            android:gravity="end"
+            android:minWidth="80dp"/>
+
+        <ImageView
+            android:id="@+id/alert_indicator"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:padding="4dp"
+            android:foregroundGravity="center"
+            android:visibility="visible"/>
+    </RelativeLayout>
+
+    <include layout="@layout/layout_list_item_card"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/reconcile_transaction_button"
-        android:gravity="center_horizontal"
-        android:minWidth="80dp"/>
+        android:layout_width="match_parent" />
+</LinearLayout>
 
-    <TextView
-        android:id="@+id/label_value"
-        style="@style/list_item_cell"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toStartOf="@+id/amount_value"
-        android:layout_toEndOf="@+id/date_value"
-        android:gravity="center_horizontal" />
 
-    <TextView
-        android:id="@+id/amount_value"
-        style="@style/list_item_cell"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toStartOf="@+id/balance_value"
-        android:gravity="end"
-        android:minWidth="80dp" />
-
-    <TextView
-        android:id="@+id/balance_value"
-        android:textColor="@color/colorPrimaryDark"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:gravity="end"
-        android:minWidth="80dp"/>
-
-</RelativeLayout>
 
 

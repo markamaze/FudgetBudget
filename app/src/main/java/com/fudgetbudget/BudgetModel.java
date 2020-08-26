@@ -347,7 +347,10 @@ class BudgetModel<T extends Transaction> {
         else if(object instanceof Transaction) {
             Transaction transaction = (Transaction) object;
 
-            getProjections( transaction ).forEach( projection -> storage.deleteProjection( (ProjectedTransaction)projection ) );
+            getProjections( transaction ).forEach( projection -> {
+                if(projection instanceof ProjectedTransaction)
+                    storage.deleteProjection( (ProjectedTransaction)projection );
+            } );
             transaction.setProperty( R.string.date_tag, "" );
 
             return storage.writeTransaction( transaction );

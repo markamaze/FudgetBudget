@@ -4,86 +4,69 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:theme="@android:style/Theme">
+    tools:context=".MainActivity">
+
+    <androidx.appcompat.widget.Toolbar android:id="@+id/action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/ActionBar"/>
 
     <ScrollView
         android:id="@+id/page_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/nav_tabs"
+        android:background="@color/colorPrimary"
+        app:layout_constraintBottom_toTopOf="@+id/nav_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_weight="11" />
+        app:layout_constraintTop_toBottomOf="@+id/action_bar"
+        app:layout_constraintVertical_weight="1" />
 
     <LinearLayout
-        android:id="@+id/nav_tabs"
+        android:id="@+id/nav_bar"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         app:layout_constraintVertical_weight="1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/page_view">
+        app:layout_constraintTop_toBottomOf="@+id/page_view" >
 
-        <FrameLayout
+        <Button
             android:id="@+id/nav_tab_transactions"
+            style="@style/NavButton"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:text="Budget" />
 
-            <TextView
-                android:id="@+id/nav_tab_text_transactions"
-                style="@style/navigation_tab"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Budget" />
-        </FrameLayout>
-
-
-        <FrameLayout
+        <Button
             android:id="@+id/nav_tab_balancesheet"
+            style="@style/NavButton"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:text="Balance" />
 
-            <TextView
-                android:id="@+id/nav_tab_text_balancesheet"
-                style="@style/navigation_tab"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Balance Sheet" />
-        </FrameLayout>
-
-        <FrameLayout
+        <Button
             android:id="@+id/nav_tab_records"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
-            <TextView
-                android:id="@+id/nav_tab_text_records"
-                style="@style/navigation_tab"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Records" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:id="@+id/nav_tab_tools"
+            style="@style/NavButton"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:text="Records" />
 
-            <TextView
-                android:id="@+id/nav_tab_tools_icon"
-                style="@style/navigation_tab"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Tools" />
-        </FrameLayout>
+        <Button
+            android:id="@+id/nav_tab_tools"
+            style="@style/NavButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Tools" />
 
     </LinearLayout>
 

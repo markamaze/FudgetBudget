@@ -148,7 +148,7 @@ public class StorageControl {
     public Object readSettingsValue(String setting) {
         switch (setting){
             case "projection_periods_to_project": return 3;
-            case "balance_threshold": return 2.0;
+            case "balance_threshold": return 500.0;
             default: return null;
         }
     }

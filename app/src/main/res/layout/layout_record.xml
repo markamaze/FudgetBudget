@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    style="@style/dialog_page">
+    android:background="@android:color/white">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -18,59 +18,51 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                style="@style/dialog_page_row">
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="Label"
-                    style="@style/dialog_page_property_key" />
+                    android:text="Label" />
 
                 <EditText
                     android:id="@+id/label_value"
                     android:layout_width="0dp"
                     android:layout_weight="2"
-                    android:layout_height="wrap_content"
-                    style="@style/dialog_page_property_value"/>
+                    android:layout_height="wrap_content"/>
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                style="@style/dialog_page_row">
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="@string/projected_date_key"
-                    style="@style/dialog_page_property_key" />
+                    android:text="@string/projected_date_key"/>
 
                 <Button
                     android:id="@+id/date_value"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    style="@style/dialog_page_property_value" />
+                    android:layout_weight="2"/>
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                style="@style/dialog_page_row">
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="@string/key_transaction_amount"
-                    style="@style/dialog_page_property_key" />
+                    android:text="@string/key_transaction_amount"/>
 
                 <EditText
                     android:id="@+id/amount_value"
@@ -78,31 +70,27 @@
                     android:layout_weight="2"
                     android:layout_height="wrap_content"
                     android:hint="amount"
-                    android:inputType="numberDecimal"
-                    style="@style/dialog_page_property_value" />
+                    android:inputType="numberDecimal"/>
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                style="@style/dialog_page_row">
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="@string/key_transaction_note"
-                    style="@style/dialog_page_property_key" />
+                    android:text="@string/key_transaction_note"/>
 
                 <EditText
                     android:id="@+id/note_value"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:inputType="textMultiLine"
-                    style="@style/dialog_page_property_value" />
+                    android:inputType="textMultiLine"/>
 
             </LinearLayout>
 

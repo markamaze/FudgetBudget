@@ -1,85 +1,112 @@
 <resources>
-c
+
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColor">@color/colorPrimaryLight</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:colorPrimary">@color/colorPrimary</item>
+        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:colorAccent">@color/colorAccent</item>
+        <item name="android:textSize">@dimen/textSize</item>
+<!--        <item name="ac"-->
+    </style>
+
+    <style name="ActionBar" parent="android:Widget.ActionBar">
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
 
     </style>
 
-    <style name="AppLightTheme" parent="Theme.AppCompat.DayNight">
-        <!-- Customize your theme here. -->
-<!--        <item name="colorPrimary">@color/colorLightThemePrimary</item>-->
-<!--        <item name="colorPrimaryDark">@color/colorLightThemePrimaryDark</item>-->
-<!--        <item name="colorAccent">@color/colorLightThemePrimaryAccent</item>-->
-        <item name="android:textSize">16sp</item>
+    <style name="NavButton" >
+        <item name="android:background">@color/colorPrimary</item>
+    </style>
+    <style name="NavButton.Inactive" >
+        <item name="android:textColor">@android:color/primary_text_light</item>
+    </style>
+    <style name="NavButton.Active" >
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
 
+    <style name="transactionListItem">
+        <item name="android:padding">8dp</item>
+    </style>
+
+    <style name="listItemDate">
+        <item name="android:textColorPrimary">@color/colorAccent</item>
     </style>
 
 
-    <style name="navigation_tab">
-        <item name="android:layout_gravity">center</item>
-        <item name="android:textAlignment">center</item>
+    <!--    <style name="AppLightTheme" parent="Theme.AppCompat.DayNight">-->
+<!--        &lt;!&ndash; Customize your theme here. &ndash;&gt;-->
+<!--&lt;!&ndash;        <item name="colorPrimary">@color/colorLightThemePrimary</item>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item name="colorPrimaryDark">@color/colorLightThemePrimaryDark</item>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item name="colorAccent">@color/colorLightThemePrimaryAccent</item>&ndash;&gt;-->
+<!--        <item name="android:textSize">16sp</item>-->
+
+<!--    </style>-->
+
+
+<!--    <style name="navigation_tab">-->
+<!--        <item name="android:layout_gravity">center</item>-->
+<!--        <item name="android:textAlignment">center</item>-->
+<!--    </style>-->
+
+
+
+
+<!--&lt;!&ndash;    balancesheet period list item style     &ndash;&gt;-->
+
+<!--    <style name="period_list_item_amount_key">-->
+<!--        <item name="android:textStyle">italic</item>-->
+<!--        <item name="android:paddingStart">24dp</item>-->
+<!--    </style>-->
+<!--    <style name="period_list_item_amount_value">-->
+<!--        <item name="android:textStyle">italic</item>-->
+<!--        <item name="android:paddingHorizontal">8dp</item>-->
+<!--        <item name="android:textAlignment">textEnd</item>-->
+<!--    </style>-->
+<!--    <style name="period_list_item_header">-->
+<!--        <item name="android:textAlignment">center</item>-->
+<!--        <item name="android:layout_gravity">center_horizontal</item>-->
+<!--        <item name="android:textColor">@color/colorLightThemePrimaryLight</item>-->
+<!--    </style>-->
+
+
+
+
+
+
+
+<!--&lt;!&ndash;    styles for setting amounts as positive or negative      &ndash;&gt;-->
+<!--    <style name="balance_amount_not_negative">-->
+<!--        <item name="android:textStyle">bold</item>-->
+<!--        <item name="android:textColor">@color/colorLightThemePrimaryDark</item>-->
+<!--    </style>-->
+
+<!--    <style name="balance_amount_negative">-->
+<!--        <item name="android:textStyle">bold</item>-->
+<!--        <item name="android:textColor">@color/colorCurrencyNegative</item>-->
+<!--    </style>-->
+
+
+
+
+
+
+<!--&lt;!&ndash;    page header styles shown at the top of each page&ndash;&gt;-->
+    <style name="page">
+<!--        <item name="android:paddingHorizontal">12dp</item>-->
     </style>
-
-
-
-
-<!--    balancesheet period list item style     -->
-
-    <style name="period_list_item_amount_key">
-        <item name="android:textStyle">italic</item>
-        <item name="android:paddingStart">24dp</item>
-    </style>
-    <style name="period_list_item_amount_value">
-        <item name="android:textStyle">italic</item>
-        <item name="android:paddingHorizontal">8dp</item>
-        <item name="android:textAlignment">textEnd</item>
-    </style>
-    <style name="period_list_item_header">
-        <item name="android:textAlignment">center</item>
-        <item name="android:layout_gravity">center_horizontal</item>
-        <item name="android:textColor">@color/colorLightThemePrimaryLight</item>
-    </style>
-
-
-
-
-
-
-
-<!--    styles for setting amounts as positive or negative      -->
-    <style name="balance_amount_not_negative">
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/colorLightThemePrimaryDark</item>
-    </style>
-
-    <style name="balance_amount_negative">
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/colorCurrencyNegative</item>
-    </style>
-
-
-
-
-
-
-<!--    page header styles shown at the top of each page-->
     <style name="page_header">
-        <item name="android:background">@color/colorLightThemePrimary</item>
         <item name="android:paddingVertical">12dp</item>
         <item name="android:paddingStart">12dp</item>
+        <item name="android:background">@color/colorAccent</item>
     </style>
     <style name="page_header_row">
         <item name="android:paddingHorizontal">12dp</item>
         <item name="android:paddingVertical">4dp</item>
     </style>
     <style name="page_header_row_key">
-        <item name="android:textColor">@color/colorPrimaryLight</item>
+<!--        <item name="android:textColor">@color/colorPrimaryLight</item>-->
         <item name="android:textAlignment">textStart</item>
         <item name="android:paddingHorizontal">24dp</item>
         <item name="android:layout_weight">2</item>
@@ -92,80 +119,111 @@ c
         <item name="android:layout_marginEnd">12dp</item>
     </style>
 
+    <style name="list" parent="">
 
-
-<!--    list styles -->
-
-    <style name="list_header_title">
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:textSize">20sp</item>
-        <item name="android:paddingHorizontal">12dp</item>
-<!--        <item name="android:textColor">@color/colorAccent</item>-->
-    </style>
-    <style name="list_item_cell">
-<!--        <item name="android:textColor">@color/colorPrimaryDark</item>-->
-    </style>
-    <style name="list_header_icon">
-        <item name="android:textAlignment">center</item>
-        <item name="android:background">@android:color/transparent</item>
     </style>
 
-
-<!--    general layout components       -->
-
-    <style name="row_nested">
-<!--        <item name="android:layout_marginVertical">0dp</item>-->
-<!--        <item name="android:layout_marginHorizontal">12dp</item>-->
-<!--        <item name="android:paddingVertical">0dp</item>-->
+    <style name="list.header">
+<!--        <item name="android:paddingVertical">12dp</item>-->
+<!--        <item name="android:background">@color/colorPrimaryDark</item>-->
     </style>
-    <style name="row_padded">
-<!--        <item name="android:layout_marginVertical">12dp</item>-->
-<!--        <item name="android:layout_marginHorizontal">12dp</item>-->
-<!--        <item name="android:paddingVertical">16dp</item>-->
+    <style name="period_calculations">
+<!--        <item name="android:background">@color/colorPrimary</item>-->
+    </style>
+    <style name="list.subheadercell">
+<!--        <item name="android:textColor">@color/colorSecondaryText</item>-->
+
     </style>
 
-
-
-<!--    dialog page styles      -->
-
-    <style name="dialog_page">
-        <item name="android:background">@color/colorPrimaryLight</item>
-        <item name="android:padding">24dp</item>
-    </style>
-    <style name="dialog_page_title">
-        <item name="android:textSize">20sp</item>
-        <item name="android:background">@color/colorPrimary</item>
-        <item name="android:textColor">@android:color/primary_text_dark</item>
-    </style>
-    <style name="dialog_page_property_key">
-        <item name="android:textColor">@color/colorPrimaryLight</item>
-        <item name="android:textAlignment">textStart</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:paddingHorizontal">4dp</item>
-    </style>
-    <style name="dialog_page_property_value">
-        <item name="android:textColor">@color/colorPrimaryLight</item>
+    <style name="list.title">
+        <item name="android:textSize">20dp</item>
+        <item name="android:textStyle">bold</item>
         <item name="android:textAlignment">center</item>
     </style>
-    <style name="dialog_page_row">
-        <item name="android:layout_marginVertical">8dp</item>
-    </style>
-    <style name="dialog_page_sub_message_text">
-        <item name="android:textSize">14dp</item>
-        <item name="android:textStyle">italic</item>
-        <item name="android:textAlignment">textEnd</item>
-    </style>
-    <style name="property_value_cell_editor">
-        <item name="android:background">@color/white</item>
-    </style>
-    <style name="property_value_cell_display">
-        <item name="android:background">@android:color/transparent</item>
-    </style>
-    <style name="value_input_cell">
-        <item name="android:minWidth">100dp</item>
-        <item name="android:padding">0dp</item>
+
+    <style name="list.item">
+        <item name="android:background">@drawable/list_item_background</item>
     </style>
 
+    <style name="list.cell"></style>
+
+    <style name="itemLayout">
+        <item name="android:paddingHorizontal">24dp</item>
+        <item name="android:paddingVertical">12dp</item>
+    </style>
+
+
+    <!--&lt;!&ndash;    list styles &ndash;&gt;-->
+
+<!--    <style name="list_header_title">-->
+<!--        <item name="android:gravity">center_vertical</item>-->
+<!--        <item name="android:textSize">20sp</item>-->
+<!--        <item name="android:paddingHorizontal">12dp</item>-->
+<!--&lt;!&ndash;        <item name="android:textColor">@color/colorAccent</item>&ndash;&gt;-->
+<!--    </style>-->
+<!--    <style name="list_item_cell">-->
+<!--&lt;!&ndash;        <item name="android:textColor">@color/colorPrimaryDark</item>&ndash;&gt;-->
+<!--    </style>-->
+<!--    <style name="list_header_icon">-->
+<!--        <item name="android:textAlignment">center</item>-->
+<!--        <item name="android:background">@android:color/transparent</item>-->
+<!--    </style>-->
+
+
+<!--&lt;!&ndash;    general layout components       &ndash;&gt;-->
+
+<!--    <style name="row_nested">-->
+<!--&lt;!&ndash;        <item name="android:layout_marginVertical">0dp</item>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item name="android:layout_marginHorizontal">12dp</item>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item name="android:paddingVertical">0dp</item>&ndash;&gt;-->
+<!--    </style>-->
+<!--    <style name="row_padded">-->
+<!--&lt;!&ndash;        <item name="android:layout_marginVertical">12dp</item>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item name="android:layout_marginHorizontal">12dp</item>&ndash;&gt;-->
+<!--&lt;!&ndash;        <item name="android:paddingVertical">16dp</item>&ndash;&gt;-->
+<!--    </style>-->
+
+
+
+<!--&lt;!&ndash;    dialog page styles      &ndash;&gt;-->
+
+<!--    <style name="dialog_page">-->
+<!--        <item name="android:background">@color/colorPrimaryLight</item>-->
+<!--        <item name="android:padding">24dp</item>-->
+<!--    </style>-->
+<!--    <style name="dialog_page_title">-->
+<!--        <item name="android:textSize">20sp</item>-->
+<!--        <item name="android:background">@color/colorPrimary</item>-->
+<!--        <item name="android:textColor">@android:color/primary_text_dark</item>-->
+<!--    </style>-->
+<!--    <style name="dialog_page_property_key">-->
+<!--        <item name="android:textColor">@color/colorPrimaryLight</item>-->
+<!--        <item name="android:textAlignment">textStart</item>-->
+<!--        <item name="android:textSize">16sp</item>-->
+<!--        <item name="android:paddingHorizontal">4dp</item>-->
+<!--    </style>-->
+<!--    <style name="dialog_page_property_value">-->
+<!--        <item name="android:textColor">@color/colorPrimaryLight</item>-->
+<!--        <item name="android:textAlignment">center</item>-->
+<!--    </style>-->
+<!--    <style name="dialog_page_row">-->
+<!--        <item name="android:layout_marginVertical">8dp</item>-->
+<!--    </style>-->
+<!--    <style name="dialog_page_sub_message_text">-->
+<!--        <item name="android:textSize">14dp</item>-->
+<!--        <item name="android:textStyle">italic</item>-->
+<!--        <item name="android:textAlignment">textEnd</item>-->
+<!--    </style>-->
+<!--    <style name="property_value_cell_editor">-->
+<!--        <item name="android:background">@color/white</item>-->
+<!--    </style>-->
+<!--    <style name="property_value_cell_display">-->
+<!--        <item name="android:background">@android:color/transparent</item>-->
+<!--    </style>-->
+<!--    <style name="value_input_cell">-->
+<!--        <item name="android:minWidth">100dp</item>-->
+<!--        <item name="android:padding">0dp</item>-->
+<!--    </style>-->
 
 
 </resources>

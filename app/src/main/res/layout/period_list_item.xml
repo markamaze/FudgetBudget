@@ -2,58 +2,63 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingVertical="12dp">
+    android:paddingVertical="40dp"
+    android:paddingHorizontal="10dp"
+    android:background="@android:drawable/dialog_holo_light_frame">
+
+
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/period_date_expense_header"
+        android:id="@+id/period_header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        style="@style/list.header">
 
         <TextView
-            android:id="@+id/projection_period_header_date_month"
-            style="@style/list_header_title"
+            android:id="@+id/projection_period_header_date"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/textView"
+            app:layout_constraintEnd_toStartOf="@+id/projection_period_header_net_gain_label"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            style="@style/list.title"/>
 
         <TextView
-            android:id="@+id/textView"
-            style="@style/period_list_item_amount_key"
-            android:layout_width="0dp"
+            android:id="@+id/projection_period_header_net_gain_label"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Expendable"
-            android:textColor="@color/colorAccent"
+            android:paddingHorizontal="6dp"
+            app:layout_constraintStart_toEndOf="@id/projection_period_header_date"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/projection_period_header_net_gain"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/projection_period_header_net_gain"
-            style="@style/period_list_item_amount_value"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
+            android:paddingHorizontal="6dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/projection_period_header_net_gain_label"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/period_list_item_balances"
+        style="@style/period_calculations"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/background_border_bottom">
+        android:visibility="visible"
+        android:layout_marginEnd="16dp">
 
         <TextView
             android:id="@+id/textView4"
-            style="@style/period_list_item_amount_key"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Start"
@@ -63,7 +68,6 @@
 
         <TextView
             android:id="@+id/projection_period_header_initial_balance"
-            style="@style/period_list_item_amount_value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toStartOf="@+id/textView2"
@@ -72,7 +76,6 @@
 
         <TextView
             android:id="@+id/textView2"
-            style="@style/period_list_item_amount_key"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Income"
@@ -82,7 +85,6 @@
 
         <TextView
             android:id="@+id/projection_period_header_income"
-            style="@style/period_list_item_amount_value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -91,7 +93,6 @@
 
         <TextView
             android:id="@+id/textView5"
-            style="@style/period_list_item_amount_key"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="End Bal"
@@ -101,7 +102,6 @@
 
         <TextView
             android:id="@+id/projection_period_header_ending_balance"
-            style="@style/period_list_item_amount_value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toStartOf="@+id/textView3"
@@ -110,7 +110,6 @@
 
         <TextView
             android:id="@+id/textView3"
-            style="@style/period_list_item_amount_key"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Expenses"
@@ -120,7 +119,6 @@
 
         <TextView
             android:id="@+id/projection_period_header_expense"
-            style="@style/period_list_item_amount_value"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -131,12 +129,11 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout android:id="@+id/period_projection_list"
-        android:tag="list_body"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingBottom="64dp"
         android:orientation="vertical"
-        android:visibility="visible"/>
+        android:visibility="gone"
+        android:layout_marginEnd="16dp"/>
 
 </LinearLayout>

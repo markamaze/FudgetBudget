@@ -1,34 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:background="@drawable/list_item_background">
-        <TextView
-            android:id="@+id/date_value"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            style="@style/list_item_cell"/>
 
-        <TextView
-            android:id="@+id/label_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:layout_marginStart="0dp"
-            android:layout_toStartOf="@+id/amount_value"
-            android:layout_toEndOf="@+id/date_value"
-            style="@style/list_item_cell" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/amount_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="80dp"
-            android:gravity="end"
-            android:layout_alignParentEnd="true"
-            style="@style/list_item_cell" />
+            <TextView
+                android:id="@+id/date_value"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                style="@style/list.cell"/>
 
-</RelativeLayout>
+            <TextView
+                android:id="@+id/label_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:layout_marginStart="0dp"
+                android:layout_toStartOf="@+id/amount_value"
+                android:layout_toEndOf="@+id/date_value"
+                style="@style/list.cell" />
+
+            <TextView
+                android:id="@+id/amount_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="80dp"
+                android:gravity="end"
+                android:layout_alignParentEnd="true"
+                style="@style/list.cell" />
+
+    </RelativeLayout>
+
+
+        <include layout="@layout/layout_list_item_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+</LinearLayout>

@@ -8,8 +8,7 @@
     <RelativeLayout
         android:id="@+id/page_tools_set_projection_freqency"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/row_padded" >
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/projection_frequency_label"
@@ -22,7 +21,6 @@
 
         <SeekBar
             android:id="@+id/projection_frequency_value"
-            style="@style/row_nested"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/projection_frequency_label" />
@@ -33,8 +31,7 @@
     <RelativeLayout
         android:id="@+id/page_tools_set_balance_threshold"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/row_padded">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/balance_threshold_label"
@@ -50,16 +47,14 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:inputType="numberDecimal"
-            style="@style/value_input_cell"/>
+            android:inputType="numberDecimal"/>
 
     </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/page_tools_reset_balance"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/row_padded">
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:id="@+id/reset_balance_toggle_controls"
@@ -88,8 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentEnd="true"
-            android:layout_below="@id/reset_balance_toggle_controls"
-            style="@style/row_nested">
+            android:layout_below="@id/reset_balance_toggle_controls">
 
             <LinearLayout android:id="@+id/reset_balance_control_option_record_overdue"
                 android:layout_width="match_parent"
@@ -109,8 +103,7 @@
                 <EditText
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"
-                    style="@style/value_input_cell" />
+                    android:inputType="numberDecimal"/>
             </LinearLayout>
 
             <LinearLayout android:id="@+id/reset_balance_control_option_delete_overdue"
@@ -131,8 +124,7 @@
                 <EditText
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"
-                    style="@style/value_input_cell" />
+                    android:inputType="numberDecimal"/>
 
             </LinearLayout>
         </RadioGroup>
@@ -142,8 +134,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/row_padded">
+        android:layout_height="wrap_content">
 
 
 
