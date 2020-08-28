@@ -54,4 +54,6 @@
     <string name="day_tag">Day</string>
     <string name="date_long_dowmd">long dayofweek month year</string>
     <string name="date_string_dayofweekanddate">day of week and date</string>
+    <string name="records_type_all">records_type_all</string>
+    <string name="balancesheet_projections">balancesheet projections period list</string>
 </resources>

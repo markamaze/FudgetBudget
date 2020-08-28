@@ -201,9 +201,9 @@ class BudgetModel<T extends Transaction> {
         //list will generate projection when one is not found in storage, will load stored projection if found
 
         ArrayList<T> projections = new ArrayList<>(  );
-        String recurrance = transaction.getProperty( R.string.recurrence_tag ).toString();
+        String recurrance = (String) transaction.getProperty( R.string.recurrence_tag );
 
-        if(recurrance.contentEquals( "0-0-0-0-0-0-0" )) projections.add( (T)transaction );
+        if(recurrance == null || recurrance.contentEquals( "0-0-0-0-0-0-0" )) projections.add( (T)transaction );
         else {
             LocalDate indexDate = (LocalDate) transaction.getProperty( R.string.date_tag );
             LinkedHashMap<LocalDate, ProjectedTransaction> storedProjections = storage.readProjections( transaction );
@@ -368,7 +368,7 @@ class BudgetModel<T extends Transaction> {
         return lowestProjected - thresholdAmount;
     }
     Double getCurrentBalance() {
-        ArrayList<RecordedTransaction> records = storage.readRecords( "all" );
+        ArrayList<RecordedTransaction> records = storage.readRecords( R.string.records_type_all );
         double balance = 0.00;
 
         for( RecordedTransaction recordedTransaction : records) {

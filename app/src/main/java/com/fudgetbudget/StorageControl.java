@@ -109,7 +109,7 @@ public class StorageControl {
 
         if(recordsFiles == null || recordsFiles.length <= 0) return foundRecords;
 
-        if(object instanceof String && String.valueOf( object ).contentEquals( "all" ))
+        if(object instanceof Integer && Integer.parseInt( object.toString() ) == R.string.records_type_all)
             Arrays.stream(recordsFiles).forEach( file -> {
                 Element recordDocument = getDocumentFromFile( file ).getDocumentElement();
                 File transactionFile = new File( recordDocument.getAttribute( "transactionURI" ));
