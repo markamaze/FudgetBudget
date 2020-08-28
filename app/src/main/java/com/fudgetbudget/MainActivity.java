@@ -131,8 +131,7 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
 
 
         LinearLayout pageLayoutTransactions = (LinearLayout) getLayoutInflater().inflate( R.layout.page_transactions, null );
-        ArrayList<Transaction> incomeListData = budgetModel.getTransactionsByType( R.string.transaction_type_income );
-        ArrayList<Transaction> expenseListData = budgetModel.getTransactionsByType( R.string.transaction_type_expense );
+
 
         //set page header values
         LinearLayout header = pageLayoutTransactions.findViewById( R.id.page_header );
@@ -143,53 +142,25 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
         Double averageExpense = budgetModel.getProjectedAverageValue( R.string.expense_tag );
         Double averageNet = averageIncome - averageExpense;
 
-        averageIncomeView.setText( viewModel.formatCurrency( averageIncome ) + "/month");
-        averageExpenseView.setText(viewModel.formatCurrency( averageExpense ) + "/month");
-        avergeNetGainLossView.setText( viewModel.formatCurrency( averageNet ) + "/month");
+        averageIncomeView.setText( formatUtility.formatCurrency( averageIncome ) + "/month");
+        averageExpenseView.setText(formatUtility.formatCurrency( averageExpense ) + "/month");
+        avergeNetGainLossView.setText( formatUtility.formatCurrency( averageNet ) + "/month");
 
         //build income transaction list
-        int[] incomeListColumnTags = new int[]{R.string.date_tag, R.string.label_tag, R.string.amount_tag};
         ViewGroup incomeTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_income_list );
-        viewModel.buildTransactionListView(incomeTransactionList, incomeListData, incomeListColumnTags );
+        viewModel.buildTransactionListView(incomeTransactionList, R.layout.transaction_list_item, R.string.transaction_type_income );
 
 
         //build expense transaction list
-        int[] expenseListColumnTags = new int[]{R.string.date_tag, R.string.label_tag, R.string.amount_tag};
         ViewGroup expenseTransactionList = pageLayoutTransactions.findViewById( R.id.transaction_expense_list );
-        viewModel.buildTransactionListView( expenseTransactionList, expenseListData, expenseListColumnTags );
+        viewModel.buildTransactionListView( expenseTransactionList, R.layout.transaction_list_item, R.string.transaction_type_expense );
+
 
         //set onclick handlers to create new transactions
         pageLayoutTransactions.findViewById( R.id.button_create_income_transaction )
-                .setOnClickListener( v -> {
-                    ViewParent parent = v.getParent().getParent();
-                    if(parent instanceof LinearLayout){
-                        LinearLayout incomeList = (LinearLayout) parent;
-
-                        T newTransaction = (T) Transaction.getInstance( R.string.transaction_type_income, this.getExternalFilesDir( null ).getAbsolutePath() );
-                        newTransaction.setProperty( R.string.label_tag, "new income" );
-                        budgetModel.update( newTransaction );
-                        ViewGroup newListItem = (ViewGroup) View.inflate( this, R.layout.transaction_list_item, null );
-                        ((TextView)newListItem.findViewById( R.id.date_value )).setText( viewModel.formatDate( R.string.date_string_dayofweekanddate, (LocalDate) newTransaction.getProperty( R.id.date_value ) ) );
-//                        ((TextView) newListItem.findViewById( R.id.label_value )).setText( newTransaction.getProperty( R.string.date ))
-
-                        incomeList.addView( newListItem, 2 );
-                    }
-
-
-
-                });
-
+                .setOnClickListener( viewModel.createTransactionListener(R.string.transaction_type_income) );
         pageLayoutTransactions.findViewById( R.id.button_create_expense_transaction )
-                .setOnClickListener( v -> {
-                    T newTransaction = (T) Transaction.getInstance( R.string.transaction_type_expense, this.getExternalFilesDir( null ).getAbsolutePath() );
-                    newTransaction.setProperty( R.string.label_tag, "new expense" );
-                    budgetModel.update( newTransaction );
-                    ViewGroup newListItem = (ViewGroup) View.inflate( this, R.layout.transaction_list_item, null );
-                    viewModel.setTransactionPropertyViews(newListItem, newTransaction, true);
-                    ((ViewGroup)pageLayoutTransactions.findViewById( R.id.transaction_income_list )).addView( newListItem, 2 );
-                });
-
-
+                .setOnClickListener( viewModel.createTransactionListener(R.string.transaction_type_expense) );
 
         return pageLayoutTransactions;
     }
@@ -200,15 +171,16 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
 
         TextView currentBalanceView = page_layout_balancesheet.findViewById( R.id.current_recorded_balance );
         Double currentBalance = budgetModel.getCurrentBalance();
-        currentBalanceView.setText( viewModel.formatCurrency(currentBalance));
+        currentBalanceView.setText( formatUtility.formatCurrency(currentBalance));
 
         TextView expendableFundsView = page_layout_balancesheet.findViewById( R.id.current_expendable_funds );
         Double expendableFunds = budgetModel.getExpendableValue();
-        expendableFundsView.setText( viewModel.formatCurrency(expendableFunds));
+        expendableFundsView.setText( formatUtility.formatCurrency(expendableFunds));
 
-        ArrayList<Object[]> projectionListData = budgetModel.getProjectionsWithBalancesByPeriod();
+//        ArrayList<Object[]> projectionListData = budgetModel.getProjectionsWithBalancesByPeriod();
         ViewGroup projectionList = page_layout_balancesheet.findViewById( R.id.projected_balance_list );
-        viewModel.buildPeriodProjectionListView( projectionList, projectionListData );
+        viewModel.buildPeriodListView( projectionList , R.layout.period_list_item, R.string.balancesheet_projections );
+//        viewModel.buildPeriodProjectionListView( projectionList, projectionListData );
 
         return page_layout_balancesheet;
     }
@@ -219,14 +191,15 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
 
         TextView currentBalanceView = page_records.findViewById( R.id.current_recorded_balance );
         Double currentBalance = budgetModel.getCurrentBalance();
-        currentBalanceView.setText( viewModel.formatCurrency( currentBalance ));
+        currentBalanceView.setText( formatUtility.formatCurrency( currentBalance ));
 
-        int[] recordsListColumns = new int[]{R.string.date_tag, R.string.label_tag, R.string.amount_tag};
-        ArrayList<RecordedTransaction> recordsListData = budgetModel.getRecords( "all" );
+//        int[] recordsListColumns = new int[]{R.string.date_tag, R.string.label_tag, R.string.amount_tag};
+//        ArrayList<RecordedTransaction> recordsListData = budgetModel.getRecords( "all" );
         ViewGroup recordsList = page_records.findViewById( R.id.record_list );
 
-        Collections.reverse(recordsListData);
-        viewModel.buildTransactionListView( recordsList, recordsListData, recordsListColumns );
+//        Collections.reverse(recordsListData);
+//        viewModel.buildTransactionListView( recordsList, recordsListData, recordsListColumns );
+        viewModel.buildTransactionListView( recordsList, R.layout.transaction_list_item, R.string.records_type_all );
 
         return page_records;
     }
