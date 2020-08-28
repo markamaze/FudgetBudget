@@ -3,22 +3,16 @@ package com.fudgetbudget;
 import android.app.DatePickerDialog;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.view.ViewParent;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AlertDialog;
 
 import com.fudgetbudget.model.ProjectedTransaction;
 import com.fudgetbudget.model.RecordedTransaction;
@@ -26,14 +20,13 @@ import com.fudgetbudget.model.Transaction;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
-public class ViewModel<T extends Transaction> {
+class ViewModel<T extends Transaction> {
 
     private final MainActivity context;
     private BudgetModel budgetModel;
@@ -44,9 +37,201 @@ public class ViewModel<T extends Transaction> {
         this.budgetModel = budgetModel;
     }
 
-    //build list view for any of the Transaction classes, using tags to set the property columns
-    void buildTransactionListView(ViewGroup listView, ArrayList<T> listData, int[] listColumns){
-        ViewGroup listHeader = (ViewGroup) View.inflate(this.context, R.layout.transaction_list_item, null);
+
+    View.OnClickListener createTransactionListener(int transaction_type_income) {
+        return v -> {
+            ViewParent parent = v.getParent().getParent();
+            if(parent instanceof LinearLayout){
+                LinearLayout incomeList = (LinearLayout) parent;
+
+                T newTransaction = (T) Transaction.getInstance( transaction_type_income, this.context.getExternalFilesDir( null ).getAbsolutePath() );
+                budgetModel.update( newTransaction );
+                ViewGroup newListItem = (ViewGroup) View.inflate( this.context, R.layout.transaction_list_item, null );
+                setLineItemPropertyViews( newListItem, newTransaction );
+
+                initializeCardLayout( newListItem, newTransaction );
+                initializeCardButtons( newListItem, newTransaction );
+
+                newListItem.findViewById( R.id.card_view ).setVisibility( VISIBLE );
+                newListItem.findViewById( R.id.card_buttons ).setVisibility( VISIBLE );
+                newListItem.findViewById( R.id.modify_transaction_button ).callOnClick();
+
+                newListItem.setOnClickListener( v1 -> toggleCardVisibility( newListItem ) );
+                incomeList.addView( newListItem, 2 );
+            }
+
+        };
+    }
+
+    void buildTransactionListView(ViewGroup listView, int layoutResource, Object dataObject){
+        ViewGroup listHeader = (ViewGroup) View.inflate(this.context, layoutResource, null);
+        Object listData;
+
+        setLineItemHeader(listHeader, layoutResource);
+        listView.addView( listHeader );
+
+
+        if(dataObject instanceof Integer){
+            Integer typeInt = (Integer) dataObject;
+            if( typeInt == R.string.transaction_type_income || typeInt == R.string.transaction_type_expense)
+                listData = budgetModel.getTransactionsByType( dataObject );
+            else if( typeInt == R.string.records_type_all )
+                listData = budgetModel.getRecords( dataObject );
+            else throw new Error("unknown data type resorce identifier");
+
+        } else listData = dataObject;
+
+        if( listData instanceof List){
+            List<?> listDataSet = (List) listData;
+
+            for( Object item : listDataSet){
+                ViewGroup listLineItem = (ViewGroup) View.inflate( this.context, layoutResource, null );
+                if( !(item instanceof Transaction) ) throw new Error("unknown data type");
+                Transaction transaction = (Transaction) item;
+
+                setLineItemPropertyViews( listLineItem, transaction );
+
+                initializeCardLayout( listLineItem, transaction );
+                initializeCardButtons( listLineItem, transaction );
+
+                if(listLineItem.findViewById( R.id.card_view ) != null)
+                    listLineItem.setOnClickListener( this::toggleCardVisibility );
+
+                listView.addView( listLineItem );
+            }
+        }
+
+        else if( listData instanceof Map ){
+            Map<?,?> listDataMap = (Map) listData;
+            for(Map.Entry item : listDataMap.entrySet() ){
+                ViewGroup listLineItem = (ViewGroup) View.inflate( this.context, layoutResource, null );
+                if( !(item.getKey() instanceof Transaction)
+                        || !(item.getValue() instanceof Double)) throw new Error("unknown data type");
+                Transaction transaction = (Transaction) item.getKey();
+                Double balance = (Double) item.getValue();
+
+                setLineItemPropertyViews( listLineItem, transaction );
+                setLineItemAlert( listLineItem, transaction, balance );
+
+                TextView balanceView = listLineItem.findViewById( R.id.balance_value );
+                if(balanceView != null) balanceView.setText( formatUtility.formatCurrency( balance ));
+
+                initializeCardLayout( listLineItem, transaction );
+                initializeCardButtons( listLineItem, transaction );
+
+                listLineItem.setOnClickListener( this::toggleCardVisibility );
+                listView.addView( listLineItem );
+            }
+        }
+
+        else throw new Error("unknown list data type");
+
+    }
+
+    void buildPeriodListView(ViewGroup periodListView, int periodItemLayout, Object dataObject){
+        Object listData;
+
+
+        if(dataObject instanceof Integer){
+            Integer typeInt = (Integer) dataObject;
+            if( typeInt == R.string.balancesheet_projections ) listData = budgetModel.getProjectionsWithBalancesByPeriod();
+            //else if( typeInt == R.string.records_by_period ) listData = budgetModel.getRecordsByPeriod();
+            else throw new Error("unknown data type resorce identifier");
+
+        } else listData = dataObject;
+
+
+        if( listData instanceof List){
+            List<?> listDataSet = (List) listData;
+            for( Object item : listDataSet){
+                ViewGroup periodItemView;
+                Object[] periodData;
+                if( !(item instanceof Object[]) ) throw new Error("unknown data type");
+                else periodData = (Object[]) item;
+
+                LocalDate periodStartDate;
+                List periodBalanceData;
+                Map periodTransactionsWithBalance;
+
+                if( !(periodData[0] instanceof LocalDate) || !(periodData[1] instanceof List) || !(periodData[2] instanceof Map)) throw new Error( "unknown data type" );
+                else {
+                    periodStartDate = (LocalDate)periodData[0];
+                    periodBalanceData = (List)periodData[1];
+                    periodTransactionsWithBalance = (Map)periodData[2];
+                }
+
+                periodItemView = (ViewGroup) View.inflate( this.context, periodItemLayout, null );
+                setPeriodItemHeader( periodItemView.findViewById( R.id.period_header ), periodStartDate );
+                buildTransactionListView( periodItemView.findViewById( R.id.period_projection_list ), R.layout.transaction_list_item_with_balance, periodTransactionsWithBalance);
+                setPeriodItemBalances( periodItemView, periodBalanceData );
+
+
+                periodItemView.findViewById( R.id.period_projection_list ).setVisibility( VISIBLE );
+                periodItemView.findViewById( R.id.period_list_item_balances ).setVisibility( GONE );
+                periodItemView.setOnClickListener( v -> {
+                    View dataList = v.findViewById( R.id.period_projection_list );
+                    View balanceList = v.findViewById( R.id.period_list_item_balances );
+                    if(dataList.getVisibility() != VISIBLE){
+                        dataList.setVisibility( VISIBLE );
+                        balanceList.setVisibility( GONE );
+                    } else {
+                        dataList.setVisibility( GONE );
+                        balanceList.setVisibility( VISIBLE );
+                    }
+                } );
+                periodListView.addView( periodItemView );
+            }
+        } else throw new Error("unknown list data type");
+
+    }
+
+
+
+    private void setPeriodItemHeader(ViewGroup periodHeader, LocalDate periodBeginDate){
+        TextView periodDateView = periodHeader.findViewById( R.id.projection_period_header_date );
+        periodDateView.setText( periodBeginDate.format( DateTimeFormatter.ofPattern( "MMMM yyyy" ) ) );
+
+    }
+
+    private void setPeriodItemBalances(ViewGroup periodItem, List<Double> periodBalances){
+        Double initialBal = periodBalances.get(0);
+        Double endBal = periodBalances.get(3);
+        Double income = periodBalances.get(1);
+        Double expense = periodBalances.get(2);
+
+
+        TextView startOfPeriodBalance = periodItem.findViewById( R.id.projection_period_header_initial_balance );
+//                if(initialBal < 0) startOfPeriodBalance.setTextAppearance( R.style.balance_amount_negative );
+//                else startOfPeriodBalance.setTextAppearance( R.style.balance_amount_not_negative );
+        startOfPeriodBalance.setText( formatUtility.formatCurrency( initialBal ) );
+
+        TextView endOfPeriodBalance = periodItem.findViewById( R.id.projection_period_header_ending_balance );
+        if(endBal < 0) endOfPeriodBalance.setTextColor( this.context.getColor( R.color.colorCurrencyNegative ));
+        else endOfPeriodBalance.setTextColor( this.context.getColor( R.color.colorCurrencyNotNegative ));
+        endOfPeriodBalance.setText( formatUtility.formatCurrency( endBal ) );
+
+        TextView periodIncome = periodItem.findViewById( R.id.projection_period_header_income);
+        periodIncome.setTextColor( this.context.getColor( R.color.colorCurrencyNotNegative ));
+        periodIncome.setText( "+" + formatUtility.formatCurrency( income ));
+
+        TextView periodExpenses = periodItem.findViewById( R.id.projection_period_header_expense );
+        periodExpenses.setTextColor( this.context.getColor( R.color.colorCurrencyNegative ));
+        periodExpenses.setText( "-" + formatUtility.formatCurrency( expense ));
+
+        TextView netGain = periodItem.findViewById( R.id.projection_period_header_net_gain );
+        TextView netGainLabel = periodItem.findViewById( R.id.projection_period_header_net_gain_label );
+        if(endBal < initialBal){
+            netGainLabel.setText( "Loss" );
+            netGain.setText("-" + formatUtility.formatCurrency( endBal - initialBal ));
+            netGain.setTextColor( this.context.getColor( R.color.colorCurrencyNegative ));
+        } else {
+            netGainLabel.setText( "Gain");
+            netGain.setText("+" + formatUtility.formatCurrency( endBal - initialBal ));
+            netGain.setTextColor( this.context.getColor( R.color.colorCurrencyNotNegative ));
+        }
+    }
+
+    private void setLineItemHeader(ViewGroup listHeader, int layoutResource) {
 
         TextView dateHeader = listHeader.findViewById( R.id.date_value );
         TextView labelHeader = listHeader.findViewById( R.id.label_value );
@@ -62,229 +247,61 @@ public class ViewModel<T extends Transaction> {
 
 //        listHeader.setBackgroundResource( R.drawable.list_header_item );
         listHeader.setBackgroundResource( R.drawable.list_header_item );
-        listView.addView( listHeader );
 
-
-
-        for( T transaction : listData ){
-            ViewGroup listLineItem = (ViewGroup) View.inflate( this.context, R.layout.transaction_list_item, null );
-
-            if(Arrays.stream(listColumns).anyMatch(i -> i == R.string.date_tag)){
-                TextView dateView = listLineItem.findViewById( R.id.date_value );
-
-                LocalDate date = (LocalDate)transaction.getProperty( R.string.date_tag );
-                if(date == null) dateView.setText( "-" );
-                else dateView.setText( formatDate( R.string.date_long_dowmd, date) );
-            }
-
-            if(Arrays.stream(listColumns).anyMatch(i -> i == R.string.label_tag )){
-                TextView labelView = listLineItem.findViewById( R.id.label_value );
-
-                String label = (String) transaction.getProperty( R.string.label_tag );
-                labelView.setText( label );
-            }
-
-            if(Arrays.stream(listColumns).anyMatch(i -> i == R.string.recurrence_tag )){
-
-            }
-
-            if(Arrays.stream(listColumns).anyMatch(i -> i == R.string.amount_tag )){
-                TextView amountView = listLineItem.findViewById( R.id.amount_value );
-
-                amountView.setText( formatCurrency( transaction.getProperty( R.string.amount_tag )) );
-//                if(transaction.getIncomeFlag()) amountView.setTextAppearance( R.style.balance_amount_not_negative );
-//                else amountView.setTextAppearance( R.style.balance_amount_negative );
-            }
-
-            listLineItem.setOnClickListener( view -> toggleTransactionCardView( view, transaction ) );
-            listView.addView( listLineItem );
-        }
-    }
-
-    //builds list view for period balance projections
-    void buildPeriodProjectionListView(ViewGroup listView, ArrayList<Object[]> listData){
-//        LinearLayout listBody = listView.findViewWithTag( "list_body" );
-
-
-        boolean firstPeriodLoaded = false; //using this as a hack to deal with inaccurate income/expense sums on the first period projected
-
-        for(Object listItem : listData){
-            ViewGroup listLineItem = (ViewGroup)LinearLayout.inflate( this.context, R.layout.period_list_item, null );
-
-            Object[] entry = (Object[]) listItem;
-            LocalDate periodBeginDate = (LocalDate) entry[0];
-            ArrayList<Double> periodBalances = (ArrayList<Double>) entry[1];
-            HashMap<T, Double> periodProjections = (HashMap<T, Double>) entry[2];
-            if(periodBeginDate.isAfter( LocalDate.now() )) firstPeriodLoaded = true;
-
-
-            //set period date
-            TextView periodDate = listLineItem.findViewById( R.id.projection_period_header_date );
-            periodDate.setText( periodBeginDate.format( DateTimeFormatter.ofPattern( "MMMM yyyy" ) ) );
-
-            if(!firstPeriodLoaded) {
-//                ((LinearLayout)listLineItem.findViewById( R.id.projection_period_header_balance_layout )).removeAllViewsInLayout();
-//                ((LinearLayout)listLineItem.findViewById( R.id.period_header_expendable_line )).setVisibility( View.GONE );
-                listLineItem.removeView( listLineItem.findViewById( R.id.period_list_item_balances ));
-                listLineItem.findViewById( R.id.period_projection_list ).setVisibility( View.VISIBLE );
-//                listLineItem.setBackground( this.context.getDrawable( android.R.drawable.dialog_holo_light_frame ) );
-
-//                listLineItem.setBackgroundResource( R.drawable.list_item_background_selected );
-            }
-            else {
-                Double initialBal = periodBalances.get(0);
-                Double endBal = periodBalances.get(3);
-                Double income = periodBalances.get(1);
-                Double expense = periodBalances.get(2);
-
-
-                TextView startOfPeriodBalance = listLineItem.findViewById( R.id.projection_period_header_initial_balance );
-//                if(initialBal < 0) startOfPeriodBalance.setTextAppearance( R.style.balance_amount_negative );
-//                else startOfPeriodBalance.setTextAppearance( R.style.balance_amount_not_negative );
-                startOfPeriodBalance.setText( formatCurrency( initialBal ) );
-
-                TextView endOfPeriodBalance = listLineItem.findViewById( R.id.projection_period_header_ending_balance );
-                if(endBal < 0) endOfPeriodBalance.setTextColor( this.context.getColor( R.color.colorCurrencyNegative ));
-                else endOfPeriodBalance.setTextColor( this.context.getColor( R.color.colorCurrencyNotNegative ));
-                endOfPeriodBalance.setText( formatCurrency( endBal ) );
-
-                TextView periodIncome = listLineItem.findViewById( R.id.projection_period_header_income);
-                periodIncome.setTextColor( this.context.getColor( R.color.colorCurrencyNotNegative ));
-                periodIncome.setText( "+" + formatCurrency( income ));
-
-                TextView periodExpenses = listLineItem.findViewById( R.id.projection_period_header_expense );
-                periodExpenses.setTextColor( this.context.getColor( R.color.colorCurrencyNegative ));
-                periodExpenses.setText( "-" + formatCurrency( expense ));
-
-                TextView netGain = listLineItem.findViewById( R.id.projection_period_header_net_gain );
-                TextView netGainLabel = listLineItem.findViewById( R.id.projection_period_header_net_gain_label );
-                if(endBal < initialBal){
-                    netGainLabel.setText( "Loss" );
-                    netGain.setText("-" + formatCurrency( endBal - initialBal ));
-                    netGain.setTextColor( this.context.getColor( R.color.colorCurrencyNegative ));
-                } else {
-                    netGainLabel.setText( "Gain");
-                    netGain.setText("+" + formatCurrency( endBal - initialBal ));
-                    netGain.setTextColor( this.context.getColor( R.color.colorCurrencyNotNegative ));
-                }
-            }
-
-
-
-            buildTransactionWithBalanceListView( listLineItem.findViewById( R.id.period_projection_list ), periodProjections );
-
-            listLineItem.setOnClickListener( v -> {
-                View balancesList = v.findViewById( R.id.period_list_item_balances );
-                View transactionsList = v.findViewById( R.id.period_projection_list );
-
-                if(transactionsList == null){}
-                else if(transactionsList.getVisibility() != View.VISIBLE) transactionsList.setVisibility( View.VISIBLE );
-                else transactionsList.setVisibility( GONE );
-
-                if(balancesList == null){}
-                else if(balancesList.getVisibility() != View.VISIBLE) balancesList.setVisibility( View.VISIBLE );
-                else balancesList.setVisibility( GONE );
-
-            } );
-
-            listView.addView( listLineItem );
-        }
-    }
-
-    //builds list view for projected transactions with resulting balance
-    private void buildTransactionWithBalanceListView(ViewGroup listView, HashMap<T, Double> listData){
-
-        ViewGroup listHeader = (ViewGroup) View.inflate(this.context, R.layout.transaction_list_item_with_balance, null);
-        TextView dateHeader = listHeader.findViewById( R.id.date_value );
-        TextView labelHeader = listHeader.findViewById( R.id.label_value );
-        TextView amountHeader = listHeader.findViewById( R.id.amount_value );
         TextView balanceHeader = listHeader.findViewById( R.id.balance_value );
+        if(balanceHeader != null) balanceHeader.setText( "Bal" );
 
-        dateHeader.setText("Date");
-        labelHeader.setText("Label");
-        amountHeader.setText("Amt");
-        balanceHeader.setText( "Bal" );
+    }
 
-//        dateHeader.setTextAppearance( R.style.period_list_item_header );
-//        labelHeader.setTextAppearance( R.style.period_list_item_header );
-//        amountHeader.setTextAppearance( R.style.period_list_item_header );
-//        balanceHeader.setTextAppearance( R.style.period_list_item_header );
+    private void setLineItemPropertyViews(ViewGroup listLineItem, Transaction transaction){
 
-        listHeader.setBackgroundResource( R.drawable.list_header_item );
-        listView.addView( listHeader );
-
-
-        for(Map.Entry<T, Double> listItem : listData.entrySet()){
-            ViewGroup listLineItem = (ViewGroup) View.inflate( this.context, R.layout.transaction_list_item_with_balance, null );
-
-            T transaction = listItem.getKey();
-            Double balance = listItem.getValue();
-
-
-//            set reconcile action button
-//            Button reconcileTransactionButton = listLineItem.findViewById( R.id.reconcile_transaction_button );
-//            if(( (LocalDate) transaction.getProperty( R.string.date_tag )).isBefore( LocalDate.now().plusDays( 1 ) )){
-//                reconcileTransactionButton.setVisibility( View.VISIBLE );
-//                reconcileTransactionButton.setOnClickListener( v -> reconcileTransaction( transaction ) );
-//            } else reconcileTransactionButton.setVisibility( View.GONE );
-
-            //set date column
-            TextView dateValue = listLineItem.findViewById( R.id.date_value );
+        //set date column
+        TextView dateValue = listLineItem.findViewById( R.id.date_value );
+        if(dateValue != null){
             LocalDate date = (LocalDate)transaction.getProperty( R.string.date_tag );
-            dateValue.setText( formatDate( R.string.date_string_dayofweekanddate, date));
+            dateValue.setText( formatUtility.formatDate( R.string.date_string_dayofweekanddate, date));
+        }
 
-
-            //set label column
-            TextView labelValue = listLineItem.findViewById( R.id.label_value );
+        //set label column
+        TextView labelValue = listLineItem.findViewById( R.id.label_value );
+        if(labelValue != null)
             labelValue.setText( ((String)transaction.getProperty( R.string.label_tag )) );
 
-
-            //set amount column
-            TextView amount = listLineItem.findViewById( R.id.amount_value );
+        //set amount column
+        TextView amount = listLineItem.findViewById( R.id.amount_value );
+        if(amount != null){
             if(transaction.getIncomeFlag()) {
-                amount.setText( "+ " + formatCurrency( transaction.getProperty( R.string.amount_tag )));
+                amount.setText( "+ " + formatUtility.formatCurrency( transaction.getProperty( R.string.amount_tag )));
 //                amount.setTextAppearance( R.style.balance_amount_not_negative );
             }
             else {
-                amount.setText( "- " + formatCurrency(transaction.getProperty( R.string.amount_tag )));
+                amount.setText( "- " + formatUtility.formatCurrency(transaction.getProperty( R.string.amount_tag )));
 //                amount.setTextAppearance( R.style.balance_amount_negative );
             }
+        }
 
+    }
 
-            //set balance column
-            TextView balanceView = listLineItem.findViewById( R.id.balance_value );
-            balanceView.setText( formatCurrency( balance ));
-//            if(balance >= 0)balanceView.setTextAppearance( R.style.balance_amount_not_negative );
-//            else balanceView.setTextAppearance( R.style.balance_amount_negative );
+    private void setLineItemAlert(ViewGroup listLineItem, Transaction transaction, Double balance){
+        ImageView alert = listLineItem.findViewById( R.id.alert_indicator );
+        if( balance <= 0.0){
+            //set alert for balance below threshold
+            alert.setImageDrawable( this.context.getDrawable( android.R.drawable.ic_dialog_alert ) );
+            alert.setBackgroundColor( this.context.getColor( R.color.colorCurrencyNegative ) );
+        }else if(balance < budgetModel.getThresholdValue()){
+            //set alert for balance below zero
+            alert.setImageDrawable( this.context.getDrawable( android.R.drawable.ic_dialog_alert ) );
+            alert.setBackgroundColor( this.context.getColor( R.color.colorCurrencyNotNegative ) );
+        }
 
-
-
-
-            ImageView alert = listLineItem.findViewById( R.id.alert_indicator );
-            if( balance <= 0.0){
-                //set alert for balance below threshold
-                alert.setImageDrawable( this.context.getDrawable( android.R.drawable.ic_dialog_alert ) );
-                alert.setBackgroundColor( this.context.getColor( R.color.colorCurrencyNegative ) );
-            }else if(balance < budgetModel.getThresholdValue()){
-                //set alert for balance below zero
-                alert.setImageDrawable( this.context.getDrawable( android.R.drawable.ic_dialog_alert ) );
-                alert.setBackgroundColor( this.context.getColor( R.color.colorCurrencyNotNegative ) );
-            }
-
-            if(date.isBefore( LocalDate.now().plusDays( 1 ) )){
-                //set visual que that item is reconcilable
-                alert.setImageDrawable( this.context.getDrawable( android.R.drawable.ic_input_add ));
-            }
-
-
-            listLineItem.setOnClickListener( view -> toggleTransactionCardView( view, transaction ) );
-
-            listView.addView( listLineItem );
+        LocalDate date = (LocalDate) transaction.getProperty( R.string.date_tag );
+        if(date.isBefore( LocalDate.now().plusDays( 1 ) )){
+            //set visual que that item is reconcilable
+            alert.setImageDrawable( this.context.getDrawable( android.R.drawable.ic_input_add ));
         }
     }
 
-
-    void setTransactionPropertyViews(ViewGroup view, Transaction transaction, boolean isEditable){
+    private void setCardLayoutPropertyViews(ViewGroup view, Transaction transaction, boolean isEditable){
 
         View labelEditor = view.findViewById( R.id.label_value );
         if(labelEditor != null){
@@ -311,7 +328,7 @@ public class ViewModel<T extends Transaction> {
 //                amount.setTextAppearance( R.style.property_value_cell_editor );
 
             } else{
-                ((TextView) amount).setText( formatCurrency( amountValue ) );
+                ((TextView) amount).setText( formatUtility.formatCurrency( amountValue ) );
                 amount.setEnabled( false );
 //                amount.setTextAppearance( R.style.property_value_cell_display );
             }
@@ -335,19 +352,19 @@ public class ViewModel<T extends Transaction> {
         TextView scheduledDateView = (TextView) view.findViewById( R.id.scheduled_date_value );
         if(scheduledDateView != null) {
             LocalDate scheduledDate = ((ProjectedTransaction)transaction).getScheduledProjectionDate();
-            scheduledDateView.setText( formatDate( R.string.date_string_short_md, scheduledDate ));
+            scheduledDateView.setText( formatUtility.formatDate( R.string.date_string_short_md, scheduledDate ));
         }
 
         TextView scheduledAmountView = (TextView) view.findViewById( R.id.scheduled_amount_value );
         if(scheduledAmountView != null) {
             Double scheduledAmount = ((ProjectedTransaction)transaction).getScheduledAmount();
-            scheduledAmountView.setText( formatCurrency( scheduledAmount ));
+            scheduledAmountView.setText( formatUtility.formatCurrency( scheduledAmount ));
         }
 
         View dateView = view.findViewById( R.id.date_value );
         if(dateView != null){
             LocalDate date = (LocalDate) transaction.getProperty( R.string.date_tag );
-            String dateString = formatDate(R.string.date_string_long_mdy, date);
+            String dateString = formatUtility.formatDate(R.string.date_string_long_mdy, date);
 
             if(date == null) {
                 dateString = "unscheduled";
@@ -372,8 +389,9 @@ public class ViewModel<T extends Transaction> {
                         newDate[0] = LocalDate.of( year, monthOfYear+1, dayOfMonth );
                     } );
                     pickerDialog.setButton( DatePickerDialog.BUTTON_POSITIVE, "OK", (dialog, which)->{
-                        dateEditorButton.setText( formatDate( R.string.date_string_long_mdy, newDate[0]));
-                        dateEditorButton.setTag(R.string.date_tag, newDate[0] );
+                        Button dateButton = view.findViewById( R.id.date_value );
+                        dateButton.setText( formatUtility.formatDate( R.string.date_string_long_mdy, newDate[0]));
+                        dateButton.setTag(R.string.date_tag, newDate[0] );
                         dialog.dismiss();
                     } );
 
@@ -382,7 +400,7 @@ public class ViewModel<T extends Transaction> {
                 } );
 
             }else {
-                ((TextView) dateView).setText( formatDate(R.string.date_string_long_mdy, date) );
+                ((TextView) dateView).setText( formatUtility.formatDate(R.string.date_string_long_mdy, date) );
                 dateView.setTag(R.string.date_tag, date);
                 dateView.setEnabled( false );
 //                dateEditorButton.setTextAppearance( R.style.property_value_cell_editor );
@@ -390,256 +408,13 @@ public class ViewModel<T extends Transaction> {
         }
 
         Switch recurrenceSwitch = (Switch) view.findViewById( R.id.recurrence_switch );
-        if(recurrenceSwitch != null) setRecurrencePropertyViews( view, transaction, isEditable, recurrenceSwitch );
-
-    }
-
-    private void setRecurrencePropertyViews(ViewGroup view, Transaction transaction, boolean isEditable, Switch recurrenceSwitch) {
-        String[] recurrenceValues = transaction.getProperty( R.string.recurrence_tag ).toString().split( "-" );
-        int recurrenceBit = Integer.parseInt( recurrenceValues[0] );
-        LocalDate date = (LocalDate) transaction.getProperty( R.string.date_tag );
-
-
-        //set recurrenceSwitch values and handlers
-        if(recurrenceBit == 1) recurrenceSwitch.setChecked( true );
-        else recurrenceSwitch.setChecked( false );
-        setRecurrencePropertyView(view, isEditable, recurrenceBit);
-        recurrenceSwitch.setOnCheckedChangeListener( (buttonView, isChecked) -> {
-            buttonView.setChecked( isChecked );
-            if(isChecked) setRecurrencePropertyView( view, isEditable, 1 );
-            else setRecurrencePropertyView( view, isEditable, 0 );
-
-        });
-
-        TextView readableRecurrence = view.findViewById( R.id.readable_recurrence_value );
-        readableRecurrence.setText( formatRecurrenceValue(recurrenceValues) );
-
-        //set frequency values and handlers
-        EditText frequencyEditor = view.findViewById( R.id.recurrence_frequency_value );
-        if(recurrenceValues[1].contentEquals( "0" )) frequencyEditor.setText("");
-        else frequencyEditor.setText( recurrenceValues[1]);
-
-
-        //set onDay Type
-        Spinner onDaySpinner = view.findViewById( R.id.on_day_type_selector );
-        int periodValueBit = Integer.parseInt( recurrenceValues[2]);
-        if(onDaySpinner != null){
-            if(periodValueBit == 0 || periodValueBit == 1) onDaySpinner.setVisibility( GONE );
-            else if(periodValueBit == 2){
-                String[] onDayTypeWeekday = this.context.getResources().getStringArray( R.array.days_of_week_options );
-                ArrayAdapter<String> adapter1 = new ArrayAdapter<>( this.context, android.R.layout.simple_list_item_1, onDayTypeWeekday );
-                onDaySpinner.setAdapter( adapter1 );
-                onDaySpinner.setEnabled( false );
-                onDaySpinner.setSelection( date.getDayOfWeek().getValue() );
-            }
-            else if(periodValueBit == 3){
-                String[] onDayTypeDayOfMonth = getOnDayOfMonthList(date);
-                ArrayAdapter<String> adapter1 = new ArrayAdapter<>( this.context, android.R.layout.simple_list_item_1, onDayTypeDayOfMonth );
-                onDaySpinner.setAdapter( adapter1 );
-                onDaySpinner.setSelection( 0 );
-
-            }
-            else if(periodValueBit == 4){
-                String[] onDayTypeDayOfYear = new String[]{};
-                ArrayAdapter<String> adapter1 = new ArrayAdapter<>( this.context, android.R.layout.simple_list_item_1, onDayTypeDayOfYear );
-                onDaySpinner.setAdapter( adapter1 );
-                onDaySpinner.setSelection( 0 );
-            }
-        }
-        //set period values and handlers
-        //      set the selected item in spinner, set visibility and content of onType Listener (setting onType Listener will require using the date to reset the list)
-        Spinner periodSpinner = view.findViewById( R.id.recurrence_period_value );
-        String[] periodList = this.context.getResources().getStringArray( R.array.date_periods );
-        ArrayAdapter<String> adapter = new ArrayAdapter<>( ViewModel.this.context, android.R.layout.simple_list_item_1, periodList );
-        adapter.setDropDownViewResource( android.R.layout.simple_list_item_1 );
-        periodSpinner.setAdapter( adapter );
-        periodSpinner.setSelection( periodValueBit );
-
-        //adjust onDay Spinner based on period
-        setOnDaySpinner( date, onDaySpinner, periodValueBit );
-
-
-        periodSpinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //when I change the selected Item I need to:
-                //  determine the display of the onDay type: both visibility and content
-                Spinner onDaySpinnerParent = (Spinner) parent;
-                onDaySpinner.setEnabled( true );
-                onDaySpinner.setVisibility( View.VISIBLE );
-                if(parent != null){
-                    if(position == 0 ) {
-                        LinearLayout onDayLayout = ViewModel.this.context.findViewById( R.id.set_recurrence_onDateType_layout );
-                        if(onDayLayout != null) onDayLayout.setVisibility( GONE );
-                    }
-                    else if(position == 1){
-                        String[] onDayTypeWeekday = ViewModel.this.context.getResources().getStringArray( R.array.days_of_week_options );
-                        ArrayAdapter<String> adapter1 = new ArrayAdapter<>( ViewModel.this.context, android.R.layout.simple_list_item_1, onDayTypeWeekday );
-                        onDaySpinner.setAdapter( adapter1 );
-                        onDaySpinner.setEnabled( false );
-                        onDaySpinner.setSelection( date.getDayOfWeek().getValue() );
-                    }
-                    else if(position == 2){
-                        String[] onDayTypeDayOfMonth = getOnDayOfMonthList(date);
-                        ArrayAdapter<String> adapter1 = new ArrayAdapter<>( ViewModel.this.context, android.R.layout.simple_list_item_1, onDayTypeDayOfMonth );
-                        onDaySpinner.setAdapter( adapter1 );
-                        onDaySpinner.setSelection( 0 );
-                    }
-                    else if(position == 3){
-                        String[] onDayTypeDayOfYear = new String[]{};
-                        ArrayAdapter<String> adapter1 = new ArrayAdapter<>( ViewModel.this.context, android.R.layout.simple_list_item_1, onDayTypeDayOfYear );
-                        onDaySpinner.setAdapter( adapter1 );
-                        onDaySpinner.setSelection( 0 );
-                    }
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        } );
-
-        //set recurrence date and handlers
-        //      set the value in the display, and reset the list and selection of the onDay Type
-        Button dateButton = view.findViewById( R.id.recurrence_date_value );
-        dateButton.setText(formatDate( R.string.date_string_long_mdy, date ));
-        dateButton.setTag(R.string.date_tag, date);
-
-        dateButton.setOnClickListener( dateButtonView -> {
-            final LocalDate[] newDate = {date};
-            DatePickerDialog pickerDialog = new DatePickerDialog( ViewModel.this.context );
-            DatePicker picker = pickerDialog.getDatePicker();
-
-            picker.init( newDate[0].getYear(), newDate[0].getMonthValue()-1, newDate[0].getDayOfMonth(), (button_view, year, monthOfYear, dayOfMonth) -> {
-                newDate[0] = LocalDate.of( year, monthOfYear+1, dayOfMonth );
-            } );
-            pickerDialog.setButton( DatePickerDialog.BUTTON_POSITIVE, "OK", (dialog, which)->{
-                dateButton.setText( newDate[0].format( DateTimeFormatter.ofPattern( "MMMM dd, yyyy" ) ));
-                dateButton.setTag(R.string.date_tag, newDate[0] );
-
-                int periodPos = ((Spinner)view.findViewById( R.id.recurrence_period_value )).getSelectedItemPosition();
-                setOnDaySpinner( newDate[0], onDaySpinner, periodPos );
-
-                dialog.dismiss();
-            } );
-
-            pickerDialog.setContentView( picker );
-            pickerDialog.show();
-        } );
-
-
-
-
-
-
-//        //set end parameters... May hold off until a future update. not crucial and this is taking forever
-//        Switch setEndParametersSwitch = view.findViewById( R.id.set_end_parameters_switch );
-//        setEndParametersSwitch.setChecked( Integer.parseInt(recurrenceValues[4]) == 1 );
-////            setEndParametersSwitch.setOnCheckedChangeListener( getRecurringStopSwitchChangeListener(view, transaction, isEditable) );
-//
-//        EditText stopAfterNumOccurrences = view.findViewById( R.id.after_number_of_occurrences_value );
-//        Button stopAfterDate = view.findViewById( R.id.after_date_value );
-//        EditText stopAfterTotal = view.findViewById( R.id.when_total_reaches_amount_value );
-
-
-        //set projections list dropdown
-//        ViewGroup projections = (ViewGroup) view.findViewById( R.id.future_occurrences_list );
-//        if(projections != null) {
-//            ArrayList<T> storedProjections = budgetModel.getProjections( transaction );
-//            int[] columns = new int[]{R.string.date_tag, R.string.amount_tag};
-//            buildListView(projections.findViewById( R.id.future_occurrences_list ), storedProjections, columns);
-//
-//            projections.findViewById( R.id.clear_projections_button ).setOnClickListener( v -> {
-//                transaction.setClearStoredProjectionsFlag(true);
-//                budgetModel.update( transaction );
-//                this.context.recreate();
-//            } );
-//        }
-
-    }
-
-    private void setOnDaySpinner(LocalDate date, Spinner onDaySpinner, int periodValueBit) {
-        if(onDaySpinner != null){
-            if(periodValueBit == 0 || periodValueBit == 1) onDaySpinner.setVisibility( GONE );
-            else if(periodValueBit == 1){
-                String[] onDayTypeWeekday = this.context.getResources().getStringArray( R.array.days_of_week_options );
-                ArrayAdapter<String> adapter1 = new ArrayAdapter<>( this.context, android.R.layout.simple_list_item_1, onDayTypeWeekday );
-                onDaySpinner.setAdapter( adapter1 );
-                onDaySpinner.setEnabled( false );
-                onDaySpinner.setSelection( date.getDayOfWeek().getValue() );
-            }
-            else if(periodValueBit == 2){
-                String[] onDayTypeDayOfMonth = getOnDayOfMonthList(date);
-                ArrayAdapter<String> adapter1 = new ArrayAdapter<>( this.context, android.R.layout.simple_list_item_1, onDayTypeDayOfMonth );
-                onDaySpinner.setAdapter( adapter1 );
-                onDaySpinner.setSelection( 0 );
-
-            }
-            else if(periodValueBit == 3){
-                String[] onDayTypeDayOfYear = new String[]{};
-                ArrayAdapter<String> adapter1 = new ArrayAdapter<>( this.context, android.R.layout.simple_list_item_1, onDayTypeDayOfYear );
-                onDaySpinner.setAdapter( adapter1 );
-                onDaySpinner.setSelection( 0 );
-            }
-        }
-
-    }
-
-    private String[] getOnDayOfMonthList(LocalDate date) {
-        String formattedDateOfMonth = formatDate(R.string.date_string_dateofmonth, date);
-        String dateOfMonth = formattedDateOfMonth + " of each month";
-
-        String formattedDayOfWeekInMonth = formatDate(R.string.date_string_dayofweekinmonth, date);
-        String dayOfWeekInMonth = formattedDayOfWeekInMonth + " of each month";
-
-        String[] dayOfArray = new String[]{dateOfMonth, dayOfWeekInMonth};
-
-        return dayOfArray;
-    }
-
-    private void setRecurrencePropertyView(View view, boolean isEditable, int recurrenceBit) {
-        if(recurrenceBit == 1) { //repeats
-            view.findViewById( R.id.property_layout_recurrence_editor ).setVisibility( View.VISIBLE );
-            view.findViewById( R.id.property_layout_date ).setVisibility( GONE );
-
-
-            if(isEditable) {
-                //repeats and is editable: show the recurrence editor with values set
-                view.findViewById( R.id.property_layout_recurrence_editor ).setVisibility( View.VISIBLE );
-                view.findViewById( R.id.property_layout_recurrence_switch ).setVisibility( View.VISIBLE );
-                view.findViewById( R.id.property_layout_recurrence_readable ).setVisibility( GONE );
-                view.findViewById( R.id.property_layout_recurrence_projections ).setVisibility( GONE );
-
-            } else {
-                //repeats and is not editable: show readable text representation of the recurrence value and next scheduled date
-
-                view.findViewById( R.id.property_layout_recurrence_switch ).setVisibility( GONE );
-                view.findViewById( R.id.property_layout_recurrence_editor ).setVisibility( GONE );
-                view.findViewById( R.id.property_layout_recurrence_readable ).setVisibility( View.VISIBLE );
-                view.findViewById( R.id.property_layout_recurrence_projections ).setVisibility( View.VISIBLE );
-            }
-        }
-        else { //does not repeat
-            view.findViewById( R.id.property_layout_recurrence_editor ).setVisibility( GONE );
-            view.findViewById( R.id.property_layout_recurrence_projections ).setVisibility( GONE );
-            view.findViewById( R.id.property_layout_date ).setVisibility( View.VISIBLE );
-
-
-            if(isEditable) {
-                //does not repeat, but can be edited: need to load the recurrence editor and remove scheduled date
-                view.findViewById( R.id.property_layout_recurrence_switch ).setVisibility( View.VISIBLE );
-            }
-            else{
-                //does not repeat and cannot edit: just show the date and remove recurrence editor
-                //remove recurrenceSwitch
-                view.findViewById( R.id.property_layout_recurrence_switch ).setVisibility( GONE );
-            }
-
+        if(recurrenceSwitch != null) {
+            RecurrenceViewBuilder recurrenceViewBuilder = new RecurrenceViewBuilder( this.context );
+            recurrenceViewBuilder.setRecurrencePropertyViews( view, transaction, isEditable, recurrenceSwitch );
         }
     }
 
-    private void updateTransactionFromView(ViewGroup editorView, Transaction transaction){
+    private void updateTransactionFromEditorView(ViewGroup editorView, Transaction transaction){
 
         Button dateValue = (Button) editorView.findViewById( R.id.date_value );
         Object tagDate = dateValue.getTag(R.string.date_tag);
@@ -660,6 +435,12 @@ public class ViewModel<T extends Transaction> {
 
             if(recurranceValue.isChecked()){
                 recurrenceBit = "1";
+
+                Button recurrenceDateButton = editorView.findViewById( R.id.recurrence_date_value );
+                if(recurrenceDateButton != null) {
+                    Object recurrenceTagDate = recurrenceDateButton.getTag( R.string.date_tag );
+                    transaction.setProperty( R.string.date_tag, recurrenceTagDate );
+                }
 
                 EditText frequencyValueView = editorView.findViewById( R.id.recurrence_frequency_value );
                 frequency = String.valueOf(frequencyValueView.getText());
@@ -708,51 +489,35 @@ public class ViewModel<T extends Transaction> {
 
     }
 
-    private void reconcileTransaction(T transaction) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder( this.context );
-        LinearLayout reconcileView = (LinearLayout) LinearLayout.inflate( this.context, R.layout.layout_reconcile_projection, null );
+    private void toggleCardVisibility(View view) {
+        ViewGroup listV = view.findViewById( R.id.period_projection_list );
+        ViewGroup cardV = view.findViewById( R.id.card_view );
+        ViewGroup buttonsV = view.findViewById( R.id.card_buttons );
 
-        setTransactionPropertyViews( reconcileView, transaction, true );
-
-        dialogBuilder.setNegativeButton( "Cancel", (dialog, which) -> dialog.dismiss() );
-        dialogBuilder.setPositiveButton( "Create Record", (dialog, which) -> {
-            updateTransactionFromView( reconcileView, transaction );
-            budgetModel.reconcile(transaction);
-            dialog.dismiss();
-            this.context.recreate();
-        } );
-
-        dialogBuilder.setView( reconcileView );
-        dialogBuilder.show();
+        if(cardV.getVisibility() != VISIBLE){
+            cardV.setVisibility( VISIBLE );
+            buttonsV.setVisibility( VISIBLE );
+            if(listV != null) listV.setVisibility( GONE );
+        } else {
+            cardV.setVisibility( GONE );
+            buttonsV.setVisibility( GONE );
+            if(listV != null) listV.setVisibility( VISIBLE );
+        }
     }
 
-    private void toggleTransactionCardView(View view, T transaction) {
-        FrameLayout cardDrawer = view.findViewById( R.id.card_view );
+    private void initializeCardButtons(ViewGroup view, Transaction transaction){
+        ViewGroup buttonsView = view.findViewById( R.id.card_buttons );
+        ViewGroup cardDrawer = view.findViewById( R.id.card_view );
 
-        RelativeLayout buttons = view.findViewById( R.id.card_buttons );
-        Button modifyButton = buttons.findViewById( R.id.modify_transaction_button );
-        Button resetProjectionButton = buttons.findViewById( R.id.reset_projections_button );
-        Button updateButton = buttons.findViewById( R.id.editor_update_button );
-        Button cancelButton = buttons.findViewById( R.id.editor_cancel_button );
-        Button deleteButton = buttons.findViewById( R.id.editor_delete_button );
-        Button recordTransactionButton = buttons.findViewById( R.id.record_transaction_button );
-
-
-        //inflate the card view if not already created
-        if(!(cardDrawer.getChildCount() > 0)){
-            ViewGroup cardViewLayout;
-
-            if(transaction instanceof ProjectedTransaction) cardViewLayout = (ViewGroup) ViewGroup.inflate( this.context, R.layout.layout_projection, null );
-            else if(transaction instanceof RecordedTransaction) cardViewLayout = (ViewGroup) ViewGroup.inflate( this.context, R.layout.layout_record, null );
-            else cardViewLayout = (ViewGroup) ViewGroup.inflate( this.context, R.layout.layout_transaction, null );
-
-            setTransactionPropertyViews( cardViewLayout, transaction, false );
-            cardDrawer.addView( cardViewLayout );
-        }
-
+        Button modifyButton = buttonsView.findViewById( R.id.modify_transaction_button );
+        Button resetProjectionButton = buttonsView.findViewById( R.id.reset_projections_button );
+        Button updateButton = buttonsView.findViewById( R.id.editor_update_button );
+        Button cancelButton = buttonsView.findViewById( R.id.editor_cancel_button );
+        Button deleteButton = buttonsView.findViewById( R.id.editor_delete_button );
+        Button recordTransactionButton = buttonsView.findViewById( R.id.record_transaction_button );
 
         if(modifyButton != null) modifyButton.setOnClickListener( v -> {
-            setTransactionPropertyViews( cardDrawer, transaction, true );
+            setCardLayoutPropertyViews( cardDrawer, transaction, true );
 
             cancelButton.setVisibility( View.VISIBLE );
             modifyButton.setVisibility( GONE );
@@ -772,13 +537,14 @@ public class ViewModel<T extends Transaction> {
         if(resetProjectionButton != null) resetProjectionButton.setOnClickListener( v-> {} );
 
         if(updateButton != null) updateButton.setOnClickListener( v -> {
-            updateTransactionFromView( cardDrawer, transaction );
+            updateTransactionFromEditorView( view.findViewById( R.id.card_view ), transaction );
             budgetModel.update( transaction );
+
             this.context.recreate();
         } );
 
         if(cancelButton != null) cancelButton.setOnClickListener( v-> {
-            setTransactionPropertyViews( cardDrawer, transaction, false );
+            setCardLayoutPropertyViews( cardDrawer, transaction, false );
 
             modifyButton.setVisibility( View.VISIBLE );
             updateButton.setVisibility( GONE );
@@ -793,75 +559,22 @@ public class ViewModel<T extends Transaction> {
             this.context.recreate();
         } );
 
-        if(cardDrawer.getVisibility() != View.VISIBLE) {
-            setTransactionPropertyViews( cardDrawer, transaction, false );
-            cardDrawer.setVisibility( View.VISIBLE );
-            buttons.setVisibility( View.VISIBLE );
-            modifyButton.setVisibility( View.VISIBLE );
-            cancelButton.setVisibility( GONE );
-            updateButton.setVisibility( GONE );
-            resetProjectionButton.setVisibility( GONE );
-            deleteButton.setVisibility( GONE );
-            recordTransactionButton.setVisibility( GONE );
+        if(recordTransactionButton != null) recordTransactionButton.setOnClickListener( v -> {
+            budgetModel.reconcile(transaction);
+            this.context.recreate();
+        } );
 
-            if(((LocalDate) transaction.getProperty( R.string.date_tag )).isBefore( LocalDate.now().plusDays( 1 ) )
-                    && !(transaction instanceof RecordedTransaction))
-                recordTransactionButton.setVisibility( View.VISIBLE );
-
-            view.setBackgroundResource( R.drawable.list_item_background_selected );
-        }
-        else {
-            cardDrawer.setVisibility( GONE );
-            buttons.setVisibility( GONE );
-
-            view.setBackgroundResource( R.drawable.list_item_background );
-        }
     }
 
+    private void initializeCardLayout(ViewGroup view, Transaction transaction){
+        ViewGroup cardViewLayout;
 
-    String formatCurrency(Object currency){ return "$" + String.format( "%.0f", currency ); }
-    String formatDate(int return_type, LocalDate date) {
+        if(transaction instanceof ProjectedTransaction) cardViewLayout = (ViewGroup) ViewGroup.inflate( this.context, R.layout.layout_projection, null );
+        else if(transaction instanceof RecordedTransaction) cardViewLayout = (ViewGroup) ViewGroup.inflate( this.context, R.layout.layout_record, null );
+        else cardViewLayout = (ViewGroup) ViewGroup.inflate( this.context, R.layout.layout_transaction, null );
 
-        if(return_type == R.string.date_string_long_mdy){
-            return date.format( DateTimeFormatter.ofPattern( "eee MMMM dd, yyyy" ) );
-        } 
-        else if(return_type == R.string.date_string_short_md){
-            return date.format( DateTimeFormatter.ofPattern( "MMM d" ) );
-        }
-        else if(return_type == R.string.date_long_dowmd) return date.format( DateTimeFormatter.ofPattern( "eee MMM d"  ));
-        else if(return_type == R.string.date_string_dayofweekanddate) return date.format(DateTimeFormatter.ofPattern( "d - eee" ));
+        setCardLayoutPropertyViews( cardViewLayout, transaction, false );
 
-        else if(return_type == R.string.date_string_dayofweekinmonth){
-            int dateOfMonth = date.getDayOfMonth();
-            String dayOfWeek = date.getDayOfWeek().toString();
-            int weekCounter = 1;
-            int dateIndex = dateOfMonth;
-
-            while(dateIndex > 7){
-                dateIndex = dateIndex -7;
-                weekCounter++;
-            }
-
-            if(weekCounter == 1) return "First " + dayOfWeek;
-            else if(weekCounter == 2) return "Second " + dayOfWeek;
-            else if(weekCounter == 3) return "Third " + dayOfWeek;
-            else if(weekCounter == 4) return "Fourth " + dayOfWeek;
-            else return "Last " + dayOfWeek;
-        }
-        else if(return_type == R.string.date_string_dateofmonth){
-            int dateOfMonth = date.getDayOfMonth();
-            if(dateOfMonth == 1) return "1st";
-            else if(dateOfMonth == 2) return "2nd";
-            else if(dateOfMonth == 3) return "3rd";
-            else return String.valueOf( dateOfMonth ) + "th";
-
-
-        }
-        else return date.format( DateTimeFormatter.BASIC_ISO_DATE );
+        ((ViewGroup)view.findViewById( R.id.card_view )).addView( cardViewLayout );
     }
-    String formatRecurrenceValue(String[] recurrenceValues) {
-
-        return "readable recurrence";
-    }
-
 }
