@@ -401,6 +401,7 @@ public class StorageControl {
             UUID childID = UUID.fromString( childElement.getAttribute( "record_id" ) );
             UUID recordId = recordedTransaction.getRecordId();
             if(childID.compareTo(recordId) == 0) recordElement = childElement;
+            index++;
         }
 
         if(recordElement == null) {
