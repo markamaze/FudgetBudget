@@ -1,8 +1,5 @@
 package com.fudgetbudget;
 
-import android.content.Context;
-
-import com.fudgetbudget.R;
 import com.fudgetbudget.model.ProjectedTransaction;
 import com.fudgetbudget.model.RecordedTransaction;
 import com.fudgetbudget.model.Transaction;
@@ -33,9 +30,9 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 public class StorageControl {
-    private final Context context;
+    private final String filesDir;
 
-    public StorageControl(Context context) { this.context = context; }
+    public StorageControl(String filesDirectory) { this.filesDir = filesDirectory; }
 
     public ArrayList<Transaction> readTransactions(Object type){
         File[] transactions_file_set = readAppFile("app_transactions").listFiles();
@@ -477,7 +474,7 @@ public class StorageControl {
     }
 
     private File readAppFile(String path) {
-        File file = new File(this.context.getExternalFilesDir( null ), path);
+        File file = new File(this.filesDir, path);
 
         if( !file.exists() && path.contentEquals( "app_balance" )){
             try {

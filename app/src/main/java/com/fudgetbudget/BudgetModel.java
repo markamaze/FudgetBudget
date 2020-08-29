@@ -1,7 +1,5 @@
 package com.fudgetbudget;
 
-import android.content.Context;
-
 import com.fudgetbudget.model.ProjectedTransaction;
 import com.fudgetbudget.model.RecordedTransaction;
 import com.fudgetbudget.model.Transaction;
@@ -10,7 +8,6 @@ import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -27,8 +24,8 @@ class BudgetModel<T extends Transaction> {
     private LinkedHashMap<LocalDate, ArrayList<Double>> projectedBalancesByPeriod;
 
 
-    BudgetModel(Context context) {
-        this.storage = new StorageControl( context );
+    BudgetModel(String filesDir) {
+        this.storage = new StorageControl( filesDir );
         this.periodsToProject = (int) storage.readSettingsValue("projection_periods_to_project");
         setProjectedTransactionsByPeriod();
         setProjectedBalancesByPeriod();
@@ -219,15 +216,15 @@ class BudgetModel<T extends Transaction> {
 
                 if(projection == null) projection = ProjectedTransaction.getInstance( transaction, indexDate );
                 projections.add( (T) projection );
-                indexDate = getNextProjectedDate(transaction, indexDate);
+                indexDate = getNextProjectedDate(transaction.getProperty( R.string.recurrence_tag ).toString(), indexDate);
             }
 
         }
 
         return projections;
     }
-    private LocalDate getNextProjectedDate(Transaction transaction, LocalDate indexDate) {
-        String[] recurrenceGroups = transaction.getProperty(R.string.recurrence_tag).toString().split( "-" );
+    LocalDate getNextProjectedDate(String recurrenceString, LocalDate indexDate) {
+        String[] recurrenceGroups = recurrenceString.split( "-" );
         int recurrenceBit = Integer.parseInt( recurrenceGroups[0] );
         int frequency = Integer.parseInt( recurrenceGroups[1] );
         int period = Integer.parseInt( recurrenceGroups[2] );
@@ -315,13 +312,12 @@ class BudgetModel<T extends Transaction> {
         else return false;
     }
     boolean reconcile(Object object){
-        //TODO: handle user trying to reconcile with a date in the future
         if(object instanceof ProjectedTransaction){
             ProjectedTransaction projectedTransaction = (ProjectedTransaction) object;
             RecordedTransaction record = RecordedTransaction.getInstance(projectedTransaction);
             Transaction transaction = storage.readTransactions( record ).get( 0 );
 
-            transaction.setProperty( R.string.date_tag, getNextProjectedDate( transaction, ((LocalDate)transaction.getProperty( R.string.date_tag ))));
+            transaction.setProperty( R.string.date_tag, getNextProjectedDate( transaction.getProperty( R.string.recurrence_tag ).toString(), ((LocalDate)transaction.getProperty( R.string.date_tag ))));
 
             storage.deleteProjection( projectedTransaction );
             storage.writeRecord( record );

@@ -37,7 +37,7 @@ public class MainActivity<T extends Transaction> extends AppCompatActivity {
         setSupportActionBar( findViewById( R.id.action_bar ) );
         getSupportActionBar().setTitle( getTitle() );
 
-        budgetModel = new BudgetModel<T>( this );
+        budgetModel = new BudgetModel<T>( this.getExternalFilesDir( null ).getPath() );
         viewModel = new ViewModel(this, budgetModel);
 
         findViewById( R.id.page_view ).setOnTouchListener( this.pageViewTouchListener );
