@@ -1,6 +1,9 @@
 package com.fudgetbudget.model;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.fudgetbudget.R;
 
 import org.w3c.dom.Document;
@@ -103,7 +106,13 @@ public class Transaction implements Comparable {
     private boolean setAmount(Object amount) {
         if(amount == null || amount instanceof String && ((String)amount).isEmpty()) this.amount = new Double( "0" );
         else if(amount instanceof Double) this.amount = (Double) amount;
-        else if(amount instanceof String) this.amount = Double.valueOf( (String) amount );
+        else if(amount instanceof String) {
+            String stringAmount = (String) amount;
+
+            if(stringAmount.substring( 0, 1).contentEquals( "$" ))
+                this.amount = Double.valueOf( stringAmount.substring( 1 ) );
+            else this.amount = Double.valueOf( stringAmount );
+        }
         else return false;
 
         return true;
@@ -131,7 +140,7 @@ public class Transaction implements Comparable {
         return true;
     }
     private boolean setRecurrance(Object recurrance){
-        if( recurrance == null) this.recurrance = "0-0-0-0-0-0-0";
+        if( recurrance == null || recurrance.toString().isEmpty()) this.recurrance = "0-0-0-0-0-0-0";
         else if( recurrance instanceof String && ((String)recurrance).length() <= 0) this.recurrance = "0-0-0-0-0-0-0";
         else if( recurrance instanceof String) this.recurrance = recurrance;
         else return false;
@@ -189,4 +198,5 @@ public class Transaction implements Comparable {
         if ( ((LocalDate)this.getProperty(R.string.date_tag)).isEqual( comparisonDate )) return 0;
         else return -1;
     }
+
 }

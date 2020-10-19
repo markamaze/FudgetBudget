@@ -1,77 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="12dp"
-    android:gravity="center_horizontal">
+    android:gravity="center_horizontal"
+    android:id="@+id/property_layout_recurrence_editor">
 
-    <LinearLayout android:id="@+id/set_period_and_frequency_layout"
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
+    <LinearLayout android:id="@+id/property_layout_recurrence_switch"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:paddingVertical="8dp">
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Repeats" />
+
+        <Switch
+            android:id="@+id/recurrence_switch"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <RelativeLayout android:id="@+id/set_recurrence_parameters"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible">
         <TextView
             android:id="@+id/set_frequency_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignBaseline="@+id/recurrence_period_value"
             android:text="every" />
         <EditText
             android:id="@+id/recurrence_frequency_value"
-            android:layout_width="wrap_content"
+            android:layout_width="80dp"
             android:layout_height="wrap_content"
-            android:minWidth="50dp"
-            android:hint="#"
-            android:gravity="center_horizontal"
-            android:inputType="number" />
+            android:inputType="number"
+            android:layout_toEndOf="@id/set_frequency_label"
+            android:layout_toStartOf="@id/recurrence_period_value" />
         <Spinner
             android:id="@+id/recurrence_period_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="end"
-            android:entries="@array/date_periods" />
-    </LinearLayout>
+            android:entries="@array/date_periods"
+            android:layout_alignParentEnd="true"
+            android:layout_alignBaseline="@id/recurrence_frequency_value"/>
 
-    <LinearLayout android:id="@+id/set_recurrence_date_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
+        <TextView android:id="@+id/recurrence_date_value_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="from"/>
+            android:text="from"
+            android:layout_alignParentStart="true"
+            android:layout_below="@id/set_frequency_label"
+            android:layout_alignBaseline="@id/recurrence_date_value" />
 
-        <Button
+        <TextView
             android:id="@+id/recurrence_date_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="date"
-            tools:ignore="NestedWeights"/>
-
-    </LinearLayout>
-
-    <LinearLayout android:id="@+id/set_recurrence_onDateType_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingVertical="8dp">
+            tools:ignore="NestedWeights"
+            android:layout_below="@+id/recurrence_frequency_value"
+            android:layout_toEndOf="@id/recurrence_date_value_label"
+            android:layout_alignParentEnd="true" />
 
         <TextView
+            android:id="@+id/on_day_type_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/recurrence_date_value_label"
+            android:layout_alignParentStart="true"
             android:text="on" />
 
         <Spinner
             android:id="@+id/on_day_type_selector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="100dp"
-            android:layout_gravity="center"/>
+            android:layout_below="@id/recurrence_date_value"
+            android:layout_toEndOf="@id/on_day_type_label"
+            android:layout_alignParentEnd="true" />
 
-    </LinearLayout>
+    </RelativeLayout>
 
     <Switch android:id="@+id/set_end_parameters_switch"
         android:layout_width="wrap_content"
@@ -148,7 +163,7 @@
                 android:text="total reachs" />
 
             <EditText
-                android:id="@id/when_total_reaches_amount_value"
+                android:id="@+id/when_total_reaches_amount_value"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:inputType="number"
@@ -158,6 +173,5 @@
         </LinearLayout>
 
     </RadioGroup>
-
 
 </LinearLayout>

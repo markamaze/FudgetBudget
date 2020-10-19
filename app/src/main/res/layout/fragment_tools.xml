@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.ToolsFragment">
+
+    <LinearLayout
+        android:id="@+id/page_tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout android:id="@+id/page_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        </LinearLayout>
+
+        <Button android:id="@+id/page_tools_update_balancesheet_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Update Balance Sheet" />
+
+        <RelativeLayout android:id="@+id/page_tools_update_balancesheet_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:padding="12dp"
+            android:visibility="gone"
+            android:background="@android:color/white">
+
+            <TextView android:id="@+id/page_tools_update_balancesheet_include_current_due_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignBaseline="@id/page_tools_update_balancesheet_include_current_due_toggle"
+                android:paddingVertical="6dp"
+                android:text="Include items due today in update"/>
+
+            <androidx.appcompat.widget.SwitchCompat android:id="@+id/page_tools_update_balancesheet_include_current_due_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:paddingVertical="6dp"
+                android:layout_alignParentEnd="true"/>
+
+            <TextView android:id="@+id/page_tools_update_balancesheet_delete_pastdue_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/page_tools_update_balancesheet_include_current_due_label"
+                android:layout_alignParentStart="true"
+                android:layout_alignBaseline="@id/page_tools_update_balancesheet_delete_pastdue_toggle"
+                android:paddingVertical="6dp"
+                android:text="Delete pastdue items (else recorded)"/>
+
+            <androidx.appcompat.widget.SwitchCompat android:id="@+id/page_tools_update_balancesheet_delete_pastdue_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/page_tools_update_balancesheet_include_current_due_toggle"
+                android:paddingVertical="6dp"
+                android:layout_alignParentEnd="true"/>
+
+            <TextView android:id="@+id/reset_current_balance_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/page_tools_update_balancesheet_delete_pastdue_label"
+                android:paddingVertical="6dp"
+                android:layout_alignBaseline="@id/reset_current_balance_toggle"
+                android:text="Set new balance (else calculated)"/>
+
+            <androidx.appcompat.widget.SwitchCompat android:id="@+id/reset_current_balance_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:paddingVertical="6dp"
+                android:layout_below="@id/page_tools_update_balancesheet_delete_pastdue_toggle"/>
+
+            <TextView android:id="@+id/balance_budget_new_current_balance_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/reset_current_balance_label"
+                android:layout_alignBaseline="@id/balance_budget_new_current_balance"
+                android:paddingTop="6dp"
+                android:layout_marginBottom="24dp"
+                android:paddingStart="36dp"
+                android:visibility="invisible"
+                android:text="set balance to"/>
+
+            <EditText android:id="@+id/balance_budget_new_current_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/reset_current_balance_toggle"
+                android:layout_toEndOf="@id/balance_budget_new_current_balance_label"
+                android:gravity="center"
+                android:layout_alignParentEnd="true"
+                android:paddingTop="6dp"
+                android:layout_marginBottom="24dp"
+                android:visibility="invisible"
+                android:inputType="numberDecimal"/>
+
+            <Button android:id="@+id/page_tools_update_balancesheet"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/balance_budget_new_current_balance_label"
+                android:paddingVertical="6dp"
+                android:text="update" />
+
+        </RelativeLayout>
+
+        <Button android:id="@+id/page_tools_projections_settings_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Projections Settings"/>
+
+        <RelativeLayout android:id="@+id/page_tools_projections_settings_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:padding="12dp"
+            android:visibility="gone"
+            android:background="@android:color/white">
+
+            <TextView
+                android:id="@+id/projection_frequency_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:text="Months to project budget"
+                android:paddingVertical="6dp"
+                android:layout_alignBaseline="@id/number_periods_to_project"/>
+
+            <TextView android:id="@+id/number_periods_to_project"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:paddingVertical="6dp"
+                android:layout_alignEnd="@id/projection_frequency_label" />
+
+            <SeekBar
+                android:id="@+id/projection_frequency_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/projection_frequency_label"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true"
+                android:paddingBottom="12dp"
+                android:min="1"
+                android:paddingVertical="6dp"
+                android:max="13"/>
+
+            <TextView
+                android:id="@+id/balance_threshold_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/projection_frequency_value"
+                android:text="Low balance threshold"
+                android:paddingVertical="6dp"
+                android:layout_alignBaseline="@+id/balance_threshold_value"/>
+
+            <EditText
+                android:id="@+id/balance_threshold_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/balance_threshold_label"
+                android:layout_toStartOf="@id/balance_threshold_set_button"
+                android:layout_below="@id/projection_frequency_value"
+                android:gravity="center"
+                android:enabled="false"
+                android:paddingVertical="6dp"
+                android:inputType="numberDecimal"/>
+
+            <Button
+                android:id="@+id/balance_threshold_set_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@id/projection_frequency_value"
+                android:paddingVertical="6dp"
+                android:text="Modify"/>
+
+        </RelativeLayout>
+
+        <Button android:id="@+id/page_tools_batch_transaction_operations_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Data Operations" />
+
+        <RelativeLayout android:id="@+id/page_tools_batch_transaction_operations_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:padding="12dp"
+            android:background="@android:color/white"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/batch_operation_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignBaseline="@id/batch_operation_reset_repeating"
+                android:paddingVertical="6dp"
+                android:text="Reset modified repeating transactions"/>
+
+            <Button
+                android:id="@+id/batch_operation_reset_repeating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:paddingVertical="6dp"
+                android:text="Reset" />
+
+            <TextView
+                android:id="@+id/batch_operation_4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/batch_operation_1"
+                android:text="Delete all records"
+                android:paddingVertical="6dp"
+                android:layout_alignBaseline="@id/batch_operation_delete_records" />
+
+            <Button
+                android:id="@+id/batch_operation_delete_records"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/batch_operation_reset_repeating"
+                android:layout_alignParentEnd="true"
+                android:paddingVertical="6dp"
+                android:text="Delete" />
+
+            <TextView
+                android:id="@+id/batch_operation_5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/batch_operation_4"
+                android:text="Delete all transactions"
+                android:paddingVertical="6dp"
+                android:layout_alignBaseline="@id/batch_operation_delete_transactions" />
+
+            <Button
+                android:id="@+id/batch_operation_delete_transactions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/batch_operation_delete_records"
+                android:layout_alignParentEnd="true"
+                android:paddingVertical="6dp"
+                android:text="Delete" />
+
+        </RelativeLayout>
+
+        <Button android:id="@+id/page_tools_afford_operations_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Can I afford it?" />
+
+        <RelativeLayout android:id="@+id/page_tools_afford_operations_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:padding="12dp"
+            android:background="@android:color/white"
+            android:visibility="gone">
+
+            <LinearLayout android:id="@+id/page_tools_afford_transactions_list_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Can I afford this?" />
+
+                <Button android:id="@+id/page_tools_afford_transactions_list_add"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="enter item" />
+
+            </LinearLayout>
+            <LinearLayout android:id="@+id/page_tools_afford_transactions_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/page_tools_afford_transactions_list_header"
+                android:orientation="vertical" />
+
+            <LinearLayout android:id="@+id/page_tools_afford_transactions_list_footer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/page_tools_afford_transactions_list"
+                android:orientation="horizontal"
+                android:visibility="invisible">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content" />
+
+                <Button android:id="@+id/page_tools_afford_transactions_list_reset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="reset list" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</ScrollView>

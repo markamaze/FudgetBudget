@@ -1,207 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@android:color/white">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <LinearLayout android:id="@+id/line_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingHorizontal="24dp">
+            android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/line_item_date_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tag="eee M/dd"
+                android:minWidth="100dp"/>
+
+            <TextView
+                android:id="@+id/line_item_recurrence_short_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/line_item_label_value"
                 android:layout_width="0dp"
                 android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/line_item_amount_value"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Label" />
+                android:gravity="end"/>
+
+            <TextView
+                android:id="@+id/line_item_balance_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"/>
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/card_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/line_item"
+            android:layout_marginHorizontal="6dp"
+            android:visibility="gone" >
+
+            <TextView android:id="@+id/label_key"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Label"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignBaseline="@id/label_value"/>
 
             <EditText
                 android:id="@+id/label_value"
-                android:layout_width="0dp"
-                android:layout_weight="2"
-                android:layout_height="wrap_content"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingHorizontal="24dp">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_toEndOf="@id/label_key"/>
 
             <TextView
-                android:layout_width="0dp"
+                android:id="@+id/amount_key"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/key_transaction_amount" />
+                android:text="Amount"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/label_key"
+                android:layout_alignBaseline="@id/amount_value"/>
 
             <EditText
                 android:id="@+id/amount_value"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:inputType="numberDecimal"/>
+                android:inputType="numberDecimal"
+                android:layout_below="@id/label_value"
+                android:layout_alignParentEnd="true"
+                android:layout_toEndOf="@id/amount_key"/>
 
-        </LinearLayout>
+            <RelativeLayout android:id="@+id/property_layout_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/amount_key">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingHorizontal="24dp">
+                <TextView android:id="@+id/date_key"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/date_value"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentStart="true"
+                    android:text="Scheduled" />
+
+                <TextView
+                    android:id="@+id/date_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_toEndOf="@+id/date_key"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout android:id="@+id/property_layout_recurrence_readable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/property_layout_date">
+
+                <TextView android:id="@+id/readable_recurrence_key"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Repeats"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignBaseline="@id/readable_recurrence_value"/>
+
+                <TextView android:id="@+id/readable_recurrence_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_toEndOf="@id/readable_recurrence_key"/>
+
+            </RelativeLayout>
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:id="@+id/note_key"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/key_transaction_note" />
+                android:text="Note"
+                android:layout_below="@id/property_layout_recurrence_readable"
+                android:layout_alignParentStart="true"
+                android:layout_alignBaseline="@id/note_value"/>
 
             <EditText
                 android:id="@+id/note_value"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:inputType="textMultiLine" />
+                android:inputType="textMultiLine"
+                android:layout_below="@id/property_layout_recurrence_readable"
+                android:layout_toEndOf="@id/note_key"
+                android:layout_alignParentEnd="true"/>
 
-        </LinearLayout>
 
-        <LinearLayout android:id="@+id/property_layout_recurrence_readable"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="gone"
-            android:paddingHorizontal="24dp">
+            <!--
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Repeats" />
+            if i remove recurrence switch and editor:
+                it is only used in the Transaction page, so I can just add the switch to
+                transaction list item views and the view model can add the editor?
 
-            <TextView android:id="@+id/readable_recurrence_value"
-                android:layout_width="0dp"
-                android:layout_weight="2"
-                android:layout_height="wrap_content" />
+            -->
 
-        </LinearLayout>
 
-        <LinearLayout android:id="@+id/property_layout_recurrence_switch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingHorizontal="24dp" >
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Repeats" />
-
-            <Switch
-                android:id="@+id/recurrence_switch"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2" />
-
-        </LinearLayout>
-
-        <LinearLayout android:id="@+id/property_layout_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="gone"
-            android:paddingHorizontal="24dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/date_key"/>
-
-            <Button
-                android:id="@+id/date_value"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"/>
-
-        </LinearLayout>
-
-        <include android:id="@+id/property_layout_recurrence_editor"
-            layout="@layout/layout_transaction_recurrance_editor"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="24dp"/>
-
-        <LinearLayout android:id="@+id/property_layout_recurrence_projections"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="24dp"
-            android:paddingVertical="12dp">
-
-            <TextView
+            <include android:id="@+id/property_layout_recurrence_editor"
+                layout="@layout/layout_transaction_recurrance_editor"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/key_projected_transactions"
-                android:textAlignment="center"
-                android:textStyle="italic"/>
+                android:layout_below="@id/note_key"/>
 
-        </LinearLayout>
+        </RelativeLayout>
 
-    </LinearLayout>
+        <include layout="@layout/layout_transaction_card_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_below="@id/card_view" />
 
+    </RelativeLayout>
 
-
-
-<!--<RelativeLayout-->
-<!--android:layout_width="match_parent"-->
-<!--android:layout_height="wrap_content"-->
-<!--android:orientation="horizontal"-->
-<!--android:background="@color/colorSecondary"-->
-<!--android:paddingHorizontal="24dp">-->
-
-<!--<Button android:id="@+id/reset_projections_button"-->
-<!--    android:layout_width="wrap_content"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:text="reset projections"-->
-<!--    android:layout_alignParentStart="true"/>-->
-
-<!--<Button android:id="@+id/toggle_editor_button"-->
-<!--    android:layout_width="wrap_content"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:layout_alignParentEnd="true"-->
-<!--    android:text="modify"/>-->
-
-<!--<Button android:id="@+id/editor_delete_button"-->
-<!--    android:layout_width="wrap_content"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:layout_alignParentStart="true"-->
-<!--    android:visibility="gone"-->
-<!--    android:text="delete"/>-->
-
-<!--<Button android:id="@+id/editor_update_button"-->
-<!--    android:layout_width="wrap_content"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:layout_toStartOf="@id/editor_cancel_button"-->
-<!--    android:visibility="gone"-->
-<!--    android:text="update"/>-->
-
-<!--<Button android:id="@+id/editor_cancel_button"-->
-<!--    android:layout_width="wrap_content"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:text="cancel"-->
-<!--    android:visibility="gone"-->
-<!--    android:layout_alignParentEnd="true"/>-->
-
-<!--</RelativeLayout>-->
-
-
-
-
-
-
-
-
+</FrameLayout>

@@ -1,4 +1,4 @@
-package com.fudgetbudget;
+package com.fudgetbudget.ui;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -6,14 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.fudgetbudget.R;
 import com.fudgetbudget.model.Transaction;
 
 import java.time.LocalDate;
@@ -22,9 +21,9 @@ import java.time.format.DateTimeFormatter;
 import static android.view.View.GONE;
 
 class RecurrenceViewBuilder {
-    private final MainActivity context;
+    private final Context context;
 
-    RecurrenceViewBuilder(MainActivity context){
+    RecurrenceViewBuilder(Context context){
         this.context = context;
     }
 
@@ -49,7 +48,7 @@ class RecurrenceViewBuilder {
         });
 
         TextView readableRecurrence = view.findViewById( R.id.readable_recurrence_value );
-        readableRecurrence.setText( formatUtility.formatRecurrenceValue(recurrenceValues) );
+        readableRecurrence.setText( formatUtility.formatRecurrenceValue(recurrenceValues, date) );
 
         //set frequency values and handlers
         EditText frequencyEditor = view.findViewById( R.id.recurrence_frequency_value );
@@ -106,8 +105,8 @@ class RecurrenceViewBuilder {
                 onDaySpinner.setVisibility( View.VISIBLE );
                 if(parent != null){
                     if(position == 0 ) {
-                        LinearLayout onDayLayout = RecurrenceViewBuilder.this.context.findViewById( R.id.set_recurrence_onDateType_layout );
-                        if(onDayLayout != null) onDayLayout.setVisibility( GONE );
+//                        LinearLayout onDayLayout = RecurrenceViewBuilder.this.context.findViewById( R.id.set_recurrence_onDateType_layout );
+//                        if(onDayLayout != null) onDayLayout.setVisibility( GONE );
                     }
                     else if(position == 1){
                         String[] onDayTypeWeekday = RecurrenceViewBuilder.this.context.getResources().getStringArray( R.array.days_of_week_options );
@@ -139,8 +138,8 @@ class RecurrenceViewBuilder {
 
         //set recurrence date and handlers
         //      set the value in the display, and reset the list and selection of the onDay Type
-        Button dateButton = view.findViewById( R.id.recurrence_date_value );
-        dateButton.setText(formatUtility.formatDate( R.string.date_string_long_mdy, date ));
+        TextView dateButton = view.findViewById( R.id.recurrence_date_value );
+        dateButton.setText(formatUtility.formatDate( "MMMM dd, yyyy", date ));
         dateButton.setTag(R.string.date_tag, date);
 
         dateButton.setOnClickListener( dateButtonView -> {
@@ -236,40 +235,38 @@ class RecurrenceViewBuilder {
 
     private void setRecurrencePropertyVisibility(View view, boolean isEditable, int recurrenceBit) {
         if(recurrenceBit == 1) { //repeats
-            view.findViewById( R.id.property_layout_recurrence_editor ).setVisibility( View.VISIBLE );
-            view.findViewById( R.id.property_layout_date ).setVisibility( GONE );
-
-
             if(isEditable) {
                 //repeats and is editable: show the recurrence editor with values set
+                view.findViewById( R.id.set_recurrence_parameters ).setVisibility( View.VISIBLE );
                 view.findViewById( R.id.property_layout_recurrence_editor ).setVisibility( View.VISIBLE );
-                view.findViewById( R.id.property_layout_recurrence_switch ).setVisibility( View.VISIBLE );
                 view.findViewById( R.id.property_layout_recurrence_readable ).setVisibility( GONE );
-                view.findViewById( R.id.property_layout_recurrence_projections ).setVisibility( GONE );
+                view.findViewById( R.id.property_layout_date ).setVisibility( GONE );
+//                view.findViewById( R.id.property_layout_recurrence_projections ).setVisibility( GONE );
 
             } else {
                 //repeats and is not editable: show readable text representation of the recurrence value and next scheduled date
-
-                view.findViewById( R.id.property_layout_recurrence_switch ).setVisibility( GONE );
+                view.findViewById( R.id.property_layout_date ).setVisibility( View.VISIBLE );
                 view.findViewById( R.id.property_layout_recurrence_editor ).setVisibility( GONE );
+                view.findViewById( R.id.set_recurrence_parameters ).setVisibility( GONE );
                 view.findViewById( R.id.property_layout_recurrence_readable ).setVisibility( View.VISIBLE );
-                view.findViewById( R.id.property_layout_recurrence_projections ).setVisibility( View.VISIBLE );
+//                view.findViewById( R.id.property_layout_recurrence_projections ).setVisibility( View.VISIBLE );
+
+//                view.findViewById( R.id.property_layout_date ).setOnClickListener( null );
             }
         }
         else { //does not repeat
-            view.findViewById( R.id.property_layout_recurrence_editor ).setVisibility( GONE );
-            view.findViewById( R.id.property_layout_recurrence_projections ).setVisibility( GONE );
+            view.findViewById( R.id.set_recurrence_parameters ).setVisibility( GONE );
             view.findViewById( R.id.property_layout_date ).setVisibility( View.VISIBLE );
 
 
-            if(isEditable) {
-                //does not repeat, but can be edited: need to load the recurrence editor and remove scheduled date
+            if(isEditable) { //does not repeat, but can be edited
+                view.findViewById( R.id.property_layout_recurrence_editor ).setVisibility( View.VISIBLE );
                 view.findViewById( R.id.property_layout_recurrence_switch ).setVisibility( View.VISIBLE );
+                view.findViewById( R.id.property_layout_recurrence_readable ).setVisibility( GONE );
             }
-            else{
-                //does not repeat and cannot edit: just show the date and remove recurrence editor
-                //remove recurrenceSwitch
-                view.findViewById( R.id.property_layout_recurrence_switch ).setVisibility( GONE );
+            else{ //does not repeat and cannot edit
+                view.findViewById( R.id.property_layout_recurrence_editor ).setVisibility( GONE );
+                view.findViewById( R.id.property_layout_recurrence_readable ).setVisibility( View.VISIBLE );
             }
 
         }
