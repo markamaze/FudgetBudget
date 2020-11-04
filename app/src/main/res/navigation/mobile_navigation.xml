@@ -3,19 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_budget">
+    app:startDestination="@+id/navigation_transactions">
 
     <fragment
         android:id="@+id/navigation_budget"
-        android:name="com.fudgetbudget.ui.BudgetFragment"
+        android:name="com.fudgetbudget.ui.BudgetFragmentLoader"
         android:label="Budget"
-        tools:layout="@layout/fragment_budget" />
+        tools:layout="@layout/loading_view_budget_fragment" />
 
     <fragment
         android:id="@+id/navigation_transactions"
-        android:name="com.fudgetbudget.ui.StoredTransactionsFragment"
+        android:name="com.fudgetbudget.ui.StoredTransactionsFragmentLoader"
         android:label="Transactions"
-        tools:layout="@layout/fragment_stored_transactions" />
+        tools:layout="@layout/loading_view_stored_transactions_fragment" />
 
     <fragment
         android:id="@+id/navigation_records"

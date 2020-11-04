@@ -1,492 +1,371 @@
 package com.fudgetbudget;
 
-import android.content.Context;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.widget.ArrayAdapter;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import androidx.loader.content.AsyncTaskLoader;
-import androidx.loader.content.Loader;
 
-import com.fudgetbudget.FudgetBudgetRepo;
-import com.fudgetbudget.R;
 import com.fudgetbudget.model.ProjectedTransaction;
 import com.fudgetbudget.model.RecordedTransaction;
 import com.fudgetbudget.model.Transaction;
 
 import java.time.LocalDate;
-import java.time.MonthDay;
-import java.time.format.DateTimeFormatter;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.UUID;
 
 public class FudgetBudgetViewModel<T extends Transaction> extends ViewModel {
-    private final FudgetBudgetRepo mModelRepo;
-    private final String mDirectory;
-    private MutableLiveData<ArrayList<Transaction>> cachedExpense;
-    private MutableLiveData<ArrayList<Transaction>> cachedIncome;
-    private Double mCalculatedAverageIncome;
-    private Double mCalculatedAverageExpense;
-    private Double mCalculatedAverageExpendable;
+    private final FudgetBudgetRepo<T> mModelRepo;
 
-    private MutableLiveData<ArrayList<Object[]>> projectionsWithBalancesByPeriod;
-    private LinkedHashMap<LocalDate, ArrayList<Double>> projectedBalancesByPeriod;
-    private LinkedHashMap<LocalDate, ArrayList<T>> projectedTransactionsByPeriod;
-    private Double lowestProjectedBalance;
-    private LocalDate lowestProjectedBalanceDate;
+    private final MutableLiveData<Double> cBalanceThreshold;
+    private final MutableLiveData<Integer> cNumProjectionPeriods;
 
+    private MutableLiveData<Map<UUID, Transaction>> cCachedTransactionsById;
+    private MutableLiveData<Map<UUID, List<T>>> cCachedProjectionsById;
+    private MutableLiveData<Map<LocalDate, List<T>>> cCachedProjectionsByPeriod;
+    private MutableLiveData<Map<LocalDate, List<RecordedTransaction>>> cCachedRecordsByPeriod;
 
-    private MutableLiveData<Map<LocalDate, ArrayList<T>>> mProjectionsByPeriod;
+    private MutableLiveData<List<LocalDate>> mProjectedPeriods;
+    private Map<LocalDate, MutableLiveData<LinkedList<String>>> mProjectedTransactionKeysByPeriod;
+    private Map<String, Map.Entry<MutableLiveData<T>, MutableLiveData<Double>>> mProjectedTransactionWithBalance;
 
-
-    public FudgetBudgetViewModel(Context context){
-        mDirectory = context.getExternalFilesDir( null ).getPath();
-        mModelRepo = new FudgetBudgetRepo(mDirectory);
-
-
-        AsyncTaskLoader asyncTaskLoader = new AsyncTaskLoader(context) {
-            @Nullable
-            @Override
-            public Object loadInBackground() {
-                return null;
-
-            }
-        };
-    }
-
-    public LiveData<ArrayList<Transaction>> getCachedExpense() {
-        if (cachedExpense == null) {
-            Stream<Transaction> expensesStream = mModelRepo.getActiveTransactions().stream().filter( transaction -> !((Transaction)transaction).getIncomeFlag() );
-            ArrayList<Transaction> expenses = expensesStream.collect( Collectors.toCollection( ArrayList::new ) );
-            Collections.sort( expenses );
-            cachedExpense = new MutableLiveData<>(  );
-            cachedExpense.setValue( expenses );
-        }
-        return cachedExpense;
-    }
-    public LiveData<ArrayList<Transaction>> getCachedIncome() {
-        if (cachedIncome == null) {
-            Stream<Transaction> incomeStream = mModelRepo.getActiveTransactions().stream().filter( transaction -> ((Transaction)transaction).getIncomeFlag() );
-            ArrayList<Transaction> income = incomeStream.collect( Collectors.toCollection( ArrayList::new ) );
-            Collections.sort( income );
-            cachedIncome = new MutableLiveData<>(  );
-            cachedIncome.setValue( income );
-        }
-        return cachedIncome;
-    }
+    private MutableLiveData<List<LocalDate>> mRecordPeriods;
+    private Map<LocalDate, MutableLiveData<List<String>>> mRecordKeysByPeriod;
+    private Map<String, MutableLiveData<T>> mRecordsByKey;
 
 
 
-    public void createTransaction(int transaction_type) {
-        Transaction newTransaction = Transaction.getInstance( transaction_type, mDirectory );
-        ArrayList<Transaction> updatedCache;
+    public FudgetBudgetViewModel(FudgetBudgetRepo repo){
+        mModelRepo = repo;
 
-        if(update( newTransaction )){
-            if(newTransaction.getIncomeFlag()){
-                updatedCache = cachedIncome.getValue();
-                updatedCache.add( newTransaction );
-                Collections.sort( updatedCache );
+        //observable cached objects initialized with data read from the repo
+        //after that, methods update/delete/reconcile/reset, will post changes to these cached values
+        //      the goal is that the viewmodel shouldn't have to reread and rebuild the entire data model once it's initialized
+        //changes to cached values are responsible for modifying the model values as needed
+        //implementors of viewmodel will only access the model values, which are also observable
+        //      when model values are changed, their observer will call its observe callback and change view as needed
 
-                cachedIncome.setValue( updatedCache );
-            }else {
-                updatedCache = cachedExpense.getValue();
-                updatedCache.add( newTransaction );
-                Collections.sort( updatedCache );
 
-                cachedExpense.setValue( updatedCache );
-            }
+        Map<UUID, Transaction> cachedTransactions = new HashMap<>();
+        mModelRepo.getTransactions().getValue().forEach( transaction -> cachedTransactions.put(transaction.getId(), transaction));
 
-            //toast success
-        } else {
-            //toast failure
-        }
+        Map<UUID, List<T>> cachedProjections = new HashMap<>();
+        cachedTransactions.forEach( (id, transaction) -> cachedProjections.put(id, mModelRepo.getProjectionsByTransactionId(id).getValue()));
 
-    }
-    public boolean update(Object object) { return mModelRepo.update( object ); }
-    public boolean delete(Object object) { return mModelRepo.delete( object ); }
-    public boolean reset(Object object) { return mModelRepo.reset( object ); }
-    public boolean reconcile(Object object){
-        return mModelRepo.reconcile( object );
-    }
+        Map<LocalDate, List<T>> cachedProjectionsByPeriod = new HashMap<>();
+        cachedProjections.forEach( (id, projectionList) -> {
+            projectionList.forEach( projection -> {
+                LocalDate projectionPeriod = ((LocalDate) projection.getProperty(R.string.date_tag)).withDayOfMonth(1);
+                if(cachedProjectionsByPeriod.get(projectionPeriod) == null) cachedProjectionsByPeriod.put(projectionPeriod, new ArrayList<>());
+                List<T> periodProjections = cachedProjectionsByPeriod.get(projectionPeriod);
+                periodProjections.add(projection);
+                cachedProjectionsByPeriod.replace(projectionPeriod, periodProjections);
+            });
+        });
 
-    public Double calculateAverage(int calculationType){
-        switch (calculationType){
-            case R.string.calculated_average_income:{
-                if(mCalculatedAverageIncome == null){
-                    mCalculatedAverageIncome = 0.0;
-                }
-                return mCalculatedAverageIncome;
-            }
-            case R.string.calculated_average_expense:{
-                if(mCalculatedAverageExpense == null){
-                    mCalculatedAverageExpense = 0.0;
-                }
-                return mCalculatedAverageExpense;
-            }
-            case R.string.calculated_average_expendable:{
-                if(mCalculatedAverageExpendable == null){
-                    Double averageIncome = calculateAverage( R.string.calculated_average_income );
-                    Double averageExpense = calculateAverage( R.string.calculated_average_expense );
-                    mCalculatedAverageExpendable = averageIncome - averageExpense;
-                }
-                return mCalculatedAverageExpendable;
-            }
-            default: return null;
-        }
-    }
+        Map<LocalDate, List<RecordedTransaction>> cachedRecords = new HashMap<>();
+        mModelRepo.getRecords().getValue().forEach( record -> {
+            LocalDate recordPeriod = ((LocalDate)record.getProperty(R.string.date_tag)).withDayOfMonth(1);
+            if(cachedRecords.get( recordPeriod ) == null) cachedRecords.put(recordPeriod, new ArrayList<>());
+            List<RecordedTransaction> periodRecords = cachedRecords.get(recordPeriod);
+            periodRecords.add(record);
+            cachedRecords.replace(recordPeriod, periodRecords);
+        });
 
-    public Double getBalanceThreshold() { return 0.0; }
+        cCachedTransactionsById = new MutableLiveData<>(cachedTransactions);
+        cCachedProjectionsById = new MutableLiveData<>(cachedProjections);
+        cCachedProjectionsByPeriod = new MutableLiveData<>(cachedProjectionsByPeriod);
+        cCachedRecordsByPeriod = new MutableLiveData<>(cachedRecords);
 
-    public Double getCurrentBalance() { return 0.0; }
+        cBalanceThreshold = new MutableLiveData<>((Double)mModelRepo.getSettingsObject(R.string.setting_value_balance_threshold).getValue());
+        cNumProjectionPeriods = new MutableLiveData<>((Integer)mModelRepo.getSettingsObject(R.string.setting_value_periods_to_project).getValue());
 
-    public Double getExpendableValue() { return 0.0; }
+        cCachedTransactionsById.observeForever( transactionMap -> {
+            //post changes to model data as needed
 
-    public Object getSettingsValue(int settingValueResource){
-        return mModelRepo.getSettingsValue( settingValueResource );
+            //the map contains all transactions with their id as the key
+            //isolate transactions which have been modified
+
+            //new transactions will need their projections added to the projection cache
+            //removed transactions will need their projections removed from the projection cache
+            //
+        });
+        cCachedProjectionsById.observeForever( projectionMap -> {
+            //post changes to model data as needed
+
+        });
+        cCachedProjectionsByPeriod.observeForever( projectionPeriodMap -> {
+            //post changes to model data as needed
+
+        });
+        cCachedRecordsByPeriod.observeForever( recordsPeriodMap -> {
+            //post changes to model data as needed
+
+        });
+        cBalanceThreshold.observeForever( threshold -> {
+            //post changes to model data as needed
+
+        });
+        cNumProjectionPeriods.observeForever( numPeriodsToProject -> {
+            //post changes to model data as needed
+
+        });
+
     }
 
 
 
-    public MutableLiveData<ArrayList<Object[]>> getProjectionsWithBalancesByPeriod(){
-        if(projectionsWithBalancesByPeriod == null) setProjectionsWithBalancesByPeriod();
-        return this.projectionsWithBalancesByPeriod;
-    }
-    private void setProjectionsWithBalancesByPeriod(){
-        ArrayList<Object[]> result = new ArrayList<>(  );
-        LinkedHashMap<LocalDate, ArrayList<Double>> balances = getProjectedBalancesByPeriod();
-        LinkedHashMap<LocalDate, ArrayList<T>> projectedTransactions = getProjectedTransactionsByPeriod();
-        final Double[] indexBal = {getCurrentBalance()};
-        balances.forEach( (balancePeriodDate, balanceList) -> {
-            ArrayList<T> periodTransactions = projectedTransactions.get( balancePeriodDate );
-            LinkedHashMap<Transaction, Double> periodProjections = new LinkedHashMap<>(  );
-
-            for( Transaction transaction : periodTransactions) {
-                Double endBal;
-                if(transaction.getIncomeFlag()) endBal = indexBal[0] + (Double)transaction.getProperty( R.string.amount_tag );
-                else endBal = indexBal[0] - (Double)transaction.getProperty( R.string.amount_tag );
-                periodProjections.put( transaction, endBal );
-                indexBal[0] = endBal;
-
-                setProjectedBalanceFlags(indexBal[0], (LocalDate)transaction.getProperty( R.string.date_tag ));
-            }
-
-            Object[] projectionItemData = new Object[]{balancePeriodDate, balanceList, periodProjections};
-            result.add( projectionItemData );
-        } );
-        MutableLiveData<ArrayList<Object[]>> liveDataResult = new MutableLiveData<>(  );
-        liveDataResult.setValue( result );
-        projectionsWithBalancesByPeriod = liveDataResult;
-    }
-
-
-    LinkedHashMap<LocalDate, ArrayList<Double>> getProjectedBalancesByPeriod(){
-        if(projectedBalancesByPeriod == null) setProjectedBalancesByPeriod();
-        return projectedBalancesByPeriod;
-    }
-    private void setProjectedBalancesByPeriod(){
-        LinkedHashMap<LocalDate, ArrayList<Double>> result = new LinkedHashMap<>();
-        double tempCurrentBalance = this.getCurrentBalance();
-
-        LinkedHashMap<LocalDate, ArrayList<T>> projectedTransactionByPeriod = getProjectedTransactionsByPeriod();
-
-        for(  Map.Entry<LocalDate, ArrayList<T>> periodEntry: projectedTransactionByPeriod.entrySet()){
-            LocalDate period = periodEntry.getKey();
-            ArrayList<T> projectionList = periodEntry.getValue();
-            double beginningBalance, endingBalance, incomeSum, expenseSum;
-
-            beginningBalance = tempCurrentBalance;
-            incomeSum = 0;
-            expenseSum = 0;
-
-            for(T projection : projectionList){
-                if( projection.getIncomeFlag() ) incomeSum += (Double)projection.getProperty(R.string.amount_tag );
-                else expenseSum += (Double)projection.getProperty( R.string.amount_tag );
-            }
-
-            endingBalance = beginningBalance + incomeSum - expenseSum;
-
-            ArrayList<Double> balanceArray = new ArrayList<>(  );
-            balanceArray.add(beginningBalance);
-            balanceArray.add( incomeSum );
-            balanceArray.add( expenseSum );
-            balanceArray.add( endingBalance );
-
-            result.put( period, balanceArray );
-            tempCurrentBalance = endingBalance;
-        }
-
-
-        projectedBalancesByPeriod = result;
-    }
-
-
-    LinkedHashMap<LocalDate, ArrayList<T>> getProjectedTransactionsByPeriod(){
-        if(this.projectedTransactionsByPeriod == null) setProjectedTransactionsByPeriod();
-        return this.projectedTransactionsByPeriod;
-    }
-    private void setProjectedTransactionsByPeriod() {
-        LinkedHashMap<LocalDate, ArrayList<T>> result = new LinkedHashMap<>();
-        ArrayList<T> allProjections = new ArrayList<>(  );
-        LocalDate cutoffDate = mModelRepo.getCutoffDate();
-        LocalDate currentDate = LocalDate.now();
-        LocalDate firstProjectedDate;
-
-
-        mModelRepo.getActiveTransactions().forEach( transaction -> {
-            ArrayList<T> projectedTransactions = getProjections( (Transaction)transaction );
-
-            allProjections.addAll( projectedTransactions );
-        } );
-
-        firstProjectedDate = currentDate.with( MonthDay.of( currentDate.getMonth(), 1 ) );
-
-        int periodsToProject = (int) mModelRepo.getSettingsValue( R.string.setting_value_periods_to_project );
-        for( int index = 0; index <= periodsToProject; index ++){
-            LocalDate indexDate = firstProjectedDate.plusMonths( index );
-            result.put( indexDate, new ArrayList<>(  ));
-        }
-
-        while(!allProjections.isEmpty()){
-            T projection = allProjections.remove( 0 );
-            LocalDate projectedDate = (LocalDate) projection.getProperty( R.string.date_tag );
-            if (projectedDate.isAfter( cutoffDate )) continue;
-
-            if(projectedDate.isBefore( firstProjectedDate )){
-                int index = 0;
-                while(projectedDate.isBefore( firstProjectedDate )){
-                    LinkedHashMap<LocalDate, ArrayList<T>> result_copy = new LinkedHashMap<>(  );
-                    index++;
-                    firstProjectedDate = firstProjectedDate.minusMonths( index );
-                    result_copy.put( firstProjectedDate, new ArrayList<>(  ));
-                    result.forEach( (date, projectionList) -> result_copy.put( date, projectionList ) );
-                    result = result_copy;
-                }
-
-            }
-
-
-            LocalDate resultInsertionDate = null;
-            int keyIndex = 0;
-            Object[] keySet = result.keySet().toArray();
-
-            while(resultInsertionDate == null && keyIndex < keySet.length){
-                LocalDate firstDayOfPeriod = ((LocalDate)keySet[keyIndex]);
-                LocalDate firstDayOfNextPeriod;
-                if(keyIndex == keySet.length -1) firstDayOfNextPeriod = cutoffDate;
-                else firstDayOfNextPeriod = ((LocalDate)keySet[keyIndex + 1]);
-
-                if( projectedDate.isAfter( firstDayOfPeriod.minusDays( 1 ) ) && projectedDate.isBefore( firstDayOfNextPeriod ) )
-                    resultInsertionDate = (LocalDate) keySet[keyIndex];
-                keyIndex++;
-            }
-
-            if(resultInsertionDate != null && !resultInsertionDate.isAfter( cutoffDate )){
-                ArrayList<T> resultSet = result.get( resultInsertionDate );
-
-                resultSet.add( projection );
-                Collections.sort( resultSet );
-                result.replace( resultInsertionDate, resultSet );
-            }
-
-
-        }
-
-        projectedTransactionsByPeriod = result;
-    }
-
-
-    void setProjectedBalanceFlags(Double balance, LocalDate balanceDate){
-        ArrayList<RecordedTransaction> records = getRecords( "all" );
-        if(this.lowestProjectedBalance == null) {
-            this.lowestProjectedBalance = getCurrentBalance();
-            if(records.isEmpty()) this.lowestProjectedBalanceDate = LocalDate.now();
-            else this.lowestProjectedBalanceDate = (LocalDate)(records.get( records.size()-1 ).getProperty( R.string.date_tag ));
-        }
-        if(balance < this.lowestProjectedBalance) {
-            this.lowestProjectedBalance = balance;
-            this.lowestProjectedBalanceDate = balanceDate;
-        }
-
-        //add setting of flags for notification of going below threshold or zero balances
-    }
-
-    public ArrayList<T> getProjections(Transaction transaction) {
-        //this will take the transaction and return a list of all projected transactions to the cutoff date
-        //list will generate projection when one is not found in storage, will load stored projection if found
-
-        ArrayList<T> projections = new ArrayList<>(  );
-        String recurrance = (String) transaction.getProperty( R.string.recurrence_tag );
-
-        if(recurrance == null || recurrance.contentEquals( "0-0-0-0-0-0-0" )) projections.add( (T)transaction );
-        else {
-            LocalDate indexDate = (LocalDate) transaction.getProperty( R.string.date_tag );
-            LinkedHashMap<LocalDate, ProjectedTransaction> storedProjections = mModelRepo.getTransactionProjections( transaction );
-
-
-            if(storedProjections.size() > 0){
-                LocalDate firstStoredProjectionDate = (LocalDate) storedProjections.keySet().toArray()[0];
-                if(firstStoredProjectionDate.isBefore( indexDate )) indexDate = firstStoredProjectionDate;
-            }
-
-            while(!indexDate.isAfter( mModelRepo.getCutoffDate() )){
-                ProjectedTransaction projection = storedProjections.get( indexDate );
-
-                if(projection == null) projection = ProjectedTransaction.getInstance( transaction, indexDate );
-                projections.add( (T) projection );
-                indexDate = mModelRepo.getNextProjectedDate(transaction.getProperty( R.string.recurrence_tag ).toString(), indexDate);
-            }
-
-        }
-
-        return projections;
-    }
-
-    public ArrayList<RecordedTransaction> getRecords(Object type){
-        return mModelRepo.getRecordedTransactions();
-    }
-
-    public ArrayList<T> getOverdueTransactions(boolean includeCurrentDue) {
-        ArrayList<T> result = new ArrayList<>(  );
-        return result;
-    }
-
-    public ArrayList<Transaction> getActiveTransactions() {
-        ArrayList<Transaction> result = new ArrayList<>(  );
-        ArrayList<Transaction> income = new ArrayList<>( cachedIncome.getValue() );
-        ArrayList<Transaction> expense = new ArrayList<>( cachedExpense.getValue() );
-        result.addAll( income );
-        result.addAll( expense );
-
-        return result;
-    }
-
-    public ArrayList<Object[]> getRecordsWithBalancesByPeriod() {
-
-
-        return new ArrayList<Object[]>();
-    }
-
-
-
-
-    public LiveData<Map<LocalDate, ArrayList<T>>> projectionsByPeriod(){
-        if(mProjectionsByPeriod == null){
-            LinkedHashMap<LocalDate, ArrayList<T>> result = new LinkedHashMap<>(  );
-            ArrayList<Transaction> expenses = getCachedExpense().getValue();
-            ArrayList<Transaction> income = getCachedIncome().getValue();
-            ArrayList<T> allProjections = new ArrayList<>(  );
-
-            expenses.forEach( transaction -> allProjections.addAll( getProjections( transaction ) ));
-            income.forEach( transaction -> allProjections.addAll( getProjections( transaction ) ) );
-
-            Collections.sort( allProjections );
-
-            for(T projection : allProjections){
-                LocalDate projectionPeriod = ((LocalDate) projection.getProperty( R.string.date_tag )).withDayOfMonth( 1 );
-
-                if(!result.containsKey( projectionPeriod )) {
-                    result.put( projectionPeriod, new ArrayList<>(  ) );
-                }
-
-                ArrayList<T> periodProjections = result.get( projectionPeriod );
-                periodProjections.add( projection );
-                Collections.sort( periodProjections );
-                result.replace( projectionPeriod, periodProjections );
-            }
-
-            mProjectionsByPeriod = new MutableLiveData<>( result );
-        }
-        return mProjectionsByPeriod;
-    }
-
-
-
-
-    private void buildProjection(){
-        HashMap<LocalDate, HashMap<String, LiveData<Object[]>>> projectedBudget; //String = "{transaction uuid}{+scheduled date if a projection}" //Object[] = {Transaction,Double}
-        ArrayList<Transaction> transactions = getActiveTransactions();
-        Double balanceIndex = getCurrentBalance();
-
-        LinkedHashMap<LocalDate, ArrayList<T>> projectionsByPeriod = new LinkedHashMap<>(  );
-        transactions.stream()
-                .map( transaction -> getProjections( transaction ) )
-                .reduce( (projectionArray, projections) -> {
-                    if(projections == null) projections = new ArrayList<T>();
-                    projections.addAll( projectionArray );
-                    return projections;
-                } ).get().stream()
-                .forEach( projection -> {
-                    LocalDate periodDate = getPeriodDate( projection );
-                    if(!(projectionsByPeriod.containsKey( periodDate ))) projectionsByPeriod.put( periodDate, new ArrayList<T>(  ) );
-                    ArrayList periodProjections = projectionsByPeriod.get( periodDate );
-
-                    periodProjections.add( projection );
-                } );
-
-        projectionsByPeriod.entrySet().stream();
-//                .map( (periodDate, periodTransactions) -> {
+//    private Map<Integer, List<Transaction>> cacheTransactions() {
+////        ArrayList<Transaction> transactions = new ArrayList<Transaction>(mModelRepo.getActiveTransactions());
+//        List<Transaction> income = (List<Transaction>) mModelRepo.getTransactionsByType(R.string.transaction_type_income).getValue();
+//        List<Transaction> expense = (List<Transaction>) mModelRepo.getTransactionsByType(R.string.transaction_type_expense).getValue();
+//        Map<Integer, List<Transaction>> cache = new HashMap<>();
 //
-//                } );
+//        cache.put(R.string.transaction_type_expense, expense);
+//        cache.put(R.string.transaction_type_income, income);
+//        mCachedTransactionsByType.postValue(cache);
+//        mCachedTransactionsByType.observeForever( transactionMap -> mExecutor.execute(() -> buildProjectionData(transactionMap)));
+//        return cache;
+//    }
+//    private Map<LocalDate, List<RecordedTransaction>> cacheRecords() {
+//        List<RecordedTransaction> allRecords = mModelRepo.getRecordedTransactions();
+//        Map<LocalDate, List<RecordedTransaction>> recordsByPeriod = new HashMap<>();
+//        Map<String, MutableLiveData<RecordedTransaction>> recordsByKey = new HashMap<>();
+//
+//        allRecords.forEach( record -> {
+//            LocalDate recordPeriodDate = ((LocalDate) record.getProperty(R.string.date_tag)).withDayOfMonth(1);
+//            List<RecordedTransaction> periodRecords = recordsByPeriod.get(recordPeriodDate);
+//
+//            if(periodRecords == null) {
+//                periodRecords = new ArrayList<>();
+//                periodRecords.add(record);
+//                recordsByPeriod.put( recordPeriodDate, periodRecords );
+//            }
+//            else {
+//                periodRecords.add(record);
+//                recordsByPeriod.replace( recordPeriodDate, periodRecords );
+//            }
+//
+//            mRecordPeriods.postValue(Arrays.asList(recordsByPeriod.keySet().stream().toArray(LocalDate[]::new)));
+//
+//        });
+//
+//        recordsByPeriod.forEach( (period, recordList) -> {
+//            MutableLiveData<List<String>> periodKeys = mRecordKeysByPeriod.get(period);
+//            if(periodKeys == null) periodKeys = new MutableLiveData<>(new ArrayList<>());
+//
+//        });
+//
+//
+//        return recordsByPeriod;
+//    }
+
+
+    public LiveData<Map<UUID, Transaction>> getCachedTransactions(){ return cCachedTransactionsById; }
+    public LiveData<Map<LocalDate, List<RecordedTransaction>>> getCachedRecords(){ return cCachedRecordsByPeriod; }
+
+
+    private void buildProjectionData(Map<Integer, List<Transaction>> transactionMap){
+
+        //get all the transactions into a list
+        List<Transaction> transactionList = new ArrayList<>();
+        transactionMap.values().forEach(transactionList::addAll);
+
+        //project the transactions and sort by period into a map
+        Map<LocalDate, List<T>> projectionMap = new HashMap<>();
+        transactionList.stream().map(transaction -> mModelRepo.getProjectionsByTransactionId(transaction.getId()).getValue()).forEach( projectionList ->
+            projectionList.forEach( projection -> {
+                        LocalDate periodDate = ((LocalDate) projection.getProperty(R.string.date_tag)).withDayOfMonth(1);
+                        List<T> periodProjections = projectionMap.get(periodDate);
+
+                        if(periodProjections == null) {
+                            periodProjections = new ArrayList<>();
+                            periodProjections.add((T) projection);
+                            projectionMap.put(periodDate, periodProjections);
+                        }else {
+                            periodProjections.add((T) projection);
+                            projectionMap.replace(periodDate, periodProjections);
+                        }
+
+                    }));
+
+
+        //projectionMap should now contain all the projections in a map sorted by period
+        //  if cachedPeriods contains periods not in projectionMap, they should be removed
+        //  if projection map contains periods not in cachedPeriods, they should be added to cachedPeriods
+        //post cachedPeriods to mProjectedPeriods
+        List<LocalDate> cachedPeriods = mProjectedPeriods.getValue();
+        cachedPeriods.removeIf( period -> projectionMap.get(period) == null );
+        projectionMap.forEach( (period, periodProjections) -> { if(!cachedPeriods.contains(period)) cachedPeriods.add(period); });
+        if(!cachedPeriods.containsAll(mProjectedPeriods.getValue())
+                || !mProjectedPeriods.getValue().containsAll(cachedPeriods))
+            mProjectedPeriods.postValue(cachedPeriods);
+
+
+        //cachedPeriods now contains only the periods to be projected
+        //  if cachedKeys contains periods not in cachedPeriods, they should be removed
+        //  if cachedPeriods contains periods not in cachedKeys, they should be added to cachedKeys
+        //now cachedKeys should contain the same periods as cachedPeriods
+        //  for each period in cachedKeys we need to update the keyList with the projections from projectionMap
+        //      if cachedKeyList of the period contains a key not in the projectionKeyList, it should be removed from cachedKeyList
+        //      if projectionKeyList contains a key not found in cachedKeyList, it should be added to cachedKeylist
+        Map<LocalDate, MutableLiveData<LinkedList<String>>> cachedKeys = mProjectedTransactionKeysByPeriod;
+        List<LocalDate> removeCachedKeys = new ArrayList<>();
+        cachedPeriods.forEach( period -> { if(cachedKeys.get(period) == null) cachedKeys.put(period, new MutableLiveData<>(new LinkedList<>())); });
+        cachedKeys.forEach( (period, keyList) -> { if( !cachedPeriods.contains(period) ) removeCachedKeys.add(period); });
+        removeCachedKeys.forEach( staleKey -> cachedKeys.remove(staleKey));
+
+        cachedKeys.forEach( (period, keyList) -> {
+            List<T> periodProjections = projectionMap.get(period);
+            Collections.sort(periodProjections);
+            LinkedList<String> projectionKeyList = new LinkedList<>(Arrays.asList(periodProjections.stream().map( projection -> {
+                String keyString = projection.getId().toString();
+                if(projection instanceof ProjectedTransaction)
+                    keyString += ":" + ((ProjectedTransaction)projection).getScheduledProjectionDate().toString();
+                return keyString;
+            }).toArray(String[]::new)));
+            LinkedList<String> cachedKeyList = keyList.getValue();
+            List<String> removeFromCache = new ArrayList<>();
+            cachedKeyList.forEach( cachedKey -> { if(!projectionKeyList.contains(cachedKey)) removeFromCache.add(cachedKey); });
+            projectionKeyList.forEach( projectionKey -> { if(!cachedKeyList.contains(projectionKey)) cachedKeyList.add(projectionKey); });
+            removeFromCache.forEach( key -> cachedKeyList.remove(key));
+//                Collections.sort( cachedKeyList, (key, next) -> {
+//                    String[] keySplit = key.split(":");
+//                    String[] nextSplit = next.split(":");
+//
+//                    if( keySplit.length != 2 && nextSplit.length != 2 ) return
+//                });
+            if(!cachedKeys.get(period).getValue().containsAll(cachedKeyList)
+                    || !cachedKeyList.containsAll(cachedKeys.get(period).getValue()))
+                cachedKeys.get(period).postValue(cachedKeyList);
+
+        });
+        mProjectedTransactionKeysByPeriod = cachedKeys;
+
+
+
+
+        //cachedKeys now contain only the projectionKeys for the current build with periods matching cachedPeriods
+        //now I need to go through the cachedProjectionsWithBalances and update cachedProjections and corresponding cachedBalances
+        //  duplicate cachedProjectionsWithBalance
+        //  go through entire set of cachedKeys, in order by period
+        //  for each cachedKey:
+        //      if the cachedProjectionWithBalance is not found, add entry to cachedProjectionsWithBalance
+        //      if the cachedProjectionWithBalance is found remove it from the duplicate
+        //          if the cachedProjection is not equivalent to projection, post updated projection
+        //          if the cachedBalance is not the same as indexBalance, post updated balance
+        //  whatever remaining in duplicate should be removed from cachedProjectionsWithBalance
+        Map<String, Map.Entry<MutableLiveData<T>, MutableLiveData<Double>>> cachedProjectionsWithBalance = mProjectedTransactionWithBalance;
+        List<String> keyHolder = new ArrayList<>(cachedProjectionsWithBalance.keySet());
+        Double indexBalance = getCurrentBalance();
+
+        for(Map.Entry<LocalDate, MutableLiveData<LinkedList<String>>> keyPeriodEntry : cachedKeys.entrySet()){
+            LocalDate period = keyPeriodEntry.getKey();
+            LinkedList<String> keys = keyPeriodEntry.getValue().getValue();
+            for(String key : keys){
+                T projection = projectionMap.get(period).stream().filter( proj -> {
+                    String stringKey = proj.getId().toString();
+                    if(proj instanceof ProjectedTransaction) stringKey += ":" + ((ProjectedTransaction)proj).getScheduledProjectionDate().toString();
+                    return stringKey.contentEquals(key);
+                }).findFirst().get();
+
+                double balance;
+                if(projection.getIncomeFlag()) balance = indexBalance + (Double)projection.getProperty(R.string.amount_tag);
+                else balance = indexBalance - (Double) projection.getProperty(R.string.amount_tag);
+                indexBalance = balance;
+
+                Map.Entry<MutableLiveData<T>, MutableLiveData<Double>> cachedEntry = cachedProjectionsWithBalance.get(key);
+                if(cachedEntry == null){
+                    //entry not found, need to create and add to cachedProjectionsWIthBalance
+                    Map.Entry<MutableLiveData<T>, MutableLiveData<Double>> projectionEntry = new AbstractMap.SimpleEntry<>(new MutableLiveData<>(projection), new MutableLiveData<>(balance));
+                    cachedProjectionsWithBalance.put(key, projectionEntry);
+                }
+                else {
+                    //engtry found, need to check projection and balance for possible updates
+                    MutableLiveData<T> cachedProjection = cachedEntry.getKey();
+                    MutableLiveData<Double> cachedBalance = cachedEntry.getValue();
+
+
+                    if(!cachedProjection.equals(projection)) cachedProjection.postValue(projection);
+                    if(!cachedBalance.getValue().equals(balance)) cachedBalance.postValue(balance);
+                }
+                keyHolder.remove(key);
+            }
+        }
+        keyHolder.forEach(cachedProjectionsWithBalance::remove);
+        mProjectedTransactionWithBalance = cachedProjectionsWithBalance;
+
     }
 
-    private LocalDate getPeriodDate(T transaction){
-        return ((LocalDate)transaction.getProperty( R.string.date_tag )).withDayOfMonth( 1 );
+
+    //methods for accessing projection model data by view implementing viewmodel
+    public LiveData<List<LocalDate>> getProjectedPeriods(){
+        return mProjectedPeriods;
+    }
+    public LiveData<LinkedList<String>> getProjectionDataKeys(LocalDate periodDate){
+        return mProjectedTransactionKeysByPeriod.get(periodDate);
+    }
+    public LiveData<T> getProjection(String projectionKey){
+        Map.Entry<MutableLiveData<T>, MutableLiveData<Double>> foundProjection = mProjectedTransactionWithBalance.get(projectionKey);
+        if(foundProjection == null) return null;
+        return foundProjection.getKey();
+    }
+    public LiveData<Double> getProjectedBalance(String projectionKey){
+        return mProjectedTransactionWithBalance.get(projectionKey).getValue();
     }
 
 
 
+    //methods for accessing record model data by view implementing viewmodel
+    public LiveData<List<LocalDate>> getRecordPeriods() { return mRecordPeriods; }
+    public LiveData<List<String>> getRecordPeriodKeys(LocalDate period) { return mRecordKeysByPeriod.get(period); }
+    public LiveData<T> getRecord(String key) { return mRecordsByKey.get(key); }
 
 
 
+    //methods for modifying stored data and resulting models: first performs the storage op, then updates the cached models
+    public boolean update(Object object) {
+        if(mModelRepo.update( object )){
+            //post changes to cached values as needed
 
-    /*
-        okay, so it is working, but how I'm loading and accessing data is not at all sufficient
+            return true;
+        }
+        return false;
+    }
+    public boolean delete(Object object) {
+        if(mModelRepo.delete( object )){
+            //post changes to cached values as needed
 
-        the problem is that I'm creating large complex object arrays which change with any update to a transaction
-        I need to define a more functional approach. the goals of this approach are:
-            -   replace calls for these massive objects with a series of functions
-                -   a single function that takes a list of transactions
-                    and returns them grouped by period
-                -   a single function that takes a list of transactions and a starting balance
-                    and returns a list with the resulting balances following each transaction
-                -   a single function that takes a single Transaction and returns a list of Projections/Transactions
-            -   when changes to transactions occur a function should only recalculate it's result if needed
-                -   if I can somehow identify what specifically needs to change when an observed object
-                    changes, I can use id's or tags or a flag to determine which functions need to be re-called
-                -   I could also have separate functions for setting specific view elements
-                    -   if only the calculated transaction balances need to be changed,
-                        should have a function which takes the map of views and balances to modify the
-                        value shown in the view
-                    -   instead of running every item through the alert function, just set the balance view style
-                        when the amount is loaded by checking against threshold and zero
-                -   If an item is added or removed, insert or remove the view and reload the balance values
-                -
+            return true;
+        }
+        return false;
+    }
+    public boolean reset(Object object) {
+        if(mModelRepo.reset( object )){
+            //post changes to cached values as needed
 
-        handling changes to transactions without rebuilding evertying, is what I'm most unsure how to handle.
-        some thoughts I have are:
-        -   all the views effected shouldn't be recreated, only update the values that are effected
-        -   I would need to observe a more nuanced set of LiveData objects and I'm not familiar with that class enough
-        -   I think a solution may lie in the area of making each list item a Fragment with a
-            viewModel providing data being observed from the main activity viewmodel
-            -   I'm having trouble though with dynamically managing child fragments
-            -   Another class that may hold answers is Room. Not sure about what it's
-                function and use cases are though but what I've gathered is that it's connected to
-                ViewModel and LiveData
-                    -
-     */
+            return true;
+        }
+        return false;
+    }
+    public boolean reconcile(Object object){
+        if(mModelRepo.reconcile( object )){
+            //post changes to cached values as needed
+
+            return true;
+        }
+        return false;
+    }
 
 
 
+    public Double getCurrentBalance() { return mModelRepo.getCurrentBalance().getValue(); }
+    public Object getSettingsObject(int resourceId){ return mModelRepo.getSettingsObject(resourceId).getValue(); }
 
 }
 

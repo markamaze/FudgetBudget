@@ -123,10 +123,11 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/period_projection_list"
+    <LinearLayout
+        android:id="@+id/period_transactions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="visible"/>
+        android:visibility="visible"
+        android:orientation="vertical" />
 
 </LinearLayout>

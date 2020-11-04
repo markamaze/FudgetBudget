@@ -9,7 +9,7 @@ import java.util.Locale;
 
 public class formatUtility {
 
-    public static String formatCurrency(Object currency){ return "$" + String.format( Locale.ENGLISH, "%.0f", currency ); }
+    public static String formatCurrency(Object currency){ return "$" + String.format( Locale.ENGLISH, "%f", currency ); }
     public static String formatDate(Object return_type, LocalDate date) {
         int resourceId;
 
@@ -126,17 +126,17 @@ public class formatUtility {
         String period = recurrenceValues[2];
         String onDayType = recurrenceValues[3];
 
-        if(period.contentEquals( "0")) period = "d";
-        else if(period.contentEquals( "1")) period = "w";
-        else if(period.contentEquals( "2")) period = "m";
-        else if(period.contentEquals( "3")) period = "y";
+        if(period.contentEquals( "0")) period = "days";
+        else if(period.contentEquals( "1")) period = "weeks";
+        else if(period.contentEquals( "2")) period = "months";
+        else if(period.contentEquals( "3")) period = "years";
 
-        String result = "e" + frequency + period ;
+        String result = frequency + " " + period ;
 
-        if(result.contentEquals( "e1d" )) result = "daily";
-        else if(result.contentEquals( "e1w" )) result = "weekly";
-        else if(result.contentEquals( "e1m" )) result = "monthly";
-        else if(result.contentEquals( "e1y" )) result = "yearly";
+        if(result.contentEquals( "1days" )) result = "daily";
+        else if(result.contentEquals( "1weeks" )) result = "weekly";
+        else if(result.contentEquals( "1months" )) result = "monthly";
+        else if(result.contentEquals( "1years" )) result = "yearly";
 
         return result;
     }

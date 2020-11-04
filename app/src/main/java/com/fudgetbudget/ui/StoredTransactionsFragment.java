@@ -8,6 +8,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.savedstate.SavedStateRegistry;
+import androidx.savedstate.SavedStateRegistryController;
 
 import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
@@ -19,27 +21,20 @@ import com.fudgetbudget.FudgetBudgetViewModel;
 import com.fudgetbudget.R;
 import com.fudgetbudget.model.Transaction;
 
+import java.util.List;
+
 import static android.view.View.GONE;
 
 public class StoredTransactionsFragment <T extends Transaction> extends Fragment {
 
     private FudgetBudgetViewModel<T> mViewModel;
-    private ListItemViewBuilder mListItemViewBuilder;
+    private ListItemViewBuilder<T> mListItemViewBuilder;
 
     @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach( context );
-        ViewModelProvider.Factory factory = new ViewModelProvider.Factory() {
-            @NonNull
-            @Override
-            public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-                return (T) new FudgetBudgetViewModel(context);
-            }
-        };
-        mViewModel = new ViewModelProvider(this, factory).get( FudgetBudgetViewModel.class );
-        mListItemViewBuilder = new ListItemViewBuilder(context);
-
-        // TODO: Use the ViewModel
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mViewModel = new ViewModelProvider(requireActivity()).get(FudgetBudgetViewModel.class);
+        mListItemViewBuilder = new ListItemViewBuilder<T>(getContext());
     }
 
     @Override
@@ -49,56 +44,51 @@ public class StoredTransactionsFragment <T extends Transaction> extends Fragment
         ViewGroup incomeList = storedTransactionView.findViewById( R.id.transaction_income_list );
 
 
-        mViewModel.getCachedExpense().observe( getViewLifecycleOwner(), expenseTransactions -> {
+        mViewModel.getCachedTransactions().observe( getViewLifecycleOwner(), transactionsCache -> {
+            List<Transaction> expenses = transactionsCache.get(R.string.transaction_type_expense);
+            List<Transaction> income = transactionsCache.get(R.string.transaction_type_income);
+
             expenseList.removeAllViews();
-            expenseTransactions.forEach( transaction -> {
-                ViewGroup listItem = (ViewGroup) getLayoutInflater().inflate( R.layout.layout_transaction, null );
-
-                listItem.findViewById( R.id.line_item_recurrence_short_value ).setVisibility( View.VISIBLE );
-                listItem.findViewById( R.id.line_item_balance_value ).setVisibility( GONE );
-
-                mListItemViewBuilder.setLineItemPropertyViews( listItem, transaction );
-                mListItemViewBuilder.setCardLayoutPropertyViews( listItem, transaction, false );
-                listItem.setOnClickListener( v -> mListItemViewBuilder.toggleCardVisibility( listItem ) );
-                initializeCardButtons( expenseList, listItem, transaction );
-
-                expenseList.addView( listItem );
-            });
-        });
-
-        mViewModel.getCachedIncome().observe( getViewLifecycleOwner(), incomeTransactions -> {
             incomeList.removeAllViews();
-            incomeTransactions.forEach( transaction -> {
-                ViewGroup listItem = (ViewGroup) getLayoutInflater().inflate( R.layout.layout_transaction, null );
-                mListItemViewBuilder.setLineItemPropertyViews( listItem, transaction );
-                mListItemViewBuilder.setCardLayoutPropertyViews( listItem, transaction, false );
-                listItem.setOnClickListener( v -> mListItemViewBuilder.toggleCardVisibility( listItem ) );
-                initializeCardButtons( incomeList, listItem, transaction );
 
-                incomeList.addView( listItem );
-            });
+            if(expenses != null) expenses.forEach( transaction -> expenseList.addView( getTransactionView(transaction) ));
+            if(expenses != null) income.forEach( transaction -> incomeList.addView( getTransactionView( transaction )));
+
         });
+
 
 
         Button createExpenseButton = storedTransactionView.findViewById( R.id.button_create_expense_transaction );
-        createExpenseButton.setOnClickListener( button -> {
-            mViewModel.createTransaction(R.string.transaction_type_expense);
-        } );
+        createExpenseButton.setOnClickListener( button -> mViewModel.update(Transaction.getInstance(R.string.transaction_type_expense, getContext().getExternalFilesDir(null).getPath())));
 
         Button createIncomeButton = storedTransactionView.findViewById( R.id.button_create_income_transaction );
-        createIncomeButton.setOnClickListener( button -> {
-            mViewModel.createTransaction(R.string.transaction_type_income);
-        } );
-
-
-//        TransitionInflater transitionInflater = TransitionInflater.from(requireContext());
-//        setEnterTransition(transitionInflater.inflateTransition( android.R.transition.slide_bottom ));
+        createIncomeButton.setOnClickListener( button -> mViewModel.update(Transaction.getInstance(R.string.transaction_type_income, getContext().getExternalFilesDir(null).getPath())));
 
         return storedTransactionView;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        getView().setVisibility(View.INVISIBLE);
+    }
 
-    private <T extends Transaction> void initializeCardButtons(ViewGroup listView, ViewGroup lineItemView, Transaction transaction){
+    private View getTransactionView(Transaction transaction) {
+        ViewGroup listItem = (ViewGroup) getLayoutInflater().inflate( R.layout.layout_transaction, null );
+
+        listItem.findViewById( R.id.line_item_recurrence_short_value ).setVisibility( View.VISIBLE );
+        listItem.findViewById( R.id.line_item_balance_value ).setVisibility( GONE );
+
+        mListItemViewBuilder.setLineItemPropertyViews( listItem, transaction );
+        mListItemViewBuilder.setCardLayoutPropertyViews( listItem, transaction, false );
+        listItem.setOnClickListener( v -> mListItemViewBuilder.toggleCardVisibility( listItem ) );
+        initializeCardButtons( listItem, transaction );
+
+        return listItem;
+    }
+
+
+    private <T extends Transaction> void initializeCardButtons(ViewGroup lineItemView, Transaction transaction){
         ViewGroup buttonsView = lineItemView.findViewById( R.id.card_buttons );
         ViewGroup cardDrawer = lineItemView.findViewById( R.id.card_view );
 
@@ -151,7 +141,7 @@ public class StoredTransactionsFragment <T extends Transaction> extends Fragment
         if(deleteButton != null) deleteButton.setOnClickListener( v -> {
             mViewModel.delete( transaction );
 
-            listView.removeView( lineItemView );
+//            listView.removeView( lineItemView );
         } );
 
     }

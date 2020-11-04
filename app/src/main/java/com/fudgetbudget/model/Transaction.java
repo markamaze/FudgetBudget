@@ -189,14 +189,38 @@ public class Transaction implements Comparable {
 
     @Override
     public int compareTo(Object transaction) {
+        if(transaction == null) return -1;
         LocalDate comparisonDate;
         if(transaction instanceof ProjectedTransaction) comparisonDate = (LocalDate)(((ProjectedTransaction)transaction).getProperty(R.string.date_tag ));
         else comparisonDate = (LocalDate)(((Transaction)transaction).getProperty(R.string.date_tag ));
 
         if( this.getProperty(R.string.date_tag) == null) return 1;
         if ( ((LocalDate)this.getProperty(R.string.date_tag)).isAfter( comparisonDate )) return 1;
-        if ( ((LocalDate)this.getProperty(R.string.date_tag)).isEqual( comparisonDate )) return 0;
-        else return -1;
+        if( ((LocalDate)this.getProperty(R.string.date_tag)).isBefore( comparisonDate )) return -1;
+        if ( ((LocalDate)this.getProperty(R.string.date_tag)).isEqual( comparisonDate )) {
+            boolean thisIsIncome = this.getIncomeFlag();
+            boolean compareIsIncome = ((Transaction) transaction).getIncomeFlag();
+
+            if(thisIsIncome && !compareIsIncome) return -1;
+            if(!thisIsIncome && compareIsIncome) return 1;
+            else return 0;
+        }
+        else return 0;
     }
 
+    @Override
+    public boolean equals(Object transaction) {
+        if( !(transaction instanceof Transaction) ) return false;
+        Transaction trns = (Transaction) transaction;
+
+        if(!this.getId().equals(trns.getId())) return false;
+        if(!this.getLabel().equals(trns.getLabel())) return false;
+        if(!this.getAmount().equals(trns.getAmount())) return false;
+        if(!this.getNote().equals(trns.getNote())) return false;
+        if(!this.getRecurrance().equals(trns.getRecurrance())) return false;
+        if(!this.getIncomeFlag().equals(trns.getIncomeFlag())) return false;
+        if(!this.getPath().equals(trns.getPath())) return false;
+        if(!this.getScheduledDate().equals(trns.getScheduledDate())) return false;
+        return true;
+    }
 }

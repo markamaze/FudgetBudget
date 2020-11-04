@@ -49,11 +49,28 @@
 
         </RelativeLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/period_projection_list"
+        <TextView
+            android:id="@+id/loading_budget_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:paddingVertical="20dp"
+            android:textAlignment="center"
+            android:text="building projected budget..." />
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/period_projection_container">
+
+                <LinearLayout
+                    android:id="@+id/period_projection_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+        </ScrollView>
+
 
     </LinearLayout>
 

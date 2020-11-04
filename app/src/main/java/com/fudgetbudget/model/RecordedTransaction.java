@@ -8,7 +8,7 @@ import org.w3c.dom.NodeList;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public class RecordedTransaction<T extends Transaction> extends Transaction {
+public class RecordedTransaction extends Transaction {
     String recordNote;
     Double recordAmount;
     LocalDate recordDate;

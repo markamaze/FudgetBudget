@@ -11,4 +11,26 @@
     <style name="SplashScreenTheme" parent="AppTheme">
         <item name="android:windowBackground">@drawable/splashscreen</item>
     </style>
+
+    <style name="line_item"></style>
+
+    <style name="line_item_cell">
+        <item name="android:minWidth">60dp</item>
+        <item name="android:paddingHorizontal">6dp</item>
+    </style>
+
+    <style name="card_row_value">
+    </style>
+
+    <style name="card_row_key">
+        <item name="android:layout_width">100dp</item>
+    </style>
+
+    <style name="income_text_style">
+        <item name="android:textColor">@android:color/holo_green_dark</item>
+    </style>
+
+    <style name="expense_text_style">
+        <item name="android:textColor">@android:color/holo_red_dark</item>
+    </style>
 </resources>

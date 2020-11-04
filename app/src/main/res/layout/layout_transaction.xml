@@ -2,7 +2,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/list_item_background">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -12,38 +13,44 @@
         <LinearLayout android:id="@+id/line_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            style="@style/line_item">
 
             <TextView
                 android:id="@+id/line_item_date_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:tag="eee M/dd"
-                android:minWidth="100dp"/>
-
-            <TextView
-                android:id="@+id/line_item_recurrence_short_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone" />
+                android:minWidth="85dp"
+                style="@style/line_item_cell"/>
 
             <TextView
                 android:id="@+id/line_item_label_value"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                style="@style/line_item_cell" />
 
             <TextView
                 android:id="@+id/line_item_amount_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="end"/>
+                android:gravity="end"
+                style="@style/line_item_cell"/>
+
+            <TextView
+                android:id="@+id/line_item_recurrence_short_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                style="@style/line_item_cell" />
 
             <TextView
                 android:id="@+id/line_item_balance_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="end"/>
+                android:gravity="end"
+                style="@style/line_item_cell"/>
 
         </LinearLayout>
 
@@ -61,7 +68,8 @@
                 android:text="Label"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentStart="true"
-                android:layout_alignBaseline="@id/label_value"/>
+                android:layout_alignBaseline="@id/label_value"
+                style="@style/card_row_key"/>
 
             <EditText
                 android:id="@+id/label_value"
@@ -69,7 +77,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
-                android:layout_toEndOf="@id/label_key"/>
+                android:layout_toEndOf="@id/label_key"
+                style="@style/card_row_value"/>
 
             <TextView
                 android:id="@+id/amount_key"
@@ -78,7 +87,8 @@
                 android:text="Amount"
                 android:layout_alignParentStart="true"
                 android:layout_below="@id/label_key"
-                android:layout_alignBaseline="@id/amount_value"/>
+                android:layout_alignBaseline="@id/amount_value"
+                style="@style/card_row_key"/>
 
             <EditText
                 android:id="@+id/amount_value"
@@ -87,7 +97,8 @@
                 android:inputType="numberDecimal"
                 android:layout_below="@id/label_value"
                 android:layout_alignParentEnd="true"
-                android:layout_toEndOf="@id/amount_key"/>
+                android:layout_toEndOf="@id/amount_key"
+                style="@style/card_row_value"/>
 
             <RelativeLayout android:id="@+id/property_layout_date"
                 android:layout_width="match_parent"
@@ -100,7 +111,8 @@
                     android:layout_alignBaseline="@id/date_value"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentStart="true"
-                    android:text="Scheduled" />
+                    android:text="Scheduled"
+                    style="@style/card_row_key"/>
 
                 <TextView
                     android:id="@+id/date_value"
@@ -108,7 +120,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
-                    android:layout_toEndOf="@+id/date_key"/>
+                    android:layout_toEndOf="@+id/date_key"
+                    style="@style/card_row_value"/>
 
             </RelativeLayout>
 
@@ -123,14 +136,16 @@
                     android:text="Repeats"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentStart="true"
-                    android:layout_alignBaseline="@id/readable_recurrence_value"/>
+                    android:layout_alignBaseline="@id/readable_recurrence_value"
+                    style="@style/card_row_key"/>
 
                 <TextView android:id="@+id/readable_recurrence_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
-                    android:layout_toEndOf="@id/readable_recurrence_key"/>
+                    android:layout_toEndOf="@id/readable_recurrence_key"
+                    style="@style/card_row_value"/>
 
             </RelativeLayout>
 
@@ -141,7 +156,8 @@
                 android:text="Note"
                 android:layout_below="@id/property_layout_recurrence_readable"
                 android:layout_alignParentStart="true"
-                android:layout_alignBaseline="@id/note_value"/>
+                android:layout_alignBaseline="@id/note_value"
+                style="@style/card_row_key"/>
 
             <EditText
                 android:id="@+id/note_value"
@@ -150,7 +166,8 @@
                 android:inputType="textMultiLine"
                 android:layout_below="@id/property_layout_recurrence_readable"
                 android:layout_toEndOf="@id/note_key"
-                android:layout_alignParentEnd="true"/>
+                android:layout_alignParentEnd="true"
+                style="@style/card_row_value"/>
 
 
             <!--

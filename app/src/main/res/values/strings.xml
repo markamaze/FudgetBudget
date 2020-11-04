@@ -25,4 +25,5 @@
     <string name="calculated_average_expendable">calculated_average_expendable</string>
     <string name="calculated_average_expense">calculated_average_expense</string>
     <string name="calculated_average_income">calculated_average_income</string>
+    <string name="view_holder_identifier">view_holder_identifier</string>
 </resources>
