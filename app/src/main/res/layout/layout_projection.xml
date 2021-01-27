@@ -32,13 +32,14 @@
                 style="@style/line_item_cell" />
 
             <TextView
-                android:id="@+id/line_item_recurrence_short_value"
+                android:id="@+id/line_item_amount_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/line_item_cell" />
+                android:gravity="end"
+                style="@style/line_item_cell"/>
 
             <TextView
-                android:id="@+id/line_item_amount_value"
+                android:id="@+id/line_item_balance_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="end"
@@ -136,8 +137,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentEnd="true"
-                    android:enabled="false"
                     android:layout_toEndOf="@id/readable_recurrence_key"
+                    android:enabled="false"
                     style="@style/card_row_value"/>
 
             </RelativeLayout>
@@ -158,37 +159,18 @@
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
                 android:layout_below="@id/property_layout_recurrence_readable"
-                android:layout_alignParentEnd="true"
                 android:layout_toEndOf="@id/note_key"
-                style="@style/card_row_value"/>
-
-
-            <include android:id="@+id/property_layout_recurrence_editor"
-                layout="@layout/layout_transaction_recurrance_editor"
-                android:visibility="gone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/note_key"/>
+                android:layout_alignParentEnd="true"/>
 
         </RelativeLayout>
 
-
         <RelativeLayout
             android:id="@+id/card_buttons"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:layout_below="@id/card_view"
             android:paddingHorizontal="12dp">
-
-
-            <Button
-                android:id="@+id/editor_delete_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/reset_projections_button"
-                android:text="delete"
-                android:visibility="gone" />
 
             <Button
                 android:id="@+id/editor_update_button"
@@ -220,6 +202,13 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:text="modify" />
+
+            <Button
+                android:id="@+id/record_transaction_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:text="record" />
 
         </RelativeLayout>
 

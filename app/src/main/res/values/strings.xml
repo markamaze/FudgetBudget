@@ -26,4 +26,5 @@
     <string name="calculated_average_expense">calculated_average_expense</string>
     <string name="calculated_average_income">calculated_average_income</string>
     <string name="view_holder_identifier">view_holder_identifier</string>
+    <string name="transaction_type_all">transaction_type_all</string>
 </resources>

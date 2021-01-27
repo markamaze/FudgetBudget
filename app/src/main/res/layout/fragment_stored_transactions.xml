@@ -1,126 +1,214 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     tools:context=".ui.StoredTransactionsFragment">
 
-    <LinearLayout android:id="@+id/page_transactions"
+    <LinearLayout android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:visibility="gone"
+        android:orientation="vertical"
+        style="@style/toolbar">
 
-        <RelativeLayout android:id="@+id/page_header"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:textAlignment="center"
+            android:textSize="18dp"
+            android:paddingVertical="12dp"
+            android:text="Stored Transactions Toolbox" />
 
-            <TextView android:id="@+id/average_income_key"
+        <RelativeLayout android:id="@+id/page_tools_update_balancesheet_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/toolbar_tool">
+
+            <TextView android:id="@+id/tool_delete_transactions_key"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
                 android:layout_alignParentStart="true"
-                android:text="average income"
-                style="@style/TextAppearance.AppCompat.Subhead" />
-
-            <TextView android:id="@+id/average_income"
+                android:layout_toStartOf="@id/tool_delete_transactions"
+                android:layout_alignBaseline="@id/tool_delete_transactions"
+                android:text="Delete All Transactions"/>
+            <Button android:id="@+id/tool_delete_transactions"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
-                android:layout_toEndOf="@id/average_income_key"
-                style="@style/TextAppearance.AppCompat.Subhead"/>
-
-            <TextView android:id="@+id/average_expenses_key"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="average expenses"
-                android:layout_below="@id/average_income_key"
-                android:layout_alignParentStart="true"
-                style="@style/TextAppearance.AppCompat.Subhead"/>
-
-            <TextView android:id="@+id/average_expenses"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/average_income"
-                android:layout_alignParentEnd="true"
-                android:layout_toEndOf="@id/average_expenses"
-                style="@style/TextAppearance.AppCompat.Subhead"/>
-
-            <TextView android:id="@+id/average_gain_loss_key"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/average_expenses_key"
-                android:layout_alignParentStart="true"
-                android:text="average expendable funds"
-                style="@style/TextAppearance.AppCompat.Subhead"/>
-
-            <TextView android:id="@+id/average_gain_loss"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/average_expenses"
-                android:layout_alignParentEnd="true"
-                android:layout_toEndOf="@id/average_gain_loss_key"
-                style="@style/TextAppearance.AppCompat.Subhead"/>
+                android:text="Delete"/>
 
         </RelativeLayout>
 
-        <LinearLayout android:id="@+id/expense_list_header"
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/about"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:visibility="gone"
+        android:orientation="vertical"
+        style="@style/toolbar">
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="12dp">
+            android:textAlignment="center"
+            android:textSize="18dp"
+            android:paddingVertical="12dp"
+            android:text="Stored Transactions Information" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="4"
-                android:layout_height="match_parent"
-                android:text="Expenses"
-                android:gravity="center"
-                style="@style/TextAppearance.AppCompat.Title"/>
-
-            <Button
-                android:id="@+id/button_create_expense_transaction"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="match_parent"
-                android:text="+"
-                style="@style/Widget.AppCompat.Button.Small"/>
-
-        </LinearLayout>
-        <LinearLayout android:id="@+id/transaction_expense_list"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"/>
-
-        <LinearLayout android:id="@+id/income_list_header"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="12dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="4"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="Income"
-                style="@style/TextAppearance.AppCompat.Title"/>
-
-            <Button
-                android:id="@+id/button_create_income_transaction"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="+"
-                style="@style/Widget.AppCompat.Button.Small"/>
-
-        </LinearLayout>
-        <LinearLayout android:id="@+id/transaction_income_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            style="@style/toolbar_tool"
+            android:text="Provide information about how the transactions are used. Include at bottom the about the app info." />
 
     </LinearLayout>
 
-</ScrollView>
+    <RelativeLayout android:id="@+id/page_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        style="@style/page_header">
+
+        <TextView android:id="@+id/average_income_key"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:text="average income"
+            style="@style/page_header_key" />
+
+        <TextView android:id="@+id/average_income"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@id/average_income_key"
+            style="@style/page_header_value"/>
+
+        <TextView android:id="@+id/average_expenses_key"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="average expenses"
+            android:layout_below="@id/average_income_key"
+            android:layout_alignParentStart="true"
+            style="@style/page_header_key"/>
+
+        <TextView android:id="@+id/average_expenses"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/average_income"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@id/average_expenses"
+            style="@style/page_header_value"/>
+
+        <TextView android:id="@+id/average_gain_loss_key"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/average_expenses_key"
+            android:layout_alignParentStart="true"
+            android:text="average expendable funds"
+            style="@style/page_header_key"/>
+
+        <TextView android:id="@+id/average_gain_loss"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/average_expenses"
+            android:layout_alignParentEnd="true"
+            android:layout_toEndOf="@id/average_gain_loss_key"
+            style="@style/page_header_value"/>
+
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/page_header"
+        android:layout_alignParentBottom="true">
+
+        <LinearLayout android:id="@+id/page_transactions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                style="@style/list">
+
+                <LinearLayout android:id="@+id/expense_list_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    style="@style/list_header">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="4"
+                        android:layout_height="wrap_content"
+                        android:text="Expenses"
+                        style="@style/list_header_title"/>
+
+                    <TextView
+                        android:id="@+id/button_create_expense_transaction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+"
+                        android:textSize="18dp"
+                        android:padding="8dp"
+                        style="@style/list_header_item" />
+
+                </LinearLayout>
+                <LinearLayout android:id="@+id/transaction_expense_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                style="@style/list">
+
+                <LinearLayout android:id="@+id/income_list_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    style="@style/list_header">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="4"
+                        android:layout_height="wrap_content"
+                        android:text="Income"
+                        style="@style/list_header_title"/>
+
+                    <TextView
+                        android:id="@+id/button_create_income_transaction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+"
+                        android:textSize="18dp"
+                        android:padding="8dp"
+                        style="@style/list_header_item" />
+
+                </LinearLayout>
+                <LinearLayout android:id="@+id/transaction_income_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

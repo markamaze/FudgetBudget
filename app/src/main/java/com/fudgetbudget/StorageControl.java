@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.UUID;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -86,8 +87,8 @@ public class StorageControl {
     }
 
 
-    public LinkedHashMap<LocalDate, ProjectedTransaction> readProjections(Transaction transaction){
-        LinkedHashMap<LocalDate, ProjectedTransaction> projections = new LinkedHashMap<>(  );
+    public LinkedList<ProjectedTransaction> readProjections(Transaction transaction){
+        LinkedList<ProjectedTransaction> projections = new LinkedList<>(  );
 
         File transactionFile = new File(transaction.getPath().getPath());
         Document transactionDocument = getDocumentFromFile( transactionFile );
@@ -98,7 +99,7 @@ public class StorageControl {
         for(int i = 0; i < storedProjections.getLength(); i++){
             Element projectionElement = (Element) storedProjections.item( i );
             ProjectedTransaction projectedTransaction = ProjectedTransaction.getInstance( transaction, projectionElement );
-            projections.put( projectedTransaction.getScheduledProjectionDate(), projectedTransaction );
+            projections.add( projectedTransaction );
         }
 
         return projections;

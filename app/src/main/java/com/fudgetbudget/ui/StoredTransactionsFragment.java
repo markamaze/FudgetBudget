@@ -1,70 +1,101 @@
 package com.fudgetbudget.ui;
 
-import android.content.Context;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.savedstate.SavedStateRegistry;
-import androidx.savedstate.SavedStateRegistryController;
-
-import android.transition.TransitionInflater;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.os.HandlerCompat;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.fudgetbudget.FudgetBudgetViewModel;
 import com.fudgetbudget.R;
 import com.fudgetbudget.model.Transaction;
+import com.google.android.material.appbar.CollapsingToolbarLayout;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
-public class StoredTransactionsFragment <T extends Transaction> extends Fragment {
+public class StoredTransactionsFragment extends Fragment {
 
-    private FudgetBudgetViewModel<T> mViewModel;
-    private ListItemViewBuilder<T> mListItemViewBuilder;
+    private FudgetBudgetViewModel mViewModel;
+    private ListItemViewBuilder mListItemViewBuilder;
+    private MutableLiveData<List<Transaction>> vTransactions;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewModel = new ViewModelProvider(requireActivity()).get(FudgetBudgetViewModel.class);
-        mListItemViewBuilder = new ListItemViewBuilder<T>(getContext());
+        mListItemViewBuilder = new ListItemViewBuilder(getContext());
+
+        if(savedInstanceState != null) vTransactions = new MutableLiveData<>(new ArrayList<>());
+        else vTransactions = new MutableLiveData<>(new ArrayList<>());
+
+        Executors.newSingleThreadExecutor().execute( () -> {
+            FudgetBudgetViewModel model = new ViewModelProvider(requireActivity()).get(FudgetBudgetViewModel.class);
+
+            HandlerCompat.createAsync(Looper.getMainLooper()).post( () -> {
+                mViewModel = model;
+                mViewModel.getTransactions().observeForever( transactions -> vTransactions.postValue(transactions));
+            } );
+        });
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View storedTransactionView = inflater.inflate( R.layout.fragment_stored_transactions, container, false );
-        ViewGroup expenseList = storedTransactionView.findViewById( R.id.transaction_expense_list );
-        ViewGroup incomeList = storedTransactionView.findViewById( R.id.transaction_income_list );
+        View storedTransactionFragView = inflater.inflate( R.layout.fragment_stored_transactions, container, false );
 
+        View createExpenseButton = storedTransactionFragView.findViewById( R.id.button_create_expense_transaction );
+        createExpenseButton.setOnClickListener( button -> mViewModel.update(Transaction.getInstance(R.string.transaction_type_expense, getContext().getExternalFilesDir(null).getPath())));
 
-        mViewModel.getCachedTransactions().observe( getViewLifecycleOwner(), transactionsCache -> {
-            List<Transaction> expenses = transactionsCache.get(R.string.transaction_type_expense);
-            List<Transaction> income = transactionsCache.get(R.string.transaction_type_income);
+        View createIncomeButton = storedTransactionFragView.findViewById( R.id.button_create_income_transaction );
+        createIncomeButton.setOnClickListener( button -> mViewModel.update(Transaction.getInstance(R.string.transaction_type_income, getContext().getExternalFilesDir(null).getPath())));
+
+        Button deleteTransactions = storedTransactionFragView.findViewById( R.id.tool_delete_transactions );
+        deleteTransactions.setOnClickListener( v -> {
+            mViewModel.delete(R.string.transaction_type_all);
+        } );
+
+        vTransactions.observeForever( transactions -> {
+            ViewGroup expenseList = storedTransactionFragView.findViewById( R.id.transaction_expense_list );
+            ViewGroup incomeList = storedTransactionFragView.findViewById( R.id.transaction_income_list );
 
             expenseList.removeAllViews();
             incomeList.removeAllViews();
 
-            if(expenses != null) expenses.forEach( transaction -> expenseList.addView( getTransactionView(transaction) ));
-            if(expenses != null) income.forEach( transaction -> incomeList.addView( getTransactionView( transaction )));
-
+            Collections.sort(transactions);
+            transactions.forEach( transaction -> {
+                if(transaction.getIncomeFlag()) incomeList.addView( getTransactionView(transaction, inflater) );
+                else expenseList.addView( getTransactionView(transaction, inflater) );
+            });
         });
+        return storedTransactionFragView;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
 
 
-        Button createExpenseButton = storedTransactionView.findViewById( R.id.button_create_expense_transaction );
-        createExpenseButton.setOnClickListener( button -> mViewModel.update(Transaction.getInstance(R.string.transaction_type_expense, getContext().getExternalFilesDir(null).getPath())));
+    }
 
-        Button createIncomeButton = storedTransactionView.findViewById( R.id.button_create_income_transaction );
-        createIncomeButton.setOnClickListener( button -> mViewModel.update(Transaction.getInstance(R.string.transaction_type_income, getContext().getExternalFilesDir(null).getPath())));
-
-        return storedTransactionView;
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -73,11 +104,11 @@ public class StoredTransactionsFragment <T extends Transaction> extends Fragment
         getView().setVisibility(View.INVISIBLE);
     }
 
-    private View getTransactionView(Transaction transaction) {
-        ViewGroup listItem = (ViewGroup) getLayoutInflater().inflate( R.layout.layout_transaction, null );
 
-        listItem.findViewById( R.id.line_item_recurrence_short_value ).setVisibility( View.VISIBLE );
-        listItem.findViewById( R.id.line_item_balance_value ).setVisibility( GONE );
+
+
+    private View getTransactionView(Transaction transaction, LayoutInflater inflater) {
+        ViewGroup listItem = (ViewGroup) inflater.inflate( R.layout.layout_transaction, null );
 
         mListItemViewBuilder.setLineItemPropertyViews( listItem, transaction );
         mListItemViewBuilder.setCardLayoutPropertyViews( listItem, transaction, false );
@@ -86,8 +117,6 @@ public class StoredTransactionsFragment <T extends Transaction> extends Fragment
 
         return listItem;
     }
-
-
     private <T extends Transaction> void initializeCardButtons(ViewGroup lineItemView, Transaction transaction){
         ViewGroup buttonsView = lineItemView.findViewById( R.id.card_buttons );
         ViewGroup cardDrawer = lineItemView.findViewById( R.id.card_view );

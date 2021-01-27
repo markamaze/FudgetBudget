@@ -1,15 +1,21 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="buttonStyle">@style/button_style</item>
     </style>
 
     <style name="SplashScreenTheme" parent="AppTheme">
         <item name="android:windowBackground">@drawable/splashscreen</item>
+    </style>
+
+    <style name="button_style" parent="TextAppearance.AppCompat.Button">
+        <item name="android:background">@drawable/button_style</item>
+<!--        <item name="android:textColor">@color/colorPrimary</item>-->
     </style>
 
     <style name="line_item"></style>
@@ -17,13 +23,23 @@
     <style name="line_item_cell">
         <item name="android:minWidth">60dp</item>
         <item name="android:paddingHorizontal">6dp</item>
+
     </style>
 
     <style name="card_row_value">
+        <item name="android:padding">8dp</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="editTextBackground">@android:color/white</item>
+        <item name="android:textSize">16dp</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:gravity">center</item>
     </style>
 
     <style name="card_row_key">
-        <item name="android:layout_width">100dp</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:width">100dp</item>
+        <item name="android:gravity">end</item>
+        <item name="android:paddingHorizontal">6dp</item>
     </style>
 
     <style name="income_text_style">
@@ -32,5 +48,56 @@
 
     <style name="expense_text_style">
         <item name="android:textColor">@android:color/holo_red_dark</item>
+    </style>
+
+    <style name="bottomNavigation">
+<!--        <item name="android:textColor">@color/colorPrimaryDark</item>-->
+<!--        <item name="android:colorBackground">@color/colorPrimaryDark</item>-->
+<!--        <item name="android:icon">@drawable/ic_home_black_24dp</item>-->
+    </style>
+    <style name="bottomNavigationActive">
+<!--        <item name="android:icon">@drawable/ic_home_light_24dp</item>-->
+<!--        <item name="android:strokeColor">@color/colorAccent</item>-->
+<!--        <item name="android:colorBackground">@color/colorAccent</item>-->
+    </style>
+
+    <style name="page_header">
+        <item name="android:paddingVertical">12dp</item>
+        <item name="android:paddingHorizontal">12dp</item>
+    </style>
+
+    <style name="page_header_key">
+        <item name="android:textStyle">italic</item>
+    </style>
+
+    <style name="page_header_value">
+        <item name="android:textSize">18dp</item>
+    </style>
+
+    <style name="toolbar">
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:padding">12dp</item>
+<!--        <item name="android:layout_marginHorizontal">24dp</item>-->
+<!--        <item name="android:layout_marginBottom">48dp</item>-->
+    </style>
+
+    <style name="list_header"></style>
+
+    <style name="list_header_title">
+        <item name="android:textSize">18dp</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="list_header_item"></style>
+
+    <style name="list">
+        <item name="android:background">@android:drawable/dialog_holo_light_frame</item>
+        <item name="android:paddingVertical">24dp</item>
+        <item name="android:paddingHorizontal">12dp</item>
+    </style>
+
+    <style name="toolbar_tool">
+        <item name="android:padding">16dp</item>
+        <item name="android:background">@android:drawable/dialog_holo_light_frame</item>
     </style>
 </resources>

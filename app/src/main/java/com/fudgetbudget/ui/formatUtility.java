@@ -9,11 +9,21 @@ import java.util.Locale;
 
 public class formatUtility {
 
-    public static String formatCurrency(Object currency){ return "$" + String.format( Locale.ENGLISH, "%f", currency ); }
+    public static String formatCurrency(Object currency){
+//        if(currency == null) return "-";
+        if(currency instanceof Double) return String.format( Locale.ENGLISH, "%.2f", currency );
+        else if(currency instanceof String){
+            if(((String)currency).isEmpty()) return "-";
+            return String.format( Locale.ENGLISH, "%.0f", Double.parseDouble(currency.toString()));
+        }
+        else return currency.toString();
+
+    }
     public static String formatDate(Object return_type, LocalDate date) {
         int resourceId;
 
-        if(return_type instanceof String) {
+        if(date == null) return "-";
+        else if(return_type instanceof String) {
             if(((String)return_type).isEmpty()) return date.format( DateTimeFormatter.ofPattern( "M/d/yy" ) );
             else return date.format( (DateTimeFormatter.ofPattern( (String)return_type )) );
         }
@@ -71,7 +81,13 @@ public class formatUtility {
                 int lengthOfMonth = scheduledDate.lengthOfMonth();
 
                 if(lengthOfMonth == scheduledDay) onDayType = "on last day of month";
-                else onDayType = "on day " + scheduledDate + " of month" ;
+                else {
+                    if(scheduledDay == 1) onDayType = "on the 1st";
+                    else if(scheduledDay == 2) onDayType = "on the 2nd";
+                    else if(scheduledDay == 3) onDayType = "on the 3rd";
+                    else onDayType = "on the " + scheduledDay + "th";
+
+                }
             }
             else if(period.contentEquals( "3" )) {
                 onDayType = "on day same date annually" ;
@@ -113,9 +129,9 @@ public class formatUtility {
         if( frequency > 1 ) period.concat( "s" );
 
 
-
-
-        String result = "Every " + frequency + " " + period + " " + onDayType;
+        String result;
+        if(frequency == 1) result = "Every " + period + " " + onDayType;
+        else result = "Every " + frequency + " " + period + "s " + onDayType;
 
         return result;
     }

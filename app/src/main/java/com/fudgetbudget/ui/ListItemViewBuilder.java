@@ -26,7 +26,7 @@ import static android.view.View.GONE;
 import static android.view.View.TEXT_ALIGNMENT_CENTER;
 import static android.view.View.VISIBLE;
 
-public class ListItemViewBuilder<T extends Transaction> {
+public class ListItemViewBuilder {
 
     private final Context context;
 
@@ -157,7 +157,7 @@ public class ListItemViewBuilder<T extends Transaction> {
 
 
     void setPeriodItemHeader(ViewGroup periodHeader, LocalDate periodBeginDate){
-        TextView periodDateView = periodHeader.findViewById( R.id.projection_period_header_date );
+        TextView periodDateView = periodHeader.findViewById( R.id.period_header_date);
         periodDateView.setText( periodBeginDate.format( DateTimeFormatter.ofPattern( "MMMM yyyy" ) ) );
 
     }
@@ -311,32 +311,17 @@ public class ListItemViewBuilder<T extends Transaction> {
         TextView lineItemAmount = listLineItem.findViewById( R.id.line_item_amount_value );
         if(lineItemAmount != null){
             if(transaction.getIncomeFlag()) {
-                lineItemAmount.setText( "+ " + formatUtility.formatCurrency( transaction.getProperty( R.string.amount_tag )));
-//                amount.setTextAppearance( R.style.balance_amount_not_negative );
+                lineItemAmount.setText( "$" + formatUtility.formatCurrency( transaction.getProperty( R.string.amount_tag )));
+                lineItemAmount.setTextAppearance( R.style.income_text_style );
             }
             else {
-                lineItemAmount.setText( "- " + formatUtility.formatCurrency(transaction.getProperty( R.string.amount_tag )));
-//                amount.setTextAppearance( R.style.balance_amount_negative );
+                lineItemAmount.setText( "$" + formatUtility.formatCurrency(transaction.getProperty( R.string.amount_tag )));
+                lineItemAmount.setTextAppearance( R.style.expense_text_style );
             }
         }
 
     }
-    void setLineItemAlert(ViewGroup listLineItem, Transaction transaction, Double balance, Double threshold){
 
-        TextView balanceView = listLineItem.findViewById( R.id.line_item_balance_value );
-        if(balanceView != null){
-            if( balance <= 0.0){
-                balanceView.setBackgroundColor( Color.RED );
-            }else if(balance < threshold){
-                balanceView.setBackgroundColor( Color.YELLOW );
-            }
-        }
-
-        LocalDate date = (LocalDate) transaction.getProperty( R.string.date_tag );
-        if( date != null && date.isBefore( LocalDate.now().plusDays( 1 ) )){
-            listLineItem.findViewById( R.id.line_item ).setBackgroundColor( Color.LTGRAY );
-        }
-    }
 
     public void setCardLayoutPropertyViews(ViewGroup view, Transaction transaction, boolean isEditable){
 

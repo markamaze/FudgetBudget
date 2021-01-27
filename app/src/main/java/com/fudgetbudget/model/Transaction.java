@@ -191,10 +191,11 @@ public class Transaction implements Comparable {
     public int compareTo(Object transaction) {
         if(transaction == null) return -1;
         LocalDate comparisonDate;
-        if(transaction instanceof ProjectedTransaction) comparisonDate = (LocalDate)(((ProjectedTransaction)transaction).getProperty(R.string.date_tag ));
-        else comparisonDate = (LocalDate)(((Transaction)transaction).getProperty(R.string.date_tag ));
+//        if(transaction instanceof ProjectedTransaction) comparisonDate = ((ProjectedTransaction)transaction).getScheduledProjectionDate();
+//        else
+            comparisonDate = (LocalDate)(((Transaction)transaction).getProperty(R.string.date_tag ));
 
-        if( this.getProperty(R.string.date_tag) == null) return 1;
+        if( this.getProperty(R.string.date_tag) == null) return 0;
         if ( ((LocalDate)this.getProperty(R.string.date_tag)).isAfter( comparisonDate )) return 1;
         if( ((LocalDate)this.getProperty(R.string.date_tag)).isBefore( comparisonDate )) return -1;
         if ( ((LocalDate)this.getProperty(R.string.date_tag)).isEqual( comparisonDate )) {
@@ -220,7 +221,7 @@ public class Transaction implements Comparable {
         if(!this.getRecurrance().equals(trns.getRecurrance())) return false;
         if(!this.getIncomeFlag().equals(trns.getIncomeFlag())) return false;
         if(!this.getPath().equals(trns.getPath())) return false;
-        if(!this.getScheduledDate().equals(trns.getScheduledDate())) return false;
+//        if(!this.getScheduledDate().equals(trns.getScheduledDate())) return false;
         return true;
     }
 }

@@ -1,47 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.RecordsFragment">
 
-    <LinearLayout
-        android:orientation="vertical" android:layout_width="match_parent"
+    <LinearLayout android:id="@+id/toolbar"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/page_records">
+        android:layout_alignParentTop="true"
+        android:visibility="gone"
+        android:orientation="vertical"
+        style="@style/toolbar">
 
-        <LinearLayout android:id="@+id/page_header"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:textAlignment="center"
+            android:textSize="18dp"
+            android:paddingVertical="12dp"
+            android:text="Records Toolbox" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/toolbar_tool" >
+
+            <TextView android:id="@+id/tool_update_current_balance_key"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@id/tool_update_current_balance_button"
+                android:layout_alignBaseline="@id/tool_update_current_balance_button"
+                android:text="Add Record and Update Balance"/>
+            <Button android:id="@+id/tool_update_current_balance_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="Add Record"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout android:id="@+id/page_tools_update_balancesheet_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/toolbar_tool">
+
+            <TextView android:id="@+id/tool_delete_records_key"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@id/tool_delete_records"
+                android:layout_alignBaseline="@id/tool_delete_records"
+                android:text="Delete All Records"/>
+            <Button android:id="@+id/tool_delete_records"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="Delete"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tool_delete_records_key"
+                android:textStyle="italic"
+                android:paddingVertical="8dp"
+                android:text="* This results in a current balance of $0.00\n** Deleting records cannot be undone." />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/about"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:visibility="gone"
+        android:orientation="vertical"
+        style="@style/toolbar">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="18dp"
+            android:paddingVertical="12dp"
+            android:text="Records Information" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/toolbar_tool"
+            android:text="Provide information about how the records are used. Include at bottom the about the app info." />
+
+    </LinearLayout>
+
+    <RelativeLayout android:id="@+id/page_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical"
+        style="@style/page_header">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Recorded Transactions"/>
+                android:layout_alignParentStart="true"
+                android:layout_alignStart="@+id/current_recorded_balance"
+                android:layout_alignBaseline="@+id/current_recorded_balance"
+                android:text="record balance"
+                style="@style/page_header_key"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView android:id="@+id/current_recorded_balance"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="record balance"/>
+                android:layout_alignParentEnd="true"
+                style="@style/page_header_value"/>
 
-                <TextView android:id="@+id/current_recorded_balance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
-            </LinearLayout>
+    </RelativeLayout>
 
-        </LinearLayout>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/page_header"
+        android:layout_alignParentBottom="true">
 
         <LinearLayout
-            android:id="@+id/record_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"/>
+                android:id="@+id/record_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+    </ScrollView>
 
-    </LinearLayout>
 
-</ScrollView>
+</RelativeLayout>

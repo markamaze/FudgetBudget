@@ -7,12 +7,10 @@
 
     <stroke android:width="12dp" android:color="@android:color/transparent"/>
     <padding
-        android:top="6dp"
-        android:bottom="6dp"
+        android:top="12dp"
+        android:bottom="12dp"
         android:right="12dp"
         android:left="12dp" />
+    <solid android:color="@color/colorPrimary" />
 
-    <gradient android:angle="360"
-        android:endColor="#FFCC80"
-        android:startColor="@android:color/transparent" />
 </shape>
