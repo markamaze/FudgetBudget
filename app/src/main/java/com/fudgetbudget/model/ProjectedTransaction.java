@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 public class ProjectedTransaction extends Transaction {
     private final LocalDate scheduledProjectionDate;
     private final Double scheduledAmount;
+    private final String scheduledNote;
     String projectedNote;
     Double projectedAmount;
     LocalDate projectedDate;
@@ -22,6 +23,7 @@ public class ProjectedTransaction extends Transaction {
         super( transaction );
         this.scheduledProjectionDate = scheduledDate ;
         this.scheduledAmount = (Double) transaction.getProperty( R.string.amount_tag );
+        this.scheduledNote = (String) transaction.getProperty( R.string.note_tag );
 
         setProjectedDate( scheduledDate );
         setProjectedAmount( transaction.getProperty( R.string.amount_tag ) );
@@ -35,6 +37,7 @@ public class ProjectedTransaction extends Transaction {
         else this.scheduledProjectionDate = LocalDate.parse( scheduledProjectionDate, DateTimeFormatter.BASIC_ISO_DATE );
 
         this.scheduledAmount = (Double) transaction.getProperty( R.string.amount_tag );
+        this.scheduledNote = (String) transaction.getProperty( R.string.note_tag );
 
         NodeList projectionProperties = projectionElement.getElementsByTagName( "projection_property" );
         for(int i = 0; i < projectionProperties.getLength(); i++) {
@@ -56,7 +59,12 @@ public class ProjectedTransaction extends Transaction {
     private boolean setProjectedAmount(Object amount){
         if(amount == null || amount instanceof String && ((String)amount).isEmpty()) this.projectedAmount = new Double( "0" );
         else if(amount instanceof Double) this.projectedAmount = (Double) amount;
-        else if(amount instanceof String) this.projectedAmount = Double.valueOf( (String) amount );
+        else if(amount instanceof String) {
+            String stringAmount = (String) amount;
+            if(stringAmount.substring( 0, 1 ).contentEquals( "$" ))
+                this.projectedAmount = Double.valueOf( stringAmount.substring( 1 ) );
+            else this.projectedAmount = Double.valueOf( (String) amount );
+        }
         else return false;
 
         return true;
@@ -93,6 +101,8 @@ public class ProjectedTransaction extends Transaction {
             default: return super.getProperty(propertyTag);
         }
     }
+
+    public String getScheduledNote() { return this.scheduledNote; }
 
 
 //    @Override

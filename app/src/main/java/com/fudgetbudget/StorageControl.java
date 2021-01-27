@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.UUID;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -34,6 +35,9 @@ public class StorageControl {
 
     public StorageControl(String filesDirectory) { this.filesDir = filesDirectory; }
 
+    public Transaction getTransaction(String path){
+        return Transaction.getInstance( getDocumentFromFile( new File( path ) ) );
+    }
     public ArrayList<Transaction> readTransactions(Object type){
         File[] transactions_file_set = readAppFile("app_transactions").listFiles();
         ArrayList<Transaction> found_transactions = new ArrayList<>(  );
@@ -83,8 +87,8 @@ public class StorageControl {
     }
 
 
-    public LinkedHashMap<LocalDate, ProjectedTransaction> readProjections(Transaction transaction){
-        LinkedHashMap<LocalDate, ProjectedTransaction> projections = new LinkedHashMap<>(  );
+    public LinkedList<ProjectedTransaction> readProjections(Transaction transaction){
+        LinkedList<ProjectedTransaction> projections = new LinkedList<>(  );
 
         File transactionFile = new File(transaction.getPath().getPath());
         Document transactionDocument = getDocumentFromFile( transactionFile );
@@ -95,7 +99,7 @@ public class StorageControl {
         for(int i = 0; i < storedProjections.getLength(); i++){
             Element projectionElement = (Element) storedProjections.item( i );
             ProjectedTransaction projectedTransaction = ProjectedTransaction.getInstance( transaction, projectionElement );
-            projections.put( projectedTransaction.getScheduledProjectionDate(), projectedTransaction );
+            projections.add( projectedTransaction );
         }
 
         return projections;
@@ -143,11 +147,19 @@ public class StorageControl {
         return foundRecords;
     }
     public Object readSettingsValue(String setting) {
-        switch (setting){
-            case "projection_periods_to_project": return 3;
-            case "balance_threshold": return 500.0;
-            default: return null;
+        File settingsFile = readAppFile( "settings" );
+        Document settingsDocument = getDocumentFromFile( settingsFile );
+
+        NodeList settingsParameters = settingsDocument.getElementsByTagName( "settings_parameter" );
+        int index = 0;
+
+        while( index < settingsParameters.getLength()){
+            Element settingItem = (Element) settingsParameters.item( index );
+            if(settingItem.getAttribute( "key" ).contentEquals( setting ))
+                return settingItem.getTextContent();
+            index++;
         }
+        return null;
     }
 
     public boolean writeTransaction(Transaction transaction){
@@ -189,7 +201,13 @@ public class StorageControl {
         return writeDocumentToFile( recordDocument );
     }
     public boolean writeSettingsValue(String key, String value) {
-        return false;
+        File settingsFile = readAppFile( "settings" );
+        Document settingsDocument = getDocumentFromFile( settingsFile );
+
+        if(settingsDocument == null) settingsDocument = getNewSettingsDocument();
+        updateSettings( settingsDocument, key, value );
+
+        return writeDocumentToFile( settingsDocument );
     }
 
     public boolean deleteProjection(ProjectedTransaction projection) {
@@ -389,7 +407,6 @@ public class StorageControl {
 
     }
 
-
     private void updateRecord(Document recordDocument, RecordedTransaction recordedTransaction) {
         Element recordsSetElement = recordDocument.getDocumentElement();
         NodeList records = recordsSetElement.getChildNodes();
@@ -411,7 +428,6 @@ public class StorageControl {
 
         updateRecordProperties(recordElement, recordedTransaction);
     }
-
     private void updateRecordProperties(Element recordElement, RecordedTransaction recordedTransaction){
         NodeList propertyNodes = recordElement.getElementsByTagName( "record_property" );
 
@@ -422,7 +438,6 @@ public class StorageControl {
             propertyElement.setTextContent( String.valueOf( recordedTransaction.getProperty( key ) ) );
         }
     }
-
     private Document getNewRecordDocument(RecordedTransaction recordedTransaction){
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder;
@@ -474,15 +489,65 @@ public class StorageControl {
         return element;
     }
 
+    private Document getNewSettingsDocument(){
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder;
+        Document document;
+
+        try {
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            document = documentBuilder.newDocument();
+            document.setDocumentURI( filesDir + "/settings" );
+            Element element = document.createElement("settings");
+
+
+            Element periodsToProject = document.createElement( "settings_parameter" );
+            periodsToProject.setAttribute( "key", "projection_periods_to_project" );
+
+            Element thresholdValue = document.createElement( "settings_parameter" );
+            thresholdValue.setAttribute( "key", "balance_threshold" );
+
+
+            periodsToProject.setTextContent( "1" );
+            thresholdValue.setTextContent( "100" );
+
+            element.appendChild( periodsToProject );
+            element.appendChild( thresholdValue );
+
+
+            document.appendChild( element );
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+            throw new Error("trouble loading settings document");
+        }
+
+        return document;
+    }
+    private void updateSettings(Document settingsDocument, String key, String value){
+        NodeList settingsNodes = settingsDocument.getElementsByTagName( "settings_parameter" );
+
+        for(int i = 0; i < settingsNodes.getLength(); i++){
+            Element propertyElement = (Element) settingsNodes.item( i );
+            String stored_key = propertyElement.getAttribute( "key" );
+            if(stored_key.contentEquals( key )){
+                propertyElement.setTextContent( value );
+                return;
+            }
+        }
+    }
+
     private File readAppFile(String path) {
         File file = new File(this.filesDir, path);
 
-        if( !file.exists() && path.contentEquals( "app_balance" )){
+        if( !file.exists() && (path.contentEquals( "settings" ) )){
             try {
                 file.setReadable( true );
                 file.setWritable( true );
                 file.createNewFile();
 
+                Document settingsDocument = getNewSettingsDocument();
+                writeDocumentToFile( settingsDocument );
+                file = readAppFile( "settings" );
 
             } catch (IOException e) { e.printStackTrace(); }
         }
@@ -506,10 +571,18 @@ public class StorageControl {
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 
             Document document = documentBuilder.parse(file);
+
             document.setDocumentURI( file.getPath() );
             return document;
 
-        } catch (Exception e){ e.printStackTrace(); return null; }
+        } catch (Exception e){
+            e.printStackTrace();
+            String[] path = file.toURI().getPath().split( "/" );
+            if(path[path.length-1].contentEquals( "settings" ))
+                return getNewSettingsDocument();
+
+            else return null;
+        }
     }
     private boolean writeDocumentToFile(Document document) {
 

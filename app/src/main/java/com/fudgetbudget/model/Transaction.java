@@ -1,6 +1,9 @@
 package com.fudgetbudget.model;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.fudgetbudget.R;
 
 import org.w3c.dom.Document;
@@ -103,7 +106,13 @@ public class Transaction implements Comparable {
     private boolean setAmount(Object amount) {
         if(amount == null || amount instanceof String && ((String)amount).isEmpty()) this.amount = new Double( "0" );
         else if(amount instanceof Double) this.amount = (Double) amount;
-        else if(amount instanceof String) this.amount = Double.valueOf( (String) amount );
+        else if(amount instanceof String) {
+            String stringAmount = (String) amount;
+
+            if(stringAmount.substring( 0, 1).contentEquals( "$" ))
+                this.amount = Double.valueOf( stringAmount.substring( 1 ) );
+            else this.amount = Double.valueOf( stringAmount );
+        }
         else return false;
 
         return true;
@@ -131,7 +140,7 @@ public class Transaction implements Comparable {
         return true;
     }
     private boolean setRecurrance(Object recurrance){
-        if( recurrance == null) this.recurrance = "0-0-0-0-0-0-0";
+        if( recurrance == null || recurrance.toString().isEmpty()) this.recurrance = "0-0-0-0-0-0-0";
         else if( recurrance instanceof String && ((String)recurrance).length() <= 0) this.recurrance = "0-0-0-0-0-0-0";
         else if( recurrance instanceof String) this.recurrance = recurrance;
         else return false;
@@ -180,13 +189,39 @@ public class Transaction implements Comparable {
 
     @Override
     public int compareTo(Object transaction) {
+        if(transaction == null) return -1;
         LocalDate comparisonDate;
-        if(transaction instanceof ProjectedTransaction) comparisonDate = (LocalDate)(((ProjectedTransaction)transaction).getProperty(R.string.date_tag ));
-        else comparisonDate = (LocalDate)(((Transaction)transaction).getProperty(R.string.date_tag ));
+//        if(transaction instanceof ProjectedTransaction) comparisonDate = ((ProjectedTransaction)transaction).getScheduledProjectionDate();
+//        else
+            comparisonDate = (LocalDate)(((Transaction)transaction).getProperty(R.string.date_tag ));
 
-        if( this.getProperty(R.string.date_tag) == null) return 1;
+        if( this.getProperty(R.string.date_tag) == null) return 0;
         if ( ((LocalDate)this.getProperty(R.string.date_tag)).isAfter( comparisonDate )) return 1;
-        if ( ((LocalDate)this.getProperty(R.string.date_tag)).isEqual( comparisonDate )) return 0;
-        else return -1;
+        if( ((LocalDate)this.getProperty(R.string.date_tag)).isBefore( comparisonDate )) return -1;
+        if ( ((LocalDate)this.getProperty(R.string.date_tag)).isEqual( comparisonDate )) {
+            boolean thisIsIncome = this.getIncomeFlag();
+            boolean compareIsIncome = ((Transaction) transaction).getIncomeFlag();
+
+            if(thisIsIncome && !compareIsIncome) return -1;
+            if(!thisIsIncome && compareIsIncome) return 1;
+            else return 0;
+        }
+        else return 0;
+    }
+
+    @Override
+    public boolean equals(Object transaction) {
+        if( !(transaction instanceof Transaction) ) return false;
+        Transaction trns = (Transaction) transaction;
+
+        if(!this.getId().equals(trns.getId())) return false;
+        if(!this.getLabel().equals(trns.getLabel())) return false;
+        if(!this.getAmount().equals(trns.getAmount())) return false;
+        if(!this.getNote().equals(trns.getNote())) return false;
+        if(!this.getRecurrance().equals(trns.getRecurrance())) return false;
+        if(!this.getIncomeFlag().equals(trns.getIncomeFlag())) return false;
+        if(!this.getPath().equals(trns.getPath())) return false;
+//        if(!this.getScheduledDate().equals(trns.getScheduledDate())) return false;
+        return true;
     }
 }

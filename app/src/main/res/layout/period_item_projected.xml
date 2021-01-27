@@ -5,56 +5,50 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingVertical="40dp"
-    android:paddingHorizontal="10dp"
-    android:background="@android:drawable/dialog_holo_light_frame">
-
-
-
+    style="@style/list">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/period_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/list.header">
+        style="@style/list_header">
 
         <TextView
-            android:id="@+id/projection_period_header_date"
+            android:id="@+id/period_header_date"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/projection_period_header_net_gain_label"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            style="@style/list.title"/>
+            style="@style/list_header_title"/>
 
         <TextView
             android:id="@+id/projection_period_header_net_gain_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="6dp"
-            app:layout_constraintStart_toEndOf="@id/projection_period_header_date"
+            app:layout_constraintStart_toEndOf="@id/period_header_date"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/projection_period_header_net_gain"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            style="@style/list_header_item" />
 
         <TextView
             android:id="@+id/projection_period_header_net_gain"
             android:layout_width="wrap_content"
-            android:paddingHorizontal="6dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/projection_period_header_net_gain_label"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            style="@style/list_header_item" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/period_list_item_balances"
-        style="@style/period_calculations"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_marginEnd="16dp">
 
         <TextView
@@ -128,12 +122,16 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout android:id="@+id/period_projection_list"
+    <LinearLayout
+        android:id="@+id/period_list"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:layout_marginEnd="16dp"/>
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:orientation="vertical" />
 
+    <TextView android:id="@+id/loading_message"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textAlignment="center"
+        android:text="Loading..."/>
 </LinearLayout>
