@@ -5,210 +5,320 @@
     android:layout_height="match_parent"
     tools:context=".ui.BudgetFragment">
 
-    <LinearLayout android:id="@+id/toolbar"
+    <ScrollView
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:visibility="gone"
-        android:orientation="vertical"
-        style="@style/toolbar">
+        android:visibility="gone">
 
-        <TextView
+        <LinearLayout
+            style="@style/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:textSize="18dp"
-            android:paddingVertical="12dp"
-            android:text="Projected Budget Toolbox" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <RelativeLayout android:id="@+id/page_tools_update_balancesheet_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/toolbar_tool">
-
-            <TextView android:id="@+id/page_tools_update_balancesheet_include_current_due_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentStart="true"
-                android:layout_alignBaseline="@id/page_tools_update_balancesheet_include_current_due_toggle"
-                android:paddingVertical="6dp"
-                android:text="Include items due today in update"/>
-
-            <androidx.appcompat.widget.SwitchCompat android:id="@+id/page_tools_update_balancesheet_include_current_due_toggle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:paddingVertical="6dp"
-                android:layout_alignParentEnd="true"/>
-
-            <TextView android:id="@+id/page_tools_update_balancesheet_delete_pastdue_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/page_tools_update_balancesheet_include_current_due_label"
-                android:layout_alignParentStart="true"
-                android:layout_alignBaseline="@id/page_tools_update_balancesheet_delete_pastdue_toggle"
-                android:paddingVertical="6dp"
-                android:text="Delete pastdue items (else recorded)"/>
-
-            <androidx.appcompat.widget.SwitchCompat android:id="@+id/page_tools_update_balancesheet_delete_pastdue_toggle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/page_tools_update_balancesheet_include_current_due_toggle"
-                android:paddingVertical="6dp"
-                android:layout_alignParentEnd="true"/>
-
-            <TextView android:id="@+id/reset_current_balance_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_below="@id/page_tools_update_balancesheet_delete_pastdue_label"
-                android:paddingVertical="6dp"
-                android:layout_alignBaseline="@id/reset_current_balance_toggle"
-                android:text="Set new balance (else calculated)"/>
-
-            <androidx.appcompat.widget.SwitchCompat android:id="@+id/reset_current_balance_toggle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:paddingVertical="6dp"
-                android:layout_below="@id/page_tools_update_balancesheet_delete_pastdue_toggle"/>
-
-            <TextView android:id="@+id/balance_budget_new_current_balance_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_below="@id/reset_current_balance_label"
-                android:layout_alignBaseline="@id/balance_budget_new_current_balance"
-                android:paddingTop="6dp"
-                android:layout_marginBottom="24dp"
-                android:paddingStart="36dp"
-                android:visibility="invisible"
-                android:text="set balance to"/>
-
-            <EditText android:id="@+id/balance_budget_new_current_balance"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/reset_current_balance_toggle"
-                android:layout_toEndOf="@id/balance_budget_new_current_balance_label"
-                android:gravity="center"
-                android:layout_alignParentEnd="true"
-                android:paddingTop="6dp"
-                android:layout_marginBottom="24dp"
-                android:visibility="invisible"
-                android:inputType="numberDecimal"/>
-
-            <Button android:id="@+id/page_tools_update_balancesheet"
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_below="@id/balance_budget_new_current_balance_label"
-                android:paddingVertical="6dp"
-                android:text="update" />
+                android:paddingVertical="12dp"
+                android:text="Projected Budget Toolbox"
+                android:textAlignment="center"
+                android:textSize="18dp" />
 
-        </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/page_tools_update_balancesheet_layout"
+                style="@style/toolbar_tool"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/toolbar_tool">
+                <TextView
+                    android:id="@+id/page_tools_update_balancesheet_include_current_due_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/page_tools_update_balancesheet_include_current_due_toggle"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:paddingVertical="6dp"
+                    android:text="Include items due today in update" />
 
-            <TextView android:id="@+id/tool_reset_projections_key"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignBaseline="@id/tool_reset_projections"
-                android:text="Reset Modified Projections"/>
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/page_tools_update_balancesheet_include_current_due_toggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:paddingVertical="6dp" />
 
-            <Button android:id="@+id/tool_reset_projections"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:text="reset"/>
+                <TextView
+                    android:id="@+id/page_tools_update_balancesheet_delete_pastdue_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/page_tools_update_balancesheet_include_current_due_label"
+                    android:layout_alignBaseline="@id/page_tools_update_balancesheet_delete_pastdue_toggle"
+                    android:layout_alignParentStart="true"
+                    android:paddingVertical="6dp"
+                    android:text="Delete pastdue items (else recorded)" />
 
-        </RelativeLayout>
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/page_tools_update_balancesheet_delete_pastdue_toggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/page_tools_update_balancesheet_include_current_due_toggle"
+                    android:layout_alignParentEnd="true"
+                    android:paddingVertical="6dp" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/toolbar_tool">
+                <TextView
+                    android:id="@+id/reset_current_balance_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/page_tools_update_balancesheet_delete_pastdue_label"
+                    android:layout_alignBaseline="@id/reset_current_balance_toggle"
+                    android:layout_alignParentStart="true"
+                    android:paddingVertical="6dp"
+                    android:text="Set new balance (else calculated)" />
 
-            <TextView android:id="@+id/tool_update_threshold_key"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignBaseline="@id/balance_threshold_value"
-                android:text="Balance threshold"/>
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/reset_current_balance_toggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/page_tools_update_balancesheet_delete_pastdue_toggle"
+                    android:layout_alignParentEnd="true"
+                    android:paddingVertical="6dp" />
 
-            <EditText android:id="@+id/balance_threshold_value"
-                android:inputType="numberDecimal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:layout_toEndOf="@id/tool_update_threshold_key"
-                android:layout_toStartOf="@id/tool_update_threshold_button"/>
+                <TextView
+                    android:id="@+id/balance_budget_new_current_balance_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/reset_current_balance_label"
+                    android:layout_alignBaseline="@id/balance_budget_new_current_balance"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginBottom="24dp"
+                    android:paddingStart="36dp"
+                    android:paddingTop="6dp"
+                    android:text="set balance to"
+                    android:visibility="invisible" />
 
-            <Button android:id="@+id/tool_update_threshold_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:text="Modify" />
+                <EditText
+                    android:id="@+id/balance_budget_new_current_balance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/reset_current_balance_toggle"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginBottom="24dp"
+                    android:layout_toEndOf="@id/balance_budget_new_current_balance_label"
+                    android:gravity="center"
+                    android:inputType="numberDecimal"
+                    android:paddingTop="6dp"
+                    android:visibility="invisible" />
 
-        </RelativeLayout>
+                <Button
+                    android:id="@+id/page_tools_update_balancesheet"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/balance_budget_new_current_balance_label"
+                    android:gravity="center"
+                    android:paddingVertical="6dp"
+                    android:text="update" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/toolbar_tool">
+            </RelativeLayout>
 
-            <TextView android:id="@+id/tool_update_period_number_key"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:text="Number of periods to project"/>
-            <TextView android:id="@+id/tool_current_period_number"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"/>
+            <RelativeLayout
+                style="@style/toolbar_tool"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <SeekBar
-                android:id="@+id/tool_update_period_number"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tool_update_period_number_key"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentEnd="true"
-                android:min="1"
-                android:max="13"/>
+                <TextView
+                    android:id="@+id/tool_reset_projections_key"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/tool_reset_projections"
+                    android:layout_alignParentStart="true"
+                    android:text="Reset Modified Projections" />
 
-        </RelativeLayout>
+                <Button
+                    android:id="@+id/tool_reset_projections"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="reset" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                style="@style/toolbar_tool"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tool_update_threshold_key"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/balance_threshold_value"
+                    android:layout_alignParentStart="true"
+                    android:text="Balance threshold" />
+
+                <EditText
+                    android:id="@+id/balance_threshold_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/tool_update_threshold_button"
+                    android:layout_toEndOf="@id/tool_update_threshold_key"
+                    android:enabled="false"
+                    android:inputType="numberDecimal" />
+
+                <Button
+                    android:id="@+id/tool_update_threshold_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="Modify" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                style="@style/toolbar_tool"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tool_update_period_number_key"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:text="Number of periods to project" />
+
+                <TextView
+                    android:id="@+id/tool_current_period_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true" />
+
+                <SeekBar
+                    android:id="@+id/tool_update_period_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tool_update_period_number_key"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
+                    android:max="13"
+                    android:min="1" />
+
+            </RelativeLayout>
 
 
-    </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 
-    <LinearLayout android:id="@+id/about"
+    <ScrollView android:id="@+id/about"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:visibility="gone"
-        android:orientation="vertical"
-        style="@style/toolbar">
+        android:visibility="gone">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:textSize="18dp"
-            android:paddingVertical="12dp"
-            android:text="Projected Budget Information" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            style="@style/toolbar">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/toolbar_tool"
-            android:text="Provide information about how the projected budget page works. Include at bottom the about the app info." />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:orientation="vertical"
+                style="@style/toolbar_tool">
 
-    </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:textSize="18dp"
+                    android:paddingVertical="12dp"
+                    android:text="How to use" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="With Transactions stored in the transaction tab, this page will project out all occurrences of those transactions by month."
+                    style="@style/info_item"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Review your projected transactions and balances. Anthing that leaves your balance below the threshold amount or at/below zero will be highlighted."
+                    style="@style/info_item"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Adjust individual items as needed to meet your financial needs."
+                    style="@style/info_item"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Due and pastdue transactions should be recorded to clear them and update your current balance."
+                    style="@style/info_item"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:orientation="vertical"
+                style="@style/toolbar_tool">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:textSize="18dp"
+                    android:paddingVertical="12dp"
+                    android:text="How it works" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="The Budget tab is built from the transactions stored in the Transactions tab."
+                    style="@style/info_item" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Repeating and single transactions are listed individually on the date they occur"
+                    style="@style/info_item"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Current balance is based on recorded transactions. That current balance is used to project future balances."
+                    style="@style/info_item"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Repeating transactions are projected out based on the settings value for the number of periods to project."
+                    style="@style/info_item"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Any occurence of repeating transactions can be modified if needed."
+                    style="@style/info_item"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Expendable funds is calculated by subtracting the balance threshold setting value from the lowest projected balance. Shows zero if lowest projected balance is below the threshold."
+                    style="@style/info_item"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
 
     <RelativeLayout android:id="@+id/page_header"
         android:layout_width="match_parent"
