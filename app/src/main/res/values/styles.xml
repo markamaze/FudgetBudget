@@ -100,4 +100,8 @@
         <item name="android:padding">16dp</item>
         <item name="android:background">@android:drawable/dialog_holo_light_frame</item>
     </style>
+
+    <style name="info_item">
+        <item name="android:paddingVertical">6dp</item>
+    </style>
 </resources>
